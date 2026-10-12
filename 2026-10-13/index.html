@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="light dark">
+<title>Who should get the vaccine first? Leaky protection — Research Explorer, 13 Oct 2026</title>
+<link rel="stylesheet" href="../assets/style.css">
+<style>canvas{height:320px}</style></head><body><main>
+<a class="back" href="../index.html">‹ All demos</a>
+<div class="eyebrow">13 Oct 2026 · Medicine &amp; Epidemiology</div>
+<h1>Who should get the vaccine first?</h1>
+<p class="lede">Most vaccines don't make you immune outright: they cut your chance of infection each time you're exposed. That "leaky" protection changes whether it's better to vaccinate the busiest spreaders or the oldest people first, and the answer flips with how fast the disease spreads.</p>
+
+<section class="card why" aria-labelledby="why-h">
+<h2 id="why-h">Why it matters</h2>
+<p>Health agencies often decide who to vaccinate first, the people who spread the most or the oldest, without considering that a vaccine might only reduce the risk from each exposure rather than block infection completely. This study shows that under that kind of leaky protection, the better choice depends on how intensely the disease is spreading, so a priority list that works for a mild outbreak can be the wrong one for an intense one.</p>
+</section>
+
+<section class="card" aria-labelledby="paper-h">
+<h2 id="paper-h">The paper</h2>
+<p style="margin:0 0 6px"><strong>Leaky protection reveals three patterns in the relative advantages of vaccination strategies across transmission intensity</strong></p>
+<p class="cite" style="margin:0">Yiwen Xing, Jianyi Zhang, Haoliang Cui, Zijie Yang, Qianning Wang, Lang Qin, Zheqi Wang, Zhongwei Jia. arXiv:2610.13567 [q-bio.PE], submitted 9 Oct 2026. <a href="https://arxiv.org/abs/2610.13567">Read on arXiv</a> · <a href="https://arxiv.org/pdf/2610.13567">PDF</a></p>
+<p style="margin-top:14px">In plain language: the authors used a survey of 2,279 residents to estimate how much each person is exposed to others, then simulated epidemics at many levels of transmission and vaccine efficacy. They compared vaccinating the most-exposed people first with vaccinating the oldest first. At low transmission, targeting the most exposed wins on both the epidemic peak and total infections; at intermediate transmission it lowers the peak but leaves more people infected overall; at high transmission the two strategies converge and oldest-first is slightly ahead on both.</p>
+</section>
+
+<section class="card" aria-labelledby="demo-h">
+<h2 id="demo-h">Try it</h2>
+<div class="controls">
+ <div><label for="R">Transmission intensity R₀ <output id="Ro"></output></label><input id="R" type="range" min="1.1" max="8" step="0.1" value="3"></div>
+ <div><label for="V">Vaccine efficacy per exposure <output id="Vo"></output></label><input id="V" type="range" min="0.1" max="0.95" step="0.05" value="0.5"></div>
+ <div><label for="C">Share of people vaccinated <output id="Co"></output></label><input id="C" type="range" min="0.05" max="0.6" step="0.05" value="0.3"></div>
+</div>
+<div class="stats" style="margin-top:22px">
+ <div class="stat"><div class="v" id="s1"></div><div class="l">Peak infected, high-exposure first</div></div>
+ <div class="stat"><div class="v" id="s2"></div><div class="l">Peak infected, oldest first</div></div>
+ <div class="stat"><div class="v" id="s3"></div><div class="l">Ever infected, high-exposure first</div></div>
+ <div class="stat"><div class="v" id="s4"></div><div class="l">Ever infected, oldest first</div></div>
+</div>
+<p class="note" id="verdict"></p>
+<div class="grid" style="margin-top:18px">
+ <div><div class="plot-title">Share currently infected over time</div><canvas id="ep" role="img" aria-label="Epidemic curves for both strategies"></canvas>
+  <div class="legend"><span style="--k:var(--c1)">High-exposure first</span><span style="--k:var(--c2)">Oldest first</span></div></div>
+ <div><div class="plot-title">Advantage of high-exposure first, across R₀</div><canvas id="sw" role="img" aria-label="Difference between strategies across transmission intensity"></canvas>
+  <div class="legend"><span style="--k:var(--c1)">Peak reduction (points)</span><span style="--k:var(--c3)">Total-infection reduction (points)</span><span style="--k:var(--cx)">Your R₀</span></div></div>
+</div>
+</section>
+
+<section class="card" aria-labelledby="math-h">
+<h2 id="math-h">The maths in this page</h2>
+<p style="margin:0">The demo uses a simplified stand-in for the paper's survey population: 30 groups (6 age bands × 5 exposure levels), with younger working-age adults more exposed. Each group <i>i</i> has exposure <i>a<sub>i</sub></i>, and infection spreads by proportionate mixing:</p>
+<div class="eq">λ<sub>i</sub> = β a<sub>i</sub> · Σ<sub>j</sub> a<sub>j</sub> I<sub>j</sub> / Σ<sub>j</sub> a<sub>j</sub> N<sub>j</sub>,&nbsp;&nbsp; β = R₀ γ Σa N / Σa² N</div>
+<ul>
+<li><strong>Leaky vaccine</strong>: vaccinated people stay susceptible but are infected at rate (1 − VE) λ<sub>i</sub> at every exposure, so heavy exposure can still wear through protection. (An "all-or-nothing" vaccine would instead fully protect a fraction VE.)</li>
+<li>Unvaccinated: dS/dt = −λS; vaccinated: dS<sub>v</sub>/dt = −(1−VE)λS<sub>v</sub>; dI/dt = new infections − γI, with γ = 1/5 per day.</li>
+<li><strong>Strategies</strong>: give the doses either to the highest-exposure groups first or to the oldest age bands first.</li>
+</ul>
+<p class="warn">This is an illustrative toy model, not the authors' code or data, so the exact R₀ at which the patterns switch differs from the paper. It shows the low-transmission win and the intermediate trade-off clearly, and the narrowing gap at high transmission.</p>
+</section>
+
+<section class="card" aria-labelledby="use-h">
+<h2 id="use-h">How to use it</h2>
+<p style="margin:0">Start with R₀ low (about 1.5) and see that vaccinating the most-exposed people almost stops the outbreak. Raise R₀ toward 4–5 and watch the right plot: the blue line (peak) stays above zero while the green line (total infections) drops below it, which is the trade-off the paper reports. At high R₀ the gaps shrink and oldest-first keeps the edge on total infections; in this toy the peak gap narrows but doesn't fully flip as it does in the paper. Lower the efficacy to make the vaccine leakier and see how the switch points move. For real policy, this is a reminder to ask how a vaccine fails before choosing who gets it first.</p>
+</section>
+</main>
+<script>
+// Toy population: 6 age bands x 5 exposure levels
+function pop(){const G=[];const ages=['0-17','18-34','35-49','50-64','65-79','80+'],an=[.2,.24,.22,.18,.12,.04],am=[1.3,1.6,1.3,1.0,.6,.4],q=[.3,.6,1,1.7,3.4];
+ ages.forEach((a,i)=>q.forEach(e=>G.push({age:i,n:an[i]/5,a:am[i]*e})));return G;}
+function run(R0,VE,cov,strat){const G=pop(),gam=1/5,dt=.25;let SA=0,S2=0;G.forEach(g=>{SA+=g.a*g.n;S2+=g.a*g.a*g.n});const beta=R0*gam*SA/S2;
+ const ord=G.map((g,i)=>i).sort((i,j)=>strat=='exp'?G[j].a-G[i].a:(G[j].age-G[i].age)||(G[j].a-G[i].a));
+ let left=cov;const v=G.map(()=>0);for(const i of ord){const t=Math.min(left,G[i].n);v[i]=t;left-=t;if(left<=0)break;}
+ const S=G.map((g,i)=>(g.n-v[i])*(1-1e-4)),Sv=v.map(x=>x*(1-1e-4)),I=G.map(g=>g.n*1e-4);let peak=0;const curve=[];
+ for(let t=0;t<=300;t+=dt){let F=0;G.forEach((g,i)=>F+=g.a*I[i]);F/=SA;let It=0;
+  G.forEach((g,i)=>{const l=beta*g.a*F*dt,n1=S[i]*(1-Math.exp(-l)),n2=Sv[i]*(1-Math.exp(-l*(1-VE)));S[i]-=n1;Sv[i]-=n2;I[i]+=n1+n2-I[i]*gam*dt;It+=I[i];});
+  peak=Math.max(peak,It);if(t%1==0)curve.push(It);}
+ const fin=1-S.reduce((a,b)=>a+b,0)-Sv.reduce((a,b)=>a+b,0);return{peak,fin,curve};}
+
+
+const $=id=>document.getElementById(id),css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+function setup(c){const r=c.getBoundingClientRect(),d=devicePixelRatio||1;c.width=r.width*d;c.height=r.height*d;const x=c.getContext('2d');x.setTransform(d,0,0,d,0,0);return [x,r.width,r.height];}
+function line(x,p,c){x.strokeStyle=c;x.lineWidth=2.5;x.beginPath();p.forEach((q,i)=>i?x.lineTo(q[0],q[1]):x.moveTo(q[0],q[1]));x.stroke();}
+const pc=v=>(v*100).toFixed(1)+'%';
+function draw(){const R=+$('R').value,V=+$('V').value,C=+$('C').value;
+ $('Ro').textContent=R.toFixed(1);$('Vo').textContent=Math.round(V*100)+'%';$('Co').textContent=Math.round(C*100)+'%';
+ const a=run(R,V,C,'exp'),b=run(R,V,C,'old');
+ $('s1').textContent=pc(a.peak);$('s2').textContent=pc(b.peak);$('s3').textContent=pc(a.fin);$('s4').textContent=pc(b.fin);
+ const dp=b.peak-a.peak,df=b.fin-a.fin,e=0.002;
+ $('verdict').textContent=dp>e&&df>e?'Pattern 1: high-exposure first wins on both peak and total infections.':dp>e&&df<-e?'Pattern 2: trade-off. High-exposure first lowers the peak but more people get infected overall.':dp<=e&&df<=e?'Pattern 3: strategies are close; oldest first is slightly ahead (or tied).':'Mixed result at these settings.';
+ let [x,W,H]=setup($('ep'));const m={l:44,r:10,t:10,b:30};const T=a.curve.length,ym=Math.max(a.peak,b.peak,0.01)*1.1;
+ const X=t=>m.l+t/(T-1)*(W-m.l-m.r),Y=v=>H-m.b-v/ym*(H-m.t-m.b);
+ x.strokeStyle=css('--grid');x.fillStyle=css('--muted');x.font='11px -apple-system,sans-serif';x.lineWidth=1;
+ for(let k=0;k<=4;k++){const v=ym*k/4;x.beginPath();x.moveTo(m.l,Y(v));x.lineTo(W-m.r,Y(v));x.stroke();x.textAlign='right';x.fillText((v*100).toFixed(0)+'%',m.l-5,Y(v)+4);}
+ x.textAlign='center';for(let t=0;t<T;t+=50)x.fillText(t+' d',X(t),H-12);
+ line(x,a.curve.map((v,t)=>[X(t),Y(v)]),css('--c1'));line(x,b.curve.map((v,t)=>[X(t),Y(v)]),css('--c2'));
+ [x,W,H]=setup($('sw'));const rs=[],P=[],F=[];for(let r=1.1;r<=8.001;r+=0.15){const p=run(r,V,C,'exp'),q=run(r,V,C,'old');rs.push(r);P.push((q.peak-p.peak)*100);F.push((q.fin-p.fin)*100);}
+ const mx=Math.max(1,...P.map(Math.abs),...F.map(Math.abs))*1.1,XR=r=>m.l+(r-1.1)/6.9*(W-m.l-m.r),YD=d=>m.t+(1-(d+mx)/(2*mx))*(H-m.t-m.b);
+ x.strokeStyle=css('--grid');x.lineWidth=1;x.fillStyle=css('--muted');x.font='11px -apple-system,sans-serif';
+ [-mx,-mx/2,0,mx/2,mx].forEach(v=>{x.beginPath();x.moveTo(m.l,YD(v));x.lineTo(W-m.r,YD(v));x.stroke();x.textAlign='right';x.fillText(v.toFixed(0),m.l-5,YD(v)+4);});
+ x.textAlign='center';for(let r=2;r<=8;r++)x.fillText(r,XR(r),H-12);
+ x.strokeStyle=css('--cx');x.setLineDash([4,4]);x.beginPath();x.moveTo(XR(R),m.t);x.lineTo(XR(R),H-m.b);x.stroke();x.setLineDash([]);
+ line(x,rs.map((r,i)=>[XR(r),YD(P[i])]),css('--c1'));line(x,rs.map((r,i)=>[XR(r),YD(F[i])]),css('--c3'));
+}
+['R','V','C'].forEach(i=>$(i).addEventListener('input',draw));addEventListener('resize',draw);matchMedia('(prefers-color-scheme: dark)').addEventListener('change',draw);draw();
+</script>
+</body></html>
