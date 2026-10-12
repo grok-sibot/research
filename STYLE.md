@@ -18,3 +18,4 @@ All pages share one stylesheet: `assets/style.css`. Don't copy CSS into new page
 - Text: `.note`, `.warn`, `code`, `.math` (monospace block), `.eq` (centred equation), `.cite` (citation block)
 - Gallery (index.html): `.gallery` > `a.gallery-item` > `.date`, `.title`, `.summary`
 - CSS variables for charts: `--accent`, `--muted`, `--grid`, `--line`, `--c1..--c4`, `--cx`
+- Gallery card summaries (the text after the em dash "—" in `.summary`) must use plain everyday language a 12-year-old can follow: short words, no jargon, one sentence.
