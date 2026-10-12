@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="light dark">
+<title>How fast do the waves carry you? Stokes drift from wind — Research Explorer, 12 Oct 2026</title>
+<style>
+:root{--bg:#f5f5f7;--card:rgba(255,255,255,.72);--text:#1d1d1f;--muted:#5c5c61;--line:rgba(0,0,0,.1);--accent:#0062cc;--c1:#0062cc;--c2:#c93400;--c3:#248a3d;--c4:#8944ab;--grid:rgba(0,0,0,.08)}
+@media(prefers-color-scheme:dark){:root{--bg:#000;--card:rgba(44,44,46,.72);--text:#f5f5f7;--muted:#a1a1a6;--line:rgba(255,255,255,.14);--accent:#64a8ff;--c1:#64a8ff;--c2:#ff9f0a;--c3:#30d158;--c4:#da8fff;--grid:rgba(255,255,255,.1)}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:17px/1.5 -apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Arial,sans-serif;-webkit-font-smoothing:antialiased}
+main{max-width:980px;margin:0 auto;padding:56px 24px 80px}
+a{color:var(--accent)}
+.back{font-size:15px;text-decoration:none}
+.eyebrow{font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);margin-top:28px}
+h1{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Helvetica Neue",Arial,sans-serif;font-size:clamp(34px,5.4vw,54px);line-height:1.08;letter-spacing:-.025em;margin:8px 0 14px}
+h2{font-size:24px;letter-spacing:-.015em;margin:0 0 10px}
+.lede{font-size:21px;color:var(--muted);max-width:760px;margin:0}
+.card{background:var(--card);-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px);border:1px solid var(--line);border-radius:24px;padding:28px;margin-top:20px}
+.why{border:1.5px solid var(--accent)}
+.why p{font-size:19px;margin:0}
+.cite{font-size:15px;color:var(--muted)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media(max-width:760px){.grid2{grid-template-columns:1fr}}
+.controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px 28px;margin-top:8px}
+label{display:block;font-size:15px;font-weight:600}
+label output{float:right;font-weight:500;color:var(--accent);font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;accent-color:var(--accent);margin-top:8px;height:28px}
+.toggle{display:flex;gap:10px;align-items:center;font-size:15px;font-weight:500;margin-top:6px}
+.toggle input{width:20px;height:20px;accent-color:var(--accent)}
+canvas{width:100%;height:340px;display:block}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;color:var(--muted);margin-top:10px}
+.legend span::before{content:"";display:inline-block;width:14px;height:3px;border-radius:2px;background:var(--k);margin-right:6px;vertical-align:middle}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-top:6px}
+.stat{border:1px solid var(--line);border-radius:16px;padding:14px 16px}
+.stat .v{font-size:28px;font-weight:600;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.stat .l{font-size:13px;color:var(--muted)}
+.note{font-size:14px;color:var(--muted);margin:10px 0 0}
+.warn{color:var(--c2);font-weight:600}
+code,.m{font-family:ui-monospace,"SF Mono",Menlo,monospace;font-size:14px}
+.eq{font-family:"Times New Roman",serif;font-size:19px;text-align:center;margin:14px 0;overflow-x:auto}
+ul{padding-left:20px;margin:6px 0}li{margin:4px 0}
+@media(prefers-reduced-motion:no-preference){.card{transition:border-color .2s}}
+</style></head><body><main>
+<a class="back" href="../index.html">‹ All demos</a>
+<div class="eyebrow">12 Oct 2026 · Climate &amp; Oceans</div>
+<h1>How far do the waves carry you?</h1>
+<p class="lede">Waves don't just bob things up and down: they nudge water, plastic and people steadily downwind. This "Stokes drift" sets how ocean models mix heat and where spills and survivors end up. Explore how well wind speed alone can predict it.</p>
+
+<section class="card why" aria-labelledby="why-h">
+<h2 id="why-h">Why it matters</h2>
+<p>Stokes drift steers oil spills, plastic and people lost at sea, and it deepens the ocean's mixed layer, which shapes how the ocean absorbs heat in climate and weather forecasts. This Naval Research Laboratory study shows that a one-line wind rule predicts surface drift well enough for routine forecasting, but warns that wind-only formulas get the drift's depth profile wrong, so a proper wave model is still needed below the surface.</p>
+</section>
+
+<section class="card" aria-labelledby="paper-h">
+<h2 id="paper-h">The paper</h2>
+<p style="margin:0 0 6px"><strong>Parametric wave spectrum models for prediction of Stokes drift profiles</strong></p>
+<p class="cite" style="margin:0">W. Erick Rogers, Yalin Fan, Luis Zamudio, Elizabeth M. Douglass (Naval Research Laboratory and Florida State University). arXiv:2610.12752, submitted 8 Oct 2026. <a href="https://arxiv.org/abs/2610.12752">Read on arXiv</a> · <a href="https://arxiv.org/pdf/2610.12752">PDF</a></p>
+<p style="margin-top:14px">In plain language: the authors compared 15 variants of nine textbook formulas for the shape of ocean wave energy against averaged spectra from moored buoys, then computed the resulting drift. They found that simply taking 1% of the wind speed gives a fairly accurate surface drift, which matched drift from a big drifting-buoy dataset at about a quarter of the buoys' total motion. But no wind-only formula got the full depth profile right, and adding Stokes drift to the HYCOM global ocean model deepened its mixed layer and generally lowered its error against observations.</p>
+</section>
+
+<section class="card" aria-labelledby="demo-h">
+<h2 id="demo-h">Try it</h2>
+<div class="controls">
+ <div><label for="U">Wind speed at 10 m <output id="Uo"></output></label><input id="U" type="range" min="2" max="25" step="0.5" value="10"></div>
+ <div><label for="F">Fetch (open water upwind) <output id="Fo"></output></label><input id="F" type="range" min="1" max="3" step="0.01" value="2"></div>
+ <div><label for="H">Hours adrift <output id="Ho"></output></label><input id="H" type="range" min="1" max="72" step="1" value="24"></div>
+</div>
+<div class="stats" style="margin-top:22px">
+ <div class="stat"><div class="v" id="s1"></div><div class="l">Surface drift, 1% wind rule</div></div>
+ <div class="stat"><div class="v" id="s2"></div><div class="l">Surface drift, full PM spectrum</div></div>
+ <div class="stat"><div class="v" id="s3"></div><div class="l">Drift left at 5 m depth (PM)</div></div>
+ <div class="stat"><div class="v" id="s4"></div><div class="l">Rough total drift of a floater in that time</div></div>
+</div>
+<p class="note" id="valid"></p>
+<div class="grid2" style="margin-top:18px">
+ <div><canvas id="prof" aria-label="Stokes drift versus depth for each method" role="img"></canvas>
+  <div class="legend"><span style="--k:var(--c4)">1% rule (surface only)</span><span style="--k:var(--c1)">PM spectrum</span><span style="--k:var(--c3)">Phillips tail from fetch peak</span><span style="--k:var(--c2)">Single "peak" wave</span></div></div>
+ <div><canvas id="spec" aria-label="Wave energy spectrum" role="img"></canvas>
+  <div class="legend"><span style="--k:var(--c1)">PM energy spectrum E(f)</span><span style="--k:var(--c3)">Stokes contribution at the surface</span></div></div>
+</div>
+</section>
+
+<section class="card" aria-labelledby="math-h">
+<h2 id="math-h">The maths in this page</h2>
+<p style="margin:0">Each wave frequency <i>f</i> with energy <i>E(f)</i> adds drift that fades with depth <i>z</i> (negative downward) as <i>e</i><sup>2<i>kz</i></sup>, where the deep-water wavenumber is <i>k</i> = ω²/<i>g</i> and ω = 2π<i>f</i>. The paper's deep-water formula, for waves all heading one way, is:</p>
+<div class="eq">U(z) = 2 ∫ E(f) ω k e<sup>2kz</sup> df</div>
+<ul>
+<li><strong>PM spectrum</strong> (Pierson–Moskowitz, fully developed sea, paper eq. 3): <i>E(f)</i> = α<i>g</i>² / ((2π)⁴<i>f</i>⁵) · exp(−1.25 (<i>f<sub>p</sub></i>/<i>f</i>)⁴) with α = 0.0081 and peak <i>f<sub>p</sub></i> = 0.13 <i>g</i>/<i>U</i><sub>10</sub>, integrated up to 0.729 Hz.</li>
+<li><strong>Phillips tail from a fetch peak</strong> (the Breivik et al. 2014 approach used in HYCOM, paper eq. 11): <i>U(z)</i> = 2 ∫<sub>ω<sub>p</sub></sub><sup>ω<sub>max</sub></sup> α<sub>P</sub> <i>g</i> ω<sup>−2</sup> e<sup>2ω²<i>z</i>/<i>g</i></sup> dω, with α<sub>P</sub> = 0.0083 and ω<sub>p</sub> ≈ 22 (<i>g</i>²/(<i>U</i><sub>10</sub><i>F</i>))<sup>1/3</sup> from the JONSWAP fetch law, where <i>F</i> is fetch.</li>
+<li><strong>1% rule</strong> (Clarke and van Gorder 2018): surface drift = 0.01 <i>U</i><sub>10</sub>.</li>
+<li><strong>Single "peak" wave</strong>: the PM surface value decaying with only the peak wavenumber. The paper warns this representative-wavenumber shortcut underpredicts how sharply drift falls off near the surface, which you can see in the orange line.</li>
+<li><strong>Total drift</strong>: the paper's rule of thumb, about 3% of wind for the current plus about 1% for wind pushing on the object, so total drift ≈ 0.04 <i>U</i><sub>10</sub>. Buoy data showed large scatter around it (correlation 0.32), so treat it as an average, not a forecast.</li>
+</ul>
+</section>
+
+<section class="card" aria-labelledby="use-h">
+<h2 id="use-h">How to use it</h2>
+<p style="margin:0">Drag the wind slider to see surface drift grow roughly in step with the wind while the deeper drift lags behind. Shorten the fetch to mimic a coastal or newly blowing wind and watch the fetch-based curve shift, and note the warning when that peak falls outside its valid range. Set the hours adrift to get a back-of-envelope distance for a floating object. This is a teaching tool built from the paper's formulas, not an operational drift forecast.</p>
+</section>
+</main>
+<script>
+const g=9.81,PI=Math.PI,$=id=>document.getElementById(id);
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+function pmE(f,fp){return 0.0081*g*g/Math.pow(2*PI,4)/Math.pow(f,5)*Math.exp(-1.25*Math.pow(fp/f,4));}
+function pmU(U,z){const fp=0.13*g/U;let s=0;const n=1500,f0=0.02,f1=0.729,df=(f1-f0)/n;for(let i=0;i<n;i++){const f=f0+(i+.5)*df,w=2*PI*f,k=w*w/g;s+=2*pmE(f,fp)*w*k*Math.exp(2*k*z)*df;}return s;}
+function bjbU(U,F,z){const wp=22*Math.cbrt(g*g/(U*F)),wm=2*PI*0.729;if(wp>=wm)return 0;let s=0;const n=1500,dw=(wm-wp)/n;for(let i=0;i<n;i++){const w=wp+(i+.5)*dw;s+=2*0.0083*g/(w*w)*Math.exp(2*w*w*z/g)*dw;}return s;}
+function setup(c){const r=c.getBoundingClientRect(),d=devicePixelRatio||1;c.width=r.width*d;c.height=r.height*d;const x=c.getContext('2d');x.setTransform(d,0,0,d,0,0);return [x,r.width,r.height];}
+function axes(x,W,H,m,xl,yl){x.strokeStyle=css('--grid');x.lineWidth=1;x.fillStyle=css('--muted');x.font='12px -apple-system,BlinkMacSystemFont,sans-serif';x.textAlign='center';x.fillText(xl,m.l+(W-m.l-m.r)/2,H-6);x.save();x.translate(13,m.t+(H-m.t-m.b)/2);x.rotate(-PI/2);x.fillText(yl,0,0);x.restore();}
+function line(x,pts,col,w=2.5,dash){x.strokeStyle=col;x.lineWidth=w;x.setLineDash(dash||[]);x.beginPath();pts.forEach((p,i)=>i?x.lineTo(p[0],p[1]):x.moveTo(p[0],p[1]));x.stroke();x.setLineDash([]);}
+function fmt(v){return (v*100).toFixed(1)+' cm/s';}
+function draw(){
+ const U=+$('U').value,F=Math.pow(10,+$('F').value)*1000,Hh=+$('H').value;
+ $('Uo').textContent=U.toFixed(1)+' m/s ('+(U*1.944).toFixed(0)+' kn)';
+ $('Fo').textContent=(F/1000<10?(F/1000).toFixed(1):Math.round(F/1000))+' km';
+ $('Ho').textContent=Hh+' h';
+ const s0=pmU(U,0),fp=0.13*g/U,kp=Math.pow(2*PI*fp,2)/g,fpJ=3.5*Math.cbrt(g*g/(U*F)),valid=fpJ>=fp;
+ $('s1').textContent=fmt(0.01*U);$('s2').textContent=fmt(s0);$('s3').textContent=fmt(pmU(U,-5));
+ $('s4').textContent='≈ '+(0.04*U*Hh*3.6).toFixed(0)+' km';
+ $('valid').innerHTML=valid?'Fetch-based peak '+fpJ.toFixed(3)+' Hz sits above the fully developed peak '+fp.toFixed(3)+' Hz, so the fetch curve is valid.':'<span class="warn">Fetch-based curve hidden:</span> with this much fetch the predicted peak ('+fpJ.toFixed(3)+' Hz) falls below the fully developed limit ('+fp.toFixed(3)+' Hz), which the paper treats as invalid.';
+ // profile
+ let [x,W,H]=setup($('prof'));const m={l:58,r:12,t:12,b:34},zmax=20;
+ const sets=[[z=>pmU(U,z),css('--c1')],[z=>s0*Math.exp(2*kp*z),css('--c2')]];if(valid)sets.push([z=>bjbU(U,F,z),css('--c3')]);
+ const umax=Math.max(0.01*U,s0,valid?bjbU(U,F,0):0)*1.1;
+ const X=u=>m.l+u/umax*(W-m.l-m.r),Y=z=>m.t+(-z)/zmax*(H-m.t-m.b);
+ x.strokeStyle=css('--grid');x.fillStyle=css('--muted');x.font='11px -apple-system,sans-serif';x.textAlign='right';
+ for(let z=0;z<=zmax;z+=5){x.beginPath();x.moveTo(m.l,Y(-z));x.lineTo(W-m.r,Y(-z));x.stroke();x.fillText(z+' m',m.l-6,Y(-z)+4);}
+ x.textAlign='center';const step=umax>0.3?0.1:umax>0.12?0.05:0.02;for(let u=0;u<=umax;u+=step){x.fillText((u*100).toFixed(0),X(u),H-20);}
+ axes(x,W,H,m,'Stokes drift (cm/s)','Depth');
+ sets.forEach(([fn,c],i)=>{const p=[];for(let j=0;j<=80;j++){const z=-zmax*j/80;p.push([X(fn(z)),Y(z)]);}line(x,p,c,2.5,i==1?[6,4]:null);});
+ x.fillStyle=css('--c4');x.beginPath();x.arc(X(0.01*U),Y(0),6,0,2*PI);x.fill();
+ // spectrum
+ [x,W,H]=setup($('spec'));const n={l:40,r:12,t:12,b:34},f0=0.02,f1=0.729;
+ let Em=0,Sm=0;const pts=[];for(let j=0;j<=300;j++){const f=f0+(f1-f0)*j/300,e=pmE(f,fp),w=2*PI*f,sd=2*e*w*w*w/g;pts.push([f,e,sd]);Em=Math.max(Em,e);Sm=Math.max(Sm,sd);}
+ const XF=f=>n.l+(f-f0)/(f1-f0)*(W-n.l-n.r),YE=v=>H-n.b-v*(H-n.t-n.b)*0.95;
+ x.strokeStyle=css('--grid');x.fillStyle=css('--muted');x.font='11px -apple-system,sans-serif';x.textAlign='center';
+ for(let f=0.1;f<0.73;f+=0.1){x.beginPath();x.moveTo(XF(f),n.t);x.lineTo(XF(f),H-n.b);x.stroke();x.fillText(f.toFixed(1),XF(f),H-20);}
+ axes(x,W,H,n,'Frequency (Hz)','Relative size');
+ x.fillStyle=css('--c1')+'22';x.beginPath();x.moveTo(XF(f0),YE(0));pts.forEach(p=>x.lineTo(XF(p[0]),YE(p[1]/Em)));x.lineTo(XF(f1),YE(0));x.fill();
+ line(x,pts.map(p=>[XF(p[0]),YE(p[1]/Em)]),css('--c1'));line(x,pts.map(p=>[XF(p[0]),YE(p[2]/Sm)]),css('--c3'));
+ x.fillStyle=css('--muted');x.textAlign='left';x.fillText('peak '+fp.toFixed(3)+' Hz',Math.min(XF(fp)+6,W-90),n.t+12);
+}
+['U','F','H'].forEach(id=>$(id).addEventListener('input',draw));
+addEventListener('resize',draw);matchMedia('(prefers-color-scheme: dark)').addEventListener('change',draw);
+draw();
+</script>
+</body></html>

@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Free energies from energy cumulants — Research Explorer, 11 Oct 2026</title>
+<style>
+:root{
+  --bg:#f5f5f7; --card:rgba(255,255,255,.72); --card-solid:#fff; --text:#1d1d1f; --muted:#5c5c61;
+  --line:rgba(0,0,0,.1); --accent:#0062cc; --accent-soft:rgba(0,98,204,.1);
+  --c1:#6e6e73; --c2:#0062cc; --c3:#248a3d; --c4:#c93400; --cx:#1d1d1f; --grid:rgba(0,0,0,.08);
+  --font:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display","Helvetica Neue",Helvetica,Arial,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#000; --card:rgba(44,44,46,.72); --card-solid:#1c1c1e; --text:#f5f5f7; --muted:#a1a1a6;
+  --line:rgba(255,255,255,.14); --accent:#64a8ff; --accent-soft:rgba(100,168,255,.16);
+  --c1:#a1a1a6; --c2:#64a8ff; --c3:#4cd964; --c4:#ff9f5a; --cx:#f5f5f7; --grid:rgba(255,255,255,.1);
+}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:17px/1.5 var(--font);-webkit-font-smoothing:antialiased}
+main{max-width:980px;margin:0 auto;padding:56px 24px 96px}
+a{color:var(--accent)}
+a:focus-visible,input:focus-visible,button:focus-visible{outline:3px solid var(--accent);outline-offset:3px;border-radius:8px}
+.eyebrow{font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+h1{font-size:clamp(32px,5vw,48px);line-height:1.08;letter-spacing:-.02em;margin:10px 0 14px}
+h2{font-size:24px;letter-spacing:-.01em;margin:0 0 12px}
+.authors{color:var(--muted);margin:0 0 6px}
+.card{background:var(--card);-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px);
+  border:1px solid var(--line);border-radius:24px;padding:28px;margin-top:24px}
+.why{background:var(--accent-soft);border-color:transparent}
+.why p{font-size:21px;line-height:1.4;margin:0;font-weight:500}
+.why .eyebrow{color:var(--accent);display:block;margin-bottom:8px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+@media(max-width:760px){.grid{grid-template-columns:1fr}}
+.controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px 28px;margin-bottom:20px}
+label{display:flex;justify-content:space-between;font-size:15px;font-weight:600}
+label output{font-weight:400;color:var(--muted);font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;accent-color:var(--accent);margin-top:6px}
+canvas{width:100%;height:300px;display:block;border-radius:14px;background:var(--card-solid);border:1px solid var(--line)}
+.legend{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:14px;color:var(--muted);margin:10px 0 0}
+.legend i{display:inline-block;width:18px;height:3px;border-radius:2px;vertical-align:middle;margin-right:6px}
+table{width:100%;border-collapse:collapse;font-size:15px;font-variant-numeric:tabular-nums;margin-top:6px}
+th,td{text-align:right;padding:8px 6px;border-bottom:1px solid var(--line)}
+th:first-child,td:first-child{text-align:left}
+th{color:var(--muted);font-weight:600}
+.note{font-size:14px;color:var(--muted)}
+code{font:14px ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--accent-soft);padding:2px 6px;border-radius:6px}
+.math{font:15px ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--accent-soft);padding:12px 16px;border-radius:14px;overflow-x:auto;margin:10px 0;white-space:pre}
+.back{display:inline-block;margin-bottom:28px;text-decoration:none;font-size:15px}
+li{margin:6px 0}
+@media (prefers-reduced-motion:no-preference){a,input{transition:opacity .2s}}
+</style>
+</head>
+<body>
+<main>
+<a class="back" href="../index.html">← All daily explorations</a>
+<div class="eyebrow">Research Explorer · Materials · 11 Oct 2026</div>
+<h1>Beyond special quasirandom structures: free energies from energy cumulants</h1>
+<p class="authors">Yann L. Müller and Anirudh Raju Natarajan — EPFL, Laboratory of materials design and simulation (MADES)</p>
+<p class="authors">arXiv:2610.11882 (submitted 8 Oct 2026, cond-mat.mtrl-sci) · <a href="https://arxiv.org/abs/2610.11882" target="_blank" rel="noopener">arxiv.org/abs/2610.11882</a> · <a href="https://arxiv.org/pdf/2610.11882v1" target="_blank" rel="noopener">PDF</a></p>
+
+<section class="card why" aria-labelledby="why-h">
+  <span class="eyebrow" id="why-h">Why it matters</span>
+  <p>Designing better battery cathodes and high-temperature alloys means deciding which disordered mixtures of elements can actually be made, and today that needs expensive simulations for every candidate. This method gets a far more accurate stability estimate from a few hundred cheap energy evaluations, so researchers can screen thousands of compositions before ever entering a lab.</p>
+</section>
+
+<section class="card" aria-labelledby="sum-h">
+  <h2 id="sum-h">The idea in plain language</h2>
+  <p>A disordered material (say, lithium and metal atoms scattered randomly over a crystal lattice) can be arranged in astronomically many ways, each with a slightly different energy. The standard shortcut, a “special quasirandom structure”, takes the <em>average</em> energy of these arrangements and adds the ideal entropy of mixing. The authors show this is just the first term of an exact series in the <em>cumulants</em> of the energy distribution: the mean, then the variance (how spread out the energies are), then the skew, and so on.</p>
+  <p>Keeping the variance lets the model capture that, on cooling, atoms prefer low-energy arrangements (short-range order). In the paper’s benchmark on 502 equiatomic alloys of a nine-element refractory system, keeping the variance cut free-energy errors by roughly an order of magnitude. They also screened Li-excess rocksalt oxide cathodes, ranking candidates for the Li₄ clusters that let lithium move, and note the screen is a ranking, not a quantitative prediction.</p>
+</section>
+
+<section class="card" aria-labelledby="demo-h">
+  <h2 id="demo-h">Interactive demo: how much does each cumulant buy you?</h2>
+  <p class="note">A <strong>toy model</strong> (not the paper’s data): per-site energies are a constant plus a Gamma-distributed amount, so the exact free energy has a closed form and the paper’s approximations (its Eq. 4, 5, 6) can be compared against it. Everything below is per atom.</p>
+  <div class="math">F = −kT·s₀ + K₁ − ½K₂β + ⅙K₃β²   (regular solution = first term only)
+exact (toy): F = ε₀ − kT·s₀ + (k/β)·ln(1 + βθ),   β = 1/kT</div>
+  <div class="controls">
+    <div><label for="sig">Energy spread √κ₂ <output id="o-sig"></output></label><input id="sig" type="range" min="5" max="80" step="1" value="35"></div>
+    <div><label for="shape">Skew (Gamma shape k) <output id="o-shape"></output></label><input id="shape" type="range" min="1" max="30" step="0.5" value="6"></div>
+    <div><label for="s0">Ideal entropy s₀ = ln Ω / M <output id="o-s0"></output></label><input id="s0" type="range" min="0.2" max="1.6" step="0.01" value="0.69"></div>
+    <div><label for="temp">Temperature <output id="o-temp"></output></label><input id="temp" type="range" min="300" max="3000" step="10" value="1200"></div>
+  </div>
+  <div class="grid">
+    <div><h2 style="font-size:17px">Free-energy error vs. exact</h2><canvas id="c1" role="img" aria-label="Chart of free energy error in meV per atom versus temperature for four approximations"></canvas></div>
+    <div><h2 style="font-size:17px">Enthalpy vs. temperature</h2><canvas id="c2" role="img" aria-label="Chart of enthalpy in meV per atom versus temperature for exact and four approximations"></canvas></div>
+  </div>
+  <div class="legend" aria-hidden="true">
+    <span><i style="background:var(--c1)"></i>Regular solution (SQS)</span>
+    <span><i style="background:var(--c2)"></i>Gaussian (+K₂)</span>
+    <span><i style="background:var(--c3)"></i>Third order (+K₃)</span>
+    <span><i style="background:var(--c4)"></i>Binomial</span>
+    <span><i style="background:var(--cx)"></i>Exact (toy)</span>
+  </div>
+  <table aria-live="polite"><thead><tr><th>At the chosen T</th><th>F − F<sub>exact</sub> (meV)</th><th>Enthalpy (meV)</th></tr></thead><tbody id="tb"></tbody></table>
+  <p class="note" id="valid"></p>
+  <p class="note">Faded dashed lines mark temperatures below the Gaussian truncation’s validity limit β<sub>c</sub> = √(2 s₀/κ₂), where the paper notes truncations stop being physical. Regular solution is always an upper bound on F (Jensen’s inequality), which you can see: its error never goes negative.</p>
+</section>
+
+<section class="card" aria-labelledby="use-h">
+  <h2 id="use-h">How to use it</h2>
+  <ol>
+    <li>Pick a disordered composition and generate a few hundred random atomic arrangements on the lattice (the paper uses random decorations of supercells, not Monte Carlo).</li>
+    <li>Evaluate their energies with a fast model, for example a foundation machine-learned potential (the paper uses GRACE).</li>
+    <li>Compute the energy mean, variance and skew (cumulants). Plug them into the truncated or binomial free-energy formulas above; no further sampling is needed.</li>
+    <li>Compare the resulting disordered-phase free energy with competing ordered phases to estimate where the disordered phase becomes stable, then send only the best candidates to heavier simulation.</li>
+  </ol>
+  <p class="note">Caveats from the paper: truncated series lose validity at low temperature; accuracy is inherited from the underlying energy model; free energies are configurational only (no vibrations); the screening estimate over-predicts Li₄-cluster probability versus Monte Carlo, so near-threshold candidates need verification.</p>
+</section>
+
+<p class="note" style="margin-top:32px">Source: Müller &amp; Natarajan, arXiv:2610.11882v1, read in full from <a href="https://arxiv.org/abs/2610.11882" target="_blank" rel="noopener">arxiv.org/abs/2610.11882</a>. The interactive model is an illustration written for this page and is not from the paper. Equations referenced are the paper’s Eq. 2, 4, 5, 6 and 12.</p>
+</main>
+<script>
+(function(){
+  var kB=8.617333e-5; // eV/K
+  var $=function(i){return document.getElementById(i)};
+  var ids=['sig','shape','s0','temp'];
+  function P(){
+    var sig=+$('sig').value/1000, k=+$('shape').value, s0=+$('s0').value, T=+$('temp').value;
+    var th=sig/Math.sqrt(k); // k*th^2 = sig^2
+    var k1=k*th, k2=k*th*th, k3=2*k*th*th*th; // eps0=0
+    var d=Math.sqrt(4*k2+(k3/k2)*(k3/k2)), p=0.5*(1-k3/(k2*d)), e0=k1-p*d;
+    return {sig:sig,k:k,s0:s0,T:T,th:th,k1:k1,k2:k2,k3:k3,d:d,p:p,e0:e0};
+  }
+  function F(m,b,beta){ // per atom, eV
+    var T=1/(kB*beta), ent=-m.s0/beta;
+    switch(m.kind){}
+    return 0;
+  }
+  function Fs(P,T){
+    var b=1/(kB*T), ent=-P.s0/b;
+    var ex=ent+(P.k/b)*Math.log(1+b*P.th);
+    var rs=ent+P.k1;
+    var ga=ent+P.k1-0.5*P.k2*b;
+    var t3=ga+P.k3*b*b/6;
+    var bi=ent+P.e0-(1/b)*Math.log(1-P.p+P.p*Math.exp(-P.d*b));
+    return [rs,ga,t3,bi,ex];
+  }
+  function Hs(P,T){ // H = d(beta F)/d beta, numeric
+    var h=T*1e-4, b=1/(kB*T);
+    var T1=1/(kB*(b*(1+1e-4))), T2=1/(kB*(b*(1-1e-4)));
+    var f1=Fs(P,T1), f2=Fs(P,T2), db=b*2e-4;
+    return f1.map(function(_,i){return (b*(1+1e-4)*f1[i]-b*(1-1e-4)*f2[i])/db});
+  }
+  function css(n){return getComputedStyle(document.documentElement).getPropertyValue(n).trim()}
+  function setup(c){
+    var r=window.devicePixelRatio||1, w=c.clientWidth, h=c.clientHeight;
+    c.width=w*r;c.height=h*r;var g=c.getContext('2d');g.setTransform(r,0,0,r,0,0);return {g:g,w:w,h:h};
+  }
+  function plot(c,series,opt){
+    var s=setup(c),g=s.g,w=s.w,h=s.h,L=52,R=14,Tp=14,B=34;
+    g.clearRect(0,0,w,h);g.font='12px '+css('--font');
+    var xs=opt.x0,xe=opt.x1,ys=opt.y0,ye=opt.y1;
+    var X=function(x){return L+(x-xs)/(xe-xs)*(w-L-R)}, Y=function(y){return Tp+(1-(y-ys)/(ye-ys))*(h-Tp-B)};
+    g.strokeStyle=css('--grid');g.fillStyle=css('--muted');g.lineWidth=1;
+    var ny=5;
+    for(var i=0;i<=ny;i++){var y=ys+(ye-ys)*i/ny;g.beginPath();g.moveTo(L,Y(y));g.lineTo(w-R,Y(y));g.stroke();
+      g.textAlign='right';g.fillText(y.toFixed(Math.abs(ye-ys)<10?1:0),L-6,Y(y)+4)}
+    for(var x=500;x<=xe;x+=500){g.textAlign='center';g.fillText(x+' K',X(x),h-14)}
+    g.textAlign='center';g.fillText(opt.ylabel,L+60,Tp+10);
+    series.forEach(function(se){
+      g.strokeStyle=css(se.col);g.lineWidth=se.w||2;
+      var pts=se.pts,started=false;g.beginPath();se._inv=undefined;
+      for(var i=0;i<pts.length;i++){
+        var x=pts[i][0],y=pts[i][1];
+        if(!isFinite(y)){started=false;continue}
+        var yc=Math.max(ys-1e9,Math.min(ye+1e9,y));
+        // draw in segments of valid/invalid
+        var inv=se.cut&&x<se.cut;
+        if(!started||inv!==se._inv){g.stroke();g.beginPath();g.setLineDash(inv?[4,4]:[]);g.globalAlpha=inv?.45:1;g.moveTo(X(x),Y(yc));started=true;se._inv=inv}
+        else g.lineTo(X(x),Y(yc));
+      }
+      g.stroke();g.setLineDash([]);g.globalAlpha=1;
+    });
+    // T marker
+    g.strokeStyle=css('--accent');g.setLineDash([2,3]);g.beginPath();g.moveTo(X(opt.T),Tp);g.lineTo(X(opt.T),h-B);g.stroke();g.setLineDash([]);
+  }
+  function draw(){
+    var p=P();
+    $('o-sig').textContent=(p.sig*1000).toFixed(0)+' meV/atom';
+    $('o-shape').textContent='k = '+p.k+' (skew '+(2/Math.sqrt(p.k)).toFixed(2)+')';
+    $('o-s0').textContent=p.s0.toFixed(2)+' k_B';
+    $('o-temp').textContent=p.T+' K';
+    var Tc=1/(kB*Math.sqrt(2*p.s0/p.k2)); // T below which Gaussian invalid
+    var Ts=[];for(var T=300;T<=3000;T+=15)Ts.push(T);
+    var names=['rs','ga','t3','bi'],cols=['--c1','--c2','--c3','--c4'];
+    var errS=[0,1,2,3].map(function(i){return {col:cols[i],w:2.2,cut:i==1?Tc:0,pts:Ts.map(function(T){var f=Fs(p,T);return [T,(f[i]-f[4])*1000]})}});
+    var maxE=0;errS.forEach(function(s){s.pts.forEach(function(q){if(q[0]>=Math.max(Tc,300)&&isFinite(q[1]))maxE=Math.max(maxE,Math.abs(q[1]))})});
+    var top=Math.max(2,Math.ceil(maxE*1.1/ (maxE>20?5:1))*(maxE>20?5:1));
+    plot($('c1'),errS,{x0:300,x1:3000,y0:-top*0.15,y1:top,T:p.T,ylabel:'meV/atom'});
+    var hs=Ts.map(function(T){return [T,Hs(p,T)]});
+    var hS=[0,1,2,3,4].map(function(i){return {col:i==4?'--cx':cols[i],w:i==4?2.8:2,cut:i==1?Tc:0,pts:hs.map(function(q){return [q[0],q[1][i]*1000]})}});
+    var lo=Infinity,hi=-Infinity;hS.forEach(function(s){s.pts.forEach(function(q){if(q[0]>=Math.max(Tc,300)&&isFinite(q[1])){lo=Math.min(lo,q[1]);hi=Math.max(hi,q[1])}})});
+    var pad=(hi-lo)*.1+1;
+    plot($('c2'),hS,{x0:300,x1:3000,y0:lo-pad,y1:hi+pad,T:p.T,ylabel:'meV/atom'});
+    var f=Fs(p,p.T),h=Hs(p,p.T),lab=['Regular solution (SQS)','Gaussian','Third order','Binomial','Exact (toy)'];
+    $('tb').innerHTML=lab.map(function(n,i){return '<tr><td>'+n+'</td><td>'+(i==4?'—':((f[i]-f[4])*1000).toFixed(1))+'</td><td>'+(h[i]*1000).toFixed(1)+'</td></tr>'}).join('');
+    $('valid').textContent='Gaussian validity limit for these settings: about '+Math.round(Tc)+' K'+(p.T<Tc?' — your chosen temperature is below it, so the truncated series is outside its valid range.':'.');
+  }
+  ids.forEach(function(i){$(i).addEventListener('input',draw)});
+  window.addEventListener('resize',draw);
+  var mq=window.matchMedia('(prefers-color-scheme: dark)');
+  (mq.addEventListener?mq.addEventListener('change',draw):mq.addListener(draw));
+  draw();
+})();
+</script>
+</body>
+</html>
