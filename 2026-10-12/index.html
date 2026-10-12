@@ -1,43 +1,9 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="light dark">
 <title>How fast do the waves carry you? Stokes drift from wind — Research Explorer, 12 Oct 2026</title>
+<link rel="stylesheet" href="../assets/style.css">
 <style>
-:root{--bg:#f5f5f7;--card:rgba(255,255,255,.72);--text:#1d1d1f;--muted:#5c5c61;--line:rgba(0,0,0,.1);--accent:#0062cc;--c1:#0062cc;--c2:#c93400;--c3:#248a3d;--c4:#8944ab;--grid:rgba(0,0,0,.08)}
-@media(prefers-color-scheme:dark){:root{--bg:#000;--card:rgba(44,44,46,.72);--text:#f5f5f7;--muted:#a1a1a6;--line:rgba(255,255,255,.14);--accent:#64a8ff;--c1:#64a8ff;--c2:#ff9f0a;--c3:#30d158;--c4:#da8fff;--grid:rgba(255,255,255,.1)}}
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--text);font:17px/1.5 -apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Arial,sans-serif;-webkit-font-smoothing:antialiased}
-main{max-width:980px;margin:0 auto;padding:56px 24px 80px}
-a{color:var(--accent)}
-.back{font-size:15px;text-decoration:none}
-.eyebrow{font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);margin-top:28px}
-h1{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Helvetica Neue",Arial,sans-serif;font-size:clamp(34px,5.4vw,54px);line-height:1.08;letter-spacing:-.025em;margin:8px 0 14px}
-h2{font-size:24px;letter-spacing:-.015em;margin:0 0 10px}
-.lede{font-size:21px;color:var(--muted);max-width:760px;margin:0}
-.card{background:var(--card);-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px);border:1px solid var(--line);border-radius:24px;padding:28px;margin-top:20px}
-.why{border:1.5px solid var(--accent)}
-.why p{font-size:19px;margin:0}
-.cite{font-size:15px;color:var(--muted)}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
-@media(max-width:760px){.grid2{grid-template-columns:1fr}}
-.controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px 28px;margin-top:8px}
-label{display:block;font-size:15px;font-weight:600}
-label output{float:right;font-weight:500;color:var(--accent);font-variant-numeric:tabular-nums}
-input[type=range]{width:100%;accent-color:var(--accent);margin-top:8px;height:28px}
-.toggle{display:flex;gap:10px;align-items:center;font-size:15px;font-weight:500;margin-top:6px}
-.toggle input{width:20px;height:20px;accent-color:var(--accent)}
-canvas{width:100%;height:340px;display:block}
-.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;color:var(--muted);margin-top:10px}
-.legend span::before{content:"";display:inline-block;width:14px;height:3px;border-radius:2px;background:var(--k);margin-right:6px;vertical-align:middle}
-.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-top:6px}
-.stat{border:1px solid var(--line);border-radius:16px;padding:14px 16px}
-.stat .v{font-size:28px;font-weight:600;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
-.stat .l{font-size:13px;color:var(--muted)}
-.note{font-size:14px;color:var(--muted);margin:10px 0 0}
-.warn{color:var(--c2);font-weight:600}
-code,.m{font-family:ui-monospace,"SF Mono",Menlo,monospace;font-size:14px}
-.eq{font-family:"Times New Roman",serif;font-size:19px;text-align:center;margin:14px 0;overflow-x:auto}
-ul{padding-left:20px;margin:6px 0}li{margin:4px 0}
-@media(prefers-reduced-motion:no-preference){.card{transition:border-color .2s}}
+canvas{height:340px;background:transparent;border:0;border-radius:0}
 </style></head><body><main>
 <a class="back" href="../index.html">‹ All demos</a>
 <div class="eyebrow">12 Oct 2026 · Climate &amp; Oceans</div>
@@ -70,7 +36,7 @@ ul{padding-left:20px;margin:6px 0}li{margin:4px 0}
  <div class="stat"><div class="v" id="s4"></div><div class="l">Rough total drift of a floater in that time</div></div>
 </div>
 <p class="note" id="valid"></p>
-<div class="grid2" style="margin-top:18px">
+<div class="grid" style="margin-top:18px">
  <div><canvas id="prof" aria-label="Stokes drift versus depth for each method" role="img"></canvas>
   <div class="legend"><span style="--k:var(--c4)">1% rule (surface only)</span><span style="--k:var(--c1)">PM spectrum</span><span style="--k:var(--c3)">Phillips tail from fetch peak</span><span style="--k:var(--c2)">Single "peak" wave</span></div></div>
  <div><canvas id="spec" aria-label="Wave energy spectrum" role="img"></canvas>

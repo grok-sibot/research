@@ -5,51 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="light dark">
 <title>Free energies from energy cumulants — Research Explorer, 11 Oct 2026</title>
+<link rel="stylesheet" href="../assets/style.css">
 <style>
-:root{
-  --bg:#f5f5f7; --card:rgba(255,255,255,.72); --card-solid:#fff; --text:#1d1d1f; --muted:#5c5c61;
-  --line:rgba(0,0,0,.1); --accent:#0062cc; --accent-soft:rgba(0,98,204,.1);
-  --c1:#6e6e73; --c2:#0062cc; --c3:#248a3d; --c4:#c93400; --cx:#1d1d1f; --grid:rgba(0,0,0,.08);
-  --font:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display","Helvetica Neue",Helvetica,Arial,sans-serif;
-}
-@media (prefers-color-scheme:dark){:root{
-  --bg:#000; --card:rgba(44,44,46,.72); --card-solid:#1c1c1e; --text:#f5f5f7; --muted:#a1a1a6;
-  --line:rgba(255,255,255,.14); --accent:#64a8ff; --accent-soft:rgba(100,168,255,.16);
-  --c1:#a1a1a6; --c2:#64a8ff; --c3:#4cd964; --c4:#ff9f5a; --cx:#f5f5f7; --grid:rgba(255,255,255,.1);
-}}
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--text);font:17px/1.5 var(--font);-webkit-font-smoothing:antialiased}
-main{max-width:980px;margin:0 auto;padding:56px 24px 96px}
-a{color:var(--accent)}
-a:focus-visible,input:focus-visible,button:focus-visible{outline:3px solid var(--accent);outline-offset:3px;border-radius:8px}
-.eyebrow{font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
-h1{font-size:clamp(32px,5vw,48px);line-height:1.08;letter-spacing:-.02em;margin:10px 0 14px}
-h2{font-size:24px;letter-spacing:-.01em;margin:0 0 12px}
-.authors{color:var(--muted);margin:0 0 6px}
-.card{background:var(--card);-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px);
-  border:1px solid var(--line);border-radius:24px;padding:28px;margin-top:24px}
-.why{background:var(--accent-soft);border-color:transparent}
-.why p{font-size:21px;line-height:1.4;margin:0;font-weight:500}
-.why .eyebrow{color:var(--accent);display:block;margin-bottom:8px}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:24px}
-@media(max-width:760px){.grid{grid-template-columns:1fr}}
-.controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px 28px;margin-bottom:20px}
-label{display:flex;justify-content:space-between;font-size:15px;font-weight:600}
-label output{font-weight:400;color:var(--muted);font-variant-numeric:tabular-nums}
-input[type=range]{width:100%;accent-color:var(--accent);margin-top:6px}
-canvas{width:100%;height:300px;display:block;border-radius:14px;background:var(--card-solid);border:1px solid var(--line)}
-.legend{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:14px;color:var(--muted);margin:10px 0 0}
-.legend i{display:inline-block;width:18px;height:3px;border-radius:2px;vertical-align:middle;margin-right:6px}
-table{width:100%;border-collapse:collapse;font-size:15px;font-variant-numeric:tabular-nums;margin-top:6px}
-th,td{text-align:right;padding:8px 6px;border-bottom:1px solid var(--line)}
-th:first-child,td:first-child{text-align:left}
-th{color:var(--muted);font-weight:600}
-.note{font-size:14px;color:var(--muted)}
-code{font:14px ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--accent-soft);padding:2px 6px;border-radius:6px}
-.math{font:15px ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--accent-soft);padding:12px 16px;border-radius:14px;overflow-x:auto;margin:10px 0;white-space:pre}
-.back{display:inline-block;margin-bottom:28px;text-decoration:none;font-size:15px}
-li{margin:6px 0}
-@media (prefers-reduced-motion:no-preference){a,input{transition:opacity .2s}}
+:root{--c1:#6e6e73;--c2:#0062cc;--c3:#248a3d;--c4:#c93400}
+@media (prefers-color-scheme:dark){:root{--c1:#a1a1a6;--c2:#64a8ff;--c3:#4cd964;--c4:#ff9f5a}}
+canvas{height:300px}
 </style>
 </head>
 <body>
@@ -61,7 +21,7 @@ li{margin:6px 0}
 <p class="authors">arXiv:2610.11882 (submitted 8 Oct 2026, cond-mat.mtrl-sci) · <a href="https://arxiv.org/abs/2610.11882" target="_blank" rel="noopener">arxiv.org/abs/2610.11882</a> · <a href="https://arxiv.org/pdf/2610.11882v1" target="_blank" rel="noopener">PDF</a></p>
 
 <section class="card why" aria-labelledby="why-h">
-  <span class="eyebrow" id="why-h">Why it matters</span>
+  <h2 id="why-h">Why it matters</h2>
   <p>Designing better battery cathodes and high-temperature alloys means deciding which disordered mixtures of elements can actually be made, and today that needs expensive simulations for every candidate. This method gets a far more accurate stability estimate from a few hundred cheap energy evaluations, so researchers can screen thousands of compositions before ever entering a lab.</p>
 </section>
 
@@ -83,8 +43,8 @@ exact (toy): F = ε₀ − kT·s₀ + (k/β)·ln(1 + βθ),   β = 1/kT</div>
     <div><label for="temp">Temperature <output id="o-temp"></output></label><input id="temp" type="range" min="300" max="3000" step="10" value="1200"></div>
   </div>
   <div class="grid">
-    <div><h2 style="font-size:17px">Free-energy error vs. exact</h2><canvas id="c1" role="img" aria-label="Chart of free energy error in meV per atom versus temperature for four approximations"></canvas></div>
-    <div><h2 style="font-size:17px">Enthalpy vs. temperature</h2><canvas id="c2" role="img" aria-label="Chart of enthalpy in meV per atom versus temperature for exact and four approximations"></canvas></div>
+    <div><h2 class="plot-title">Free-energy error vs. exact</h2><canvas id="c1" role="img" aria-label="Chart of free energy error in meV per atom versus temperature for four approximations"></canvas></div>
+    <div><h2 class="plot-title">Enthalpy vs. temperature</h2><canvas id="c2" role="img" aria-label="Chart of enthalpy in meV per atom versus temperature for exact and four approximations"></canvas></div>
   </div>
   <div class="legend" aria-hidden="true">
     <span><i style="background:var(--c1)"></i>Regular solution (SQS)</span>
