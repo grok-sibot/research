@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="light dark">
+<title>One model, many speeds: Elastic Latent Recurrence — Research Explorer, 14 Oct 2026</title>
+<link rel="stylesheet" href="../assets/style.css">
+<style>canvas{height:300px}</style></head><body><main>
+<a class="back" href="../index.html">‹ All demos</a>
+<div class="eyebrow">14 Oct 2026 · AI</div>
+<h1>One model, many speeds</h1>
+<p class="lede">Looped language models reuse the same layers over and over so one checkpoint can spend more compute for more accuracy. Elastic Latent Recurrence trains them so the cheap one-loop setting still matches a normal model — then every extra loop buys you more quality.</p>
+
+<section class="card why" aria-labelledby="why-h">
+<h2 id="why-h">Why it matters</h2>
+<p>Phone apps and chat bots often need one small model that can answer fast when you're in a hurry and think harder when the question is tough, without shipping several separate models. This recipe keeps the fast setting as good as a normal model of the same size, then lets you turn a dial to trade a bit of time for noticeably better answers from the same weights.</p>
+</section>
+
+<section class="card" aria-labelledby="paper-h">
+<h2 id="paper-h">The paper</h2>
+<p style="margin:0 0 6px"><strong>One Model to Loop Them All: Elastic Latent Recurrence for Language Models</strong></p>
+<p class="cite" style="margin:0">Faisal Ladhak, Shantanu Acharya, Santiago Akle Serano, Simeng Sun, Boris Ginsburg, Krishna C Puvvada. arXiv:2610.12582 [cs.LG], submitted 8 Oct 2026. <a href="https://arxiv.org/abs/2610.12582">Read on arXiv</a> · <a href="https://arxiv.org/pdf/2610.12582">PDF</a></p>
+<p style="margin-top:14px">In plain language: older looped models paid a “one-loop tax” — at the cheapest depth they lagged a normal model, so you still needed a separate fast model. ELR fixes that with a gated state update, mixing loop counts inside each training step, and telling each pass where it sits in the budget. On a 4B hybrid model, one loop sits 0.5 points from the matched baseline; four loops of the same checkpoint add about 7 points on a ten-task average. Their post-trained Koi-4B goes from an estimated 18 to 29 on the Artificial Analysis Intelligence Index by loop count alone.</p>
+</section>
+
+<section class="card" aria-labelledby="demo-h">
+<h2 id="demo-h">Try it</h2>
+<p class="note" style="margin:0 0 14px">Interactive toy using the paper’s reported GDP-Hybrid-4B averages and relative latency. The “naive looped” curve is an illustrative stand-in for the one-loop tax described in the paper, not a re-run of Huginn.</p>
+<div class="controls">
+ <div><label for="K">Inference loops <output id="Ko"></output></label><input id="K" type="range" min="1" max="4" step="1" value="2"></div>
+ <div><label for="B">Base accuracy (points) <output id="Bo"></output></label><input id="B" type="range" min="55" max="75" step="0.5" value="65.7"></div>
+ <div><label for="T">One-loop tax (points) <output id="To"></output></label><input id="T" type="range" min="0" max="12" step="0.5" value="6"></div>
+</div>
+<label class="toggle"><input id="LKV" type="checkbox" checked> Last-loop KV cache (keep memory at one-loop size)</label>
+<div class="stats" style="margin-top:22px">
+ <div class="stat"><div class="v" id="s1"></div><div class="l">ELR accuracy (toy)</div></div>
+ <div class="stat"><div class="v" id="s2"></div><div class="l">Naive looped accuracy</div></div>
+ <div class="stat"><div class="v" id="s3"></div><div class="l">Relative decode cost</div></div>
+ <div class="stat"><div class="v" id="s4"></div><div class="l">Attention KV memory</div></div>
+</div>
+<p class="note" id="verdict"></p>
+<div class="grid" style="margin-top:18px">
+ <div><div class="plot-title">Accuracy vs loop count</div><canvas id="acc" role="img" aria-label="Accuracy curves for ELR, naive looped, and baseline"></canvas>
+  <div class="legend"><span style="--k:var(--c1)">ELR (paper-shaped)</span><span style="--k:var(--c2)">Naive with tax</span><span style="--k:var(--cx)">Baseline</span><span style="--k:var(--c3)">Your k</span></div></div>
+ <div><div class="plot-title">Cost and memory vs loops</div><canvas id="cost" role="img" aria-label="Relative latency and KV memory versus loop count"></canvas>
+  <div class="legend"><span style="--k:var(--c1)">Decode latency (×)</span><span style="--k:var(--c4)">KV memory (×)</span><span style="--k:var(--c3)">Your k</span></div></div>
+</div>
+</section>
+
+<section class="card" aria-labelledby="math-h">
+<h2 id="math-h">The maths in this page</h2>
+<p style="margin:0">ELR splits the network into input, shared recurrent, and output blocks. At loop count <i>k</i> the effective depth is</p>
+<div class="eq">D<sub>eff</sub>(k) = L<sub>in</sub> + k · L<sub>rec</sub> + L<sub>out</sub></div>
+<p style="margin:12px 0 0">so with the paper’s 14 / 24 / 14 split, relative compute ≈ (28 + 24k) / 52. The adaptive-delta state update is</p>
+<div class="eq">s<sub>i</sub> = s<sub>i−1</sub> + β<sub>i</sub> ⊙ (r<sub>i</sub> − s<sub>i−1</sub>),&nbsp;&nbsp; β<sub>i</sub> = σ(W<sub>β</sub> s̃<sub>i</sub> + b<sub>β</sub>) ⊙ softplus(γ)</div>
+<ul>
+<li><strong>ELR curve</strong>: interpolated from the reported ten-task averages (65.13, 70.85, 72.08, 72.38) shifted so one-loop sits near your chosen baseline.</li>
+<li><strong>Naive tax</strong>: starts <i>T</i> points below baseline at <i>k</i> = 1 and recovers toward ELR by <i>k</i> = 4 — the failure mode the paper avoids.</li>
+<li><strong>Last-loop KV</strong>: overwrites one attention cache each loop, holding memory at 1× instead of growing to ~2.5× at four loops (paper’s Koi-4B figure).</li>
+</ul>
+<p class="warn">This is an illustrative toy using the paper’s published averages and architecture ratios, not the authors’ training code. Absolute scores shift with the base slider; the shape of diminishing returns and the one-loop parity are the point.</p>
+</section>
+
+<section class="card" aria-labelledby="use-h">
+<h2 id="use-h">How to use it</h2>
+<p style="margin:0">Leave the tax at about 6 and slide loops from 1 to 4: ELR stays near the baseline at one loop while the orange “naive” line starts far below, then both rise with diminishing returns after the second loop. Raise the tax to see why older looped models forced you to keep a separate fast checkpoint. Uncheck last-loop KV to watch memory climb with depth even though accuracy barely changes after <i>k</i> = 3. For real serving, the takeaway is that elastic depth can be a quality dial on one small model instead of a shelf of differently sized ones.</p>
+</section>
+</main>
+<script>
+// Paper-shaped ELR averages (GDP-Hybrid-4B Table 8) and architecture costs
+const ELR_RAW=[65.13,70.85,72.08,72.38], BASE_PAPER=65.65;
+const LIN=14,LREC=24,LOUT=14, D1=LIN+LREC+LOUT; // 52
+const lat=k=>(LIN+k*LREC+LOUT)/D1; // ≈1, 1.46, 1.92, 2.38
+const kvPer=k=>1+(k-1)*0.5; // ~1, 1.5, 2, 2.5 as in paper Koi (~2.5 at k=4)
+
+function elrAt(k,base){const o=ELR_RAW[k-1]-ELR_RAW[0];return base-0.52+o;} // paper: k1 = base-0.52
+function naiveAt(k,base,tax){
+  const elr=elrAt(k,base);
+  // tax fades: full at k=1, ~0 at k=4
+  const fade=Math.pow((4-k)/3,1.4);
+  return elr-tax*fade;
+}
+
+const $=id=>document.getElementById(id),css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+function setup(c){const r=c.getBoundingClientRect(),d=devicePixelRatio||1;c.width=r.width*d;c.height=r.height*d;const x=c.getContext('2d');x.setTransform(d,0,0,d,0,0);return [x,r.width,r.height];}
+function line(x,p,c,w){x.strokeStyle=c;x.lineWidth=w||2.5;x.beginPath();p.forEach((q,i)=>i?x.lineTo(q[0],q[1]):x.moveTo(q[0],q[1]));x.stroke();}
+function dashV(x,X,t,b,c){x.strokeStyle=c;x.setLineDash([4,4]);x.lineWidth=1.5;x.beginPath();x.moveTo(X,t);x.lineTo(X,b);x.stroke();x.setLineDash([]);}
+
+function draw(){
+  const K=+$('K').value|0, B=+$('B').value, T=+$('T').value, lkv=$('LKV').checked;
+  $('Ko').textContent=K; $('Bo').textContent=B.toFixed(1); $('To').textContent=T.toFixed(1);
+  const e=elrAt(K,B), n=naiveAt(K,B,T), L=lat(K), M=lkv?1:kvPer(K);
+  $('s1').textContent=e.toFixed(1)+'%';
+  $('s2').textContent=n.toFixed(1)+'%';
+  $('s3').textContent=L.toFixed(2)+'×';
+  $('s4').textContent=M.toFixed(2)+'×';
+  const gain=e-elrAt(1,B), frac=gain/(elrAt(4,B)-elrAt(1,B)+1e-9);
+  $('verdict').textContent=K===1
+    ? (Math.abs(e-B)<1?'At one loop, ELR sits near the baseline — little or no one-loop tax.':'At one loop ELR is close to baseline; the naive curve still pays the full tax.')
+    : `At ${K} loops you capture about ${(frac*100).toFixed(0)}% of the 1→4 gain, at ${L.toFixed(2)}× decode cost`+(lkv?' with one-loop KV memory.':` and ${M.toFixed(1)}× KV memory.`);
+
+  // Accuracy plot
+  let [x,W,H]=setup($('acc'));
+  const m={l:44,r:12,t:12,b:32}, ks=[1,2,3,4];
+  const E=ks.map(k=>elrAt(k,B)), N=ks.map(k=>naiveAt(k,B,T));
+  const ymin=Math.min(B, ...E, ...N)-2, ymax=Math.max(B, ...E, ...N)+2;
+  const X=k=>m.l+(k-1)/3*(W-m.l-m.r), Y=v=>H-m.b-(v-ymin)/(ymax-ymin)*(H-m.t-m.b);
+  x.strokeStyle=css('--grid');x.fillStyle=css('--muted');x.font='11px -apple-system,sans-serif';x.lineWidth=1;
+  for(let i=0;i<=4;i++){const v=ymin+(ymax-ymin)*i/4;x.beginPath();x.moveTo(m.l,Y(v));x.lineTo(W-m.r,Y(v));x.stroke();x.textAlign='right';x.fillText(v.toFixed(0)+'%',m.l-6,Y(v)+4);}
+  x.textAlign='center';ks.forEach(k=>x.fillText('k='+k,X(k),H-10));
+  // baseline
+  x.strokeStyle=css('--cx');x.setLineDash([5,4]);x.lineWidth=1.5;x.beginPath();x.moveTo(m.l,Y(B));x.lineTo(W-m.r,Y(B));x.stroke();x.setLineDash([]);
+  line(x,ks.map(k=>[X(k),Y(elrAt(k,B))]),css('--c1'));
+  line(x,ks.map(k=>[X(k),Y(naiveAt(k,B,T))]),css('--c2'));
+  dashV(x,X(K),m.t,H-m.b,css('--c3'));
+  // points
+  ks.forEach(k=>{[[elrAt(k,B),'--c1'],[naiveAt(k,B,T),'--c2']].forEach(([v,c])=>{x.fillStyle=css(c);x.beginPath();x.arc(X(k),Y(v),4,0,6.3);x.fill();});});
+
+  // Cost plot
+  [x,W,H]=setup($('cost'));
+  const Lats=ks.map(lat), Mems=ks.map(k=>lkv?1:kvPer(k));
+  const cmax=Math.max(2.6, ...Lats, ...Mems)*1.05;
+  const Yc=v=>H-m.b-v/cmax*(H-m.t-m.b);
+  x.strokeStyle=css('--grid');x.fillStyle=css('--muted');x.font='11px -apple-system,sans-serif';x.lineWidth=1;
+  for(let i=0;i<=4;i++){const v=cmax*i/4;x.beginPath();x.moveTo(m.l,Yc(v));x.lineTo(W-m.r,Yc(v));x.stroke();x.textAlign='right';x.fillText(v.toFixed(1)+'×',m.l-6,Yc(v)+4);}
+  x.textAlign='center';ks.forEach(k=>x.fillText('k='+k,X(k),H-10));
+  line(x,ks.map(k=>[X(k),Yc(lat(k))]),css('--c1'));
+  line(x,ks.map(k=>[X(k),Yc(lkv?1:kvPer(k))]),css('--c4'));
+  dashV(x,X(K),m.t,H-m.b,css('--c3'));
+  ks.forEach(k=>{x.fillStyle=css('--c1');x.beginPath();x.arc(X(k),Yc(lat(k)),4,0,6.3);x.fill();
+    x.fillStyle=css('--c4');x.beginPath();x.arc(X(k),Yc(lkv?1:kvPer(k)),4,0,6.3);x.fill();});
+}
+['K','B','T','LKV'].forEach(i=>$(i).addEventListener('input',draw));
+addEventListener('resize',draw);
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',draw);
+draw();
+</script>
+</body></html>
