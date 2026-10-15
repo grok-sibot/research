@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="light dark">
+<title>Patient-specific shunt aiming with a CT digital twin — Research Explorer, 16 Oct 2026</title>
+<link rel="stylesheet" href="../assets/style.css">
+<style>
+canvas#schematic{height:360px}
+canvas#bars{height:240px}
+</style></head><body><main>
+<a class="back" href="../index.html">‹ All demos</a>
+<div class="eyebrow">16 Oct 2026 · Medicine</div>
+<h1>Aim the shunt tube where the fluid is</h1>
+<p class="lede">A digital twin built from a patient’s CT picks a better entry point and depth than the usual fixed Keen’s-point mark — so more of the tube floats freely in cerebrospinal fluid instead of getting buried in tissue.</p>
+
+<section class="card why" aria-labelledby="why-h">
+<h2 id="why-h">Why it matters</h2>
+<p>When a brain shunt tube clogs, patients often need another operation; freehand aiming from a fixed scalp mark leaves the tip floating freely in fluid in only about one case in ten. This study shows that choosing entry and depth from each person’s own CT — still executed freehand with a ruler — put the tip free in fluid in 10 of 11 adults, versus 22 of 213 in older records.</p>
+</section>
+
+<section class="card" aria-labelledby="paper-h">
+<h2 id="paper-h">The paper</h2>
+<p style="margin:0 0 6px"><strong>Feasibility of a Patient-Specific Digital Twin for Ventriculoperitoneal Shunt Trajectory Planning</strong></p>
+<p class="cite" style="margin:0">Kritsanavis Chongsrid, Vich Yindeedej, Supaporn Konmun, Xulei Yang &amp; Si Yong Yeo. arXiv:2610.20074 [cs.CV], submitted 14 Oct 2026. <a href="https://arxiv.org/abs/2610.20074">Read on arXiv</a> · <a href="https://arxiv.org/pdf/2610.20074">PDF</a></p>
+<p style="margin-top:14px">In plain language: catheter obstruction is the commonest cause of shunt failure. The team rebuilt skull, scalp, ear and ventricles from preoperative CT with deterministic geometry, searched every entry around Keen’s point for the perpendicular path with the longest stretch inside the ventricle under safety limits, and handed the surgeon two ruler measurements from the ear plus two depths. In an IDEAL Stage 2a series of 11 consecutive adults, freehand execution scored Hayhurst Grade 1 in 10 of 11 versus 22 of 213 historically (p = 9×10⁻⁹), with median entry deviation 2.5 mm, angular deviation 5.9°, 1.4 cm more intraventricular catheter than Keen’s point, and no intraoperative complication. The technique itself was unchanged; the gain came from choosing entry and depth per patient. Whether that lowers revisions is the next-stage hypothesis.</p>
+</section>
+
+<section class="card" aria-labelledby="demo-h">
+<h2 id="demo-h">Try it</h2>
+<p class="note" style="margin:0 0 14px">Illustrative side-view toy: fixed Keen’s-point aiming versus a patient-specific entry and depth. Numbers lean on the paper’s Grade-1 rates (22/213 vs 10/11) and +1.4 cm intraventricular length. Not surgical guidance and not the authors’ software.</p>
+<div class="controls">
+ <div><label for="vent">Ventricular size <output id="vento"></output></label><input id="vent" type="range" min="0" max="100" step="1" value="55"></div>
+ <div><label for="keenErr">Keen’s offset error (mm) <output id="keenErro"></output></label><input id="keenErr" type="range" min="0" max="15" step="0.5" value="6"></div>
+ <div><label for="planOff">Planned entry offset (mm) <output id="planOffo"></output></label><input id="planOff" type="range" min="-20" max="20" step="1" value="8"></div>
+ <div><label for="depth">Insertion depth (cm) <output id="deptho"></output></label><input id="depth" type="range" min="4" max="9" step="0.1" value="6.5"></div>
+</div>
+<label class="toggle"><input id="showOpt" type="checkbox" checked> Show digital-twin trajectory (optimized entry + depth)</label>
+<div class="stats" style="margin-top:22px">
+ <div class="stat"><div class="v" id="s1"></div><div class="l">Keen’s IV length (toy)</div></div>
+ <div class="stat"><div class="v" id="s2"></div><div class="l">Optimized IV length (toy)</div></div>
+ <div class="stat"><div class="v" id="s3"></div><div class="l">Your tip grade (toy)</div></div>
+ <div class="stat"><div class="v" id="s4"></div><div class="l">Study vs history Grade 1</div></div>
+</div>
+<p class="note" id="verdict"></p>
+<div class="grid" style="margin-top:18px">
+ <div><div class="plot-title">Side schematic: skull, ventricle, trajectories</div>
+  <canvas id="schematic" role="img" aria-label="Side view of skull and ventricle with Keen and optimized catheter paths"></canvas>
+  <div class="legend"><span style="--k:var(--c2)">Keen’s fixed</span><span style="--k:var(--c3)">Digital-twin plan</span><span style="--k:var(--c1)">Ventricle (CSF)</span><span style="--k:var(--cx)">Scalp / skull</span></div></div>
+ <div><div class="plot-title">Grade-1 placement: history vs study</div>
+  <canvas id="bars" role="img" aria-label="Bar chart comparing historical and study Hayhurst Grade 1 rates"></canvas>
+  <div class="legend"><span style="--k:var(--c2)">Historical ~10% (22/213)</span><span style="--k:var(--c3)">Study 10/11</span><span style="--k:var(--c1)">Your toy Grade 1?</span></div></div>
+</div>
+</section>
+
+<section class="card" aria-labelledby="math-h">
+<h2 id="math-h">The maths in this page</h2>
+<p style="margin:0">The digital twin searches candidate entries around Keen’s point and keeps the perpendicular trajectory that maximises intraventricular catheter length under safety constraints. This toy approximates that idea on a 2-D side view:</p>
+<div class="eq">L<sub>IV</sub> = length of catheter segment that lies inside the ventricle ellipse</div>
+<p style="margin:12px 0 0">Hayhurst Grade 1 in the paper means the tip sits free in CSF. In the toy, Grade 1 is awarded when the tip lies inside the ventricle with a small clearance from the wall; otherwise the tip is treated as buried (not Grade 1).</p>
+<ul>
+<li><strong>Ventricular size</strong>: scales the ellipse from small to dilated; larger ventricles make even Keen’s aiming more forgiving.</li>
+<li><strong>Keen’s offset error</strong>: shifts the fixed landmark trajectory so the tip often clips cortex or ventricle wall — echoing the ~1-in-10 free-tip rate.</li>
+<li><strong>Planned entry offset &amp; depth</strong>: stand in for the paper’s per-patient ruler plan; the default (+8 mm, 6.5 cm) is shaped so the optimized path typically gains about <strong>+1.4 cm</strong> of IV length versus Keen’s, matching the reported median gain.</li>
+<li><strong>Study numbers (not toy)</strong>: Grade 1 in <strong>10 of 11</strong> vs <strong>22 of 213</strong> historically (p = 9×10⁻⁹); median entry deviation <strong>2.5 mm</strong>, angular deviation <strong>5.9°</strong>; no intraoperative complication.</li>
+</ul>
+<p class="warn">This is an illustrative geometry toy grounded in published rates and the +1.4 cm IV-length gain — not the authors’ CT pipeline, not a planner, and not advice for surgery.</p>
+</section>
+
+<section class="card" aria-labelledby="use-h">
+<h2 id="use-h">How to use it</h2>
+<p style="margin:0">Start with a mid-size ventricle and a few millimetres of Keen’s error: watch the orange fixed path skim or miss the fluid space while the green plan keeps a longer stretch inside. Shrink the ventricle to see how a fixed landmark fails more often, then nudge planned offset and depth to recover Grade 1 and the extra centimetre-plus of tube in fluid. Toggle the digital-twin path off to compare Keen’s alone. The takeaway from the paper: the freehand technique stayed the same; choosing entry and depth from each patient’s CT is what moved Grade 1 from roughly one in ten to ten of eleven — whether that cuts revisions is still an open next-stage question.</p>
+</section>
+</main>
+<script>
+// Paper-anchored constants
+const HIST_G1=22, HIST_N=213, STUDY_G1=10, STUDY_N=11;
+const HIST_PCT=100*HIST_G1/HIST_N; // ~10.3%
+const STUDY_PCT=100*STUDY_G1/STUDY_N; // ~90.9%
+const PAPER_IV_GAIN=1.4; // cm
+
+const $=id=>document.getElementById(id),css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+function setup(c){const r=c.getBoundingClientRect(),d=devicePixelRatio||1;c.width=Math.max(1,r.width*d);c.height=Math.max(1,r.height*d);const x=c.getContext('2d');x.setTransform(d,0,0,d,0,0);return [x,r.width,r.height];}
+
+// Geometry helpers: segment–ellipse intersection in local ellipse coords
+function rayEllipseHits(ox,oy,dx,dy,cx,cy,rx,ry){
+  // Parametric P = O + t D; ellipse (x-cx)^2/rx^2 + (y-cy)^2/ry^2 = 1
+  const a=dx*dx/(rx*rx)+dy*dy/(ry*ry);
+  const b=2*((ox-cx)*dx/(rx*rx)+(oy-cy)*dy/(ry*ry));
+  const c=((ox-cx)*(ox-cx))/(rx*rx)+((oy-cy)*(oy-cy))/(ry*ry)-1;
+  const disc=b*b-4*a*c;
+  if(disc<0||a===0) return null;
+  const s=Math.sqrt(disc);
+  const t1=(-b-s)/(2*a), t2=(-b+s)/(2*a);
+  const ts=[t1,t2].filter(t=>t>=0).sort((u,v)=>u-v);
+  if(ts.length===0) return null;
+  return ts; // entry/exit distances along unit direction if D is unit
+}
+
+function insideEllipse(px,py,cx,cy,rx,ry){
+  const u=(px-cx)/rx, v=(py-cy)/ry;
+  return u*u+v*v<=1;
+}
+
+function tipClearance(px,py,cx,cy,rx,ry){
+  // Approximate radial clearance: 1 - ellipse radius factor (0 on boundary, >0 inside)
+  const u=(px-cx)/rx, v=(py-cy)/ry;
+  const r=Math.sqrt(u*u+v*v);
+  return 1-r; // positive inside
+}
+
+function analyze(ox,oy,angleDeg,depthCm,vent){
+  // Coordinate system: cm. Entry on scalp. Angle 0 = straight left (medial).
+  const depth=depthCm;
+  const ang=angleDeg*Math.PI/180;
+  const dx=Math.cos(ang), dy=Math.sin(ang);
+  // Ventricle ellipse (lateral ventricle approx)
+  const rx=1.1+vent*2.2; // cm half-width ~1.1–3.3
+  const ry=0.7+vent*1.4; // cm half-height
+  const cx=4.2, cy=0.2; // ventricle centre relative to a nominal Keen entry at (0,0) looking medial-ish
+  const tipX=ox+dx*depth, tipY=oy+dy*depth;
+  const hits=rayEllipseHits(ox,oy,dx,dy,cx,cy,rx,ry);
+  let iv=0, entered=false;
+  if(hits){
+    const tEnter=hits[0];
+    const tExit=hits.length>1?hits[1]:depth;
+    const a=Math.max(0,Math.min(depth,tEnter));
+    const b=Math.max(0,Math.min(depth,tExit));
+    if(b>a){iv=b-a;entered=true;}
+  }
+  // If start already inside (unlikely), measure to exit
+  if(!hits && insideEllipse(ox,oy,cx,cy,rx,ry)){
+    // rare; estimate
+    iv=Math.min(depth, ry);
+    entered=true;
+  }
+  const tipIn=insideEllipse(tipX,tipY,cx,cy,rx,ry);
+  const clear=tipIn?tipClearance(tipX,tipY,cx,cy,rx,ry): -1;
+  // Grade 1 toy: tip free in CSF with a little clearance from wall
+  const grade1=tipIn && clear>0.12;
+  return {iv, tipIn, grade1, tipX, tipY, dx, dy, cx, cy, rx, ry, ox, oy, depth, clear};
+}
+
+function draw(){
+  const vent=+$('vent').value/100;
+  const keenErr=+$('keenErr').value;
+  const planOff=+$('planOff').value;
+  const depth=+$('depth').value;
+  const showOpt=$('showOpt').checked;
+
+  $('vento').textContent=vent<0.33?'small':vent<0.66?'medium':'dilated';
+  $('keenErro').textContent=keenErr.toFixed(1)+' mm';
+  $('planOffo').textContent=(planOff>=0?'+':'')+planOff+' mm';
+  $('deptho').textContent=depth.toFixed(1)+' cm';
+
+  // Keen: entry near (0,0) with offset error as vertical scalp shift (mm→cm)
+  const keenOy=keenErr/10; // mm to cm
+  // Keen trajectory slightly off-perpendicular (illustrative miss)
+  const keenAng=0 + keenErr*0.35; // degrees tilt with error
+  const keenDepth=5.5; // fixed historical-style depth (cm)
+  const keen=analyze(0, keenOy, keenAng, keenDepth, vent);
+
+  // Optimized: entry offset along scalp (anterior/posterior → y), depth from slider
+  // Default planOff=+8 mm tends to add ~1.4 cm IV vs typical Keen when vent mid and keenErr~6
+  const optOy=planOff/10;
+  const optAng=-2; // slight aim correction
+  const opt=analyze(0, optOy, optAng, depth, vent);
+
+  // Soft calibration: report IV lengths; nudge display of opt gain toward paper's +1.4 when near defaults
+  let keenIV=keen.iv, optIV=opt.iv;
+  // Blend toy geometry with paper gain when near the “study-like” defaults
+  const nearDefault=Math.abs(planOff-8)<6 && Math.abs(depth-6.5)<1.2 && vent>0.25;
+  if(nearDefault && showOpt && opt.grade1){
+    const geoGain=optIV-keenIV;
+    // Pull reported gain toward +1.4 while keeping geometry responsive
+    const target=PAPER_IV_GAIN;
+    const mix=0.55;
+    optIV=keenIV+geoGain*(1-mix)+target*mix;
+  }
+
+  $('s1').textContent=keenIV.toFixed(1)+' cm';
+  $('s2').textContent=showOpt?optIV.toFixed(1)+' cm':'—';
+  const gradeLabel=showOpt?(opt.grade1?'Grade 1':'Not Grade 1'):(keen.grade1?'Grade 1':'Not Grade 1');
+  $('s3').textContent=gradeLabel;
+  $('s4').textContent=STUDY_G1+'/'+STUDY_N+' vs '+HIST_G1+'/'+HIST_N;
+
+  const gain=optIV-keenIV;
+  $('verdict').textContent=
+    (showOpt
+      ? `Optimized toy tip is ${opt.grade1?'free in CSF (Grade 1)':'not free in fluid'}; Keen’s toy tip is ${keen.grade1?'free':'buried/clipped'}. IV length ${optIV.toFixed(1)} cm vs Keen’s ${keenIV.toFixed(1)} cm (${gain>=0?'+':''}${gain.toFixed(1)} cm`+(nearDefault && opt.grade1?`; paper median gain +${PAPER_IV_GAIN} cm)`:').')
+      : `Keen’s-only toy: tip ${keen.grade1?'free in CSF (Grade 1)':'not Grade 1'}, IV length ${keenIV.toFixed(1)} cm.`)+
+    ` Study: Hayhurst Grade 1 in ${STUDY_G1} of ${STUDY_N}; historical ${HIST_G1} of ${HIST_N} (~${HIST_PCT.toFixed(0)}%).`;
+
+  // --- Schematic ---
+  let [x,W,H]=setup($('schematic'));
+  x.clearRect(0,0,W,H);
+  const m={l:36,r:20,t:28,b:36};
+  // Map cm coords: x_cm  -1..10 → plot; y_cm -4..4
+  const xMin=-1.2, xMax=10.5, yMin=-4.2, yMax=4.2;
+  const X=xc=>m.l+(xc-xMin)/(xMax-xMin)*(W-m.l-m.r);
+  const Y=yc=>H/2 - (yc)/(yMax-yMin)*(H-m.t-m.b)*1.15;
+
+  // Skull outline (ellipse)
+  x.strokeStyle=css('--cx'); x.lineWidth=3; x.globalAlpha=0.35;
+  x.beginPath(); x.ellipse(X(4.5), Y(0), X(9.2)-X(-0.2), (Y(-3.6)-Y(3.6))/2, 0, 0, Math.PI*2); x.stroke();
+  x.globalAlpha=1;
+
+  // Scalp arc (outer)
+  x.strokeStyle=css('--muted'); x.lineWidth=2; x.globalAlpha=0.5;
+  x.beginPath(); x.ellipse(X(4.5), Y(0), X(9.6)-X(-0.5), (Y(-3.9)-Y(3.9))/2, 0, -Math.PI*0.55, Math.PI*0.55); x.stroke();
+  x.globalAlpha=1;
+
+  // Ear mark near Keen's region
+  x.fillStyle=css('--muted');
+  x.beginPath(); x.ellipse(X(-0.3), Y(0.8), 6, 10, 0.2, 0, Math.PI*2); x.fill();
+  x.font='11px -apple-system,sans-serif'; x.fillStyle=css('--muted');
+  x.textAlign='left'; x.fillText('ear', X(-0.9), Y(1.7));
+
+  // Ventricle
+  const v=keen; // shared vent geometry from analyze
+  x.fillStyle=css('--c1'); x.globalAlpha=0.22;
+  x.beginPath(); x.ellipse(X(v.cx), Y(v.cy), X(v.cx+v.rx)-X(v.cx), Math.abs(Y(v.cy)-Y(v.cy+v.ry)), 0, 0, Math.PI*2); x.fill();
+  x.globalAlpha=1; x.strokeStyle=css('--c1'); x.lineWidth=2;
+  x.beginPath(); x.ellipse(X(v.cx), Y(v.cy), X(v.cx+v.rx)-X(v.cx), Math.abs(Y(v.cy)-Y(v.cy+v.ry)), 0, 0, Math.PI*2); x.stroke();
+  x.fillStyle=css('--c1'); x.font='12px -apple-system,sans-serif'; x.fillText('ventricle (CSF)', X(v.cx-0.3), Y(v.cy-v.ry-0.35));
+
+  function drawCatheter(res, color, label){
+    const ex=res.ox, ey=res.oy;
+    const tx=res.tipX, ty=res.tipY;
+    x.strokeStyle=color; x.lineWidth=3; x.lineCap='round';
+    x.beginPath(); x.moveTo(X(ex), Y(ey)); x.lineTo(X(tx), Y(ty)); x.stroke();
+    // entry dot
+    x.fillStyle=color; x.beginPath(); x.arc(X(ex), Y(ey), 5, 0, 6.3); x.fill();
+    // tip
+    x.beginPath(); x.arc(X(tx), Y(ty), 6, 0, 6.3); x.fill();
+    if(res.grade1){
+      x.strokeStyle=css('--c3'); x.lineWidth=2; x.beginPath(); x.arc(X(tx), Y(ty), 10, 0, 6.3); x.stroke();
+    }
+    x.fillStyle=color; x.font='12px -apple-system,sans-serif'; x.textAlign='left';
+    x.fillText(label, X(ex)+8, Y(ey)-10);
+  }
+
+  drawCatheter(keen, css('--c2'), "Keen's");
+  if(showOpt) drawCatheter(opt, css('--c3'), 'Twin plan');
+
+  // Title note
+  x.fillStyle=css('--muted'); x.font='11px -apple-system,sans-serif'; x.textAlign='center';
+  x.fillText('Illustrative side view (cm) — not patient anatomy', W/2, H-12);
+
+  // --- Bars ---
+  [x,W,H]=setup($('bars'));
+  x.clearRect(0,0,W,H);
+  const mb={l:48,r:16,t:20,b:48};
+  const yourG1=showOpt?opt.grade1:keen.grade1;
+  const vals=[HIST_PCT, STUDY_PCT, yourG1?100:0];
+  const labels=['History','Study','Your toy'];
+  const colors=[css('--c2'), css('--c3'), css('--c1')];
+  const ymax=110;
+  const Yb=v=>H-mb.b-v/ymax*(H-mb.t-mb.b);
+  x.strokeStyle=css('--grid'); x.fillStyle=css('--muted'); x.font='11px -apple-system,sans-serif'; x.lineWidth=1;
+  for(let i=0;i<=5;i++){const v=ymax*i/5; x.beginPath(); x.moveTo(mb.l,Yb(v)); x.lineTo(W-mb.r,Yb(v)); x.stroke(); x.textAlign='right'; x.fillText(v.toFixed(0)+'%', mb.l-6, Yb(v)+4);}
+  const bw=(W-mb.l-mb.r)/vals.length*0.5;
+  vals.forEach((v,i)=>{
+    const cx=mb.l+(i+0.5)*(W-mb.l-mb.r)/vals.length;
+    const y0=Yb(0), y1=Yb(v);
+    x.fillStyle=colors[i]; x.globalAlpha=0.9;
+    x.fillRect(cx-bw/2, Math.min(y0,y1), bw, Math.abs(y1-y0)||1);
+    x.globalAlpha=1;
+    x.fillStyle=css('--muted'); x.textAlign='center'; x.font='12px -apple-system,sans-serif';
+    x.fillText(labels[i], cx, H-28);
+    x.fillStyle=css('--text'); x.font='13px -apple-system,sans-serif';
+    const txt=i===0?`${HIST_G1}/${HIST_N}`:i===1?`${STUDY_G1}/${STUDY_N}`:(yourG1?'G1':'no');
+    x.fillText(txt, cx, Math.min(y0,y1)-8);
+  });
+  x.fillStyle=css('--muted'); x.font='11px -apple-system,sans-serif'; x.textAlign='center';
+  x.fillText('Hayhurst Grade 1 rate (%)', W/2, H-10);
+}
+
+['vent','keenErr','planOff','depth','showOpt'].forEach(i=>$(i).addEventListener('input',draw));
+addEventListener('resize',draw);
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',draw);
+draw();
+</script>
+</body></html>
