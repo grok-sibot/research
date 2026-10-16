@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="light dark">
+<title>Electrodes that fish lithium and salt out of seawater — Research Explorer, 17 Oct 2026</title>
+<link rel="stylesheet" href="../assets/style.css">
+<style>
+/* page-specific: a fifth ion colour (Na) and canvas heights */
+:root{--c5:#00808a}
+@media (prefers-color-scheme:dark){:root{--c5:#63e6e2}}
+#u4{font-size:17px;line-height:1.35;padding-top:6px}
+canvas#pourbaix{height:380px}
+canvas#uptake{height:380px}
+td.ok{color:var(--c3);font-weight:600} td.no{color:var(--muted)}
+tr.hl td{background:var(--accent-soft)}
+select{font:inherit;font-size:15px;padding:8px 10px;border-radius:10px;border:1px solid var(--line);background:var(--card-solid);color:var(--text);width:100%;margin-top:8px}
+.selwrap label{display:block}
+.tablewrap{overflow-x:auto}
+@media(max-width:480px){.tablewrap table{font-size:13px}.tablewrap th,.tablewrap td{padding:7px 3px}}
+</style></head><body><main>
+<a class="back" href="../index.html">‹ All demos</a>
+<div class="eyebrow">17 Oct 2026 · Materials</div>
+<h1>Electrodes that fish lithium and salt out of seawater</h1>
+<p class="lede">A computer screen of 20,414 known compounds finds the few battery-style electrodes that should survive in seawater and soak up ions at safe voltages — some picky enough to grab only lithium, one broad enough to help make fresh water.</p>
+<p class="authors">Sougat Purohit, Andreas Kuhlmann, Marten Huck, Hans-Georg Steinrück &amp; Gopalakrishnan Sai Gautam</p>
+
+<section class="card why" aria-labelledby="why-h">
+<h2 id="why-h">Why it matters</h2>
+<p>Seawater and salty brines hold both drinkable water and the lithium our batteries need, yet today’s main routes are slow, water-hungry evaporation ponds or membranes that cannot single out one element. By screening 20,414 known materials for ones that survive seawater and grab ions at safe voltages, this study gives experimenters a short list of 11 ion-selective electrodes — including LiFeP₂O₇, Fe₂(MoO₄)₃ and Li₃Fe₂(PO₄)₃ for lithium — plus olivine FePO₄ as the closest thing to an all-round desalination electrode.</p>
+</section>
+
+<section class="card" aria-labelledby="paper-h">
+<h2 id="paper-h">The paper</h2>
+<p style="margin:0 0 6px"><strong>Identifying intercalation electrodes for electrochemical ion recovery and desalination</strong></p>
+<p class="cite" style="margin:0">Sougat Purohit, Andreas Kuhlmann, Marten Huck, Hans-Georg Steinrück &amp; Gopalakrishnan Sai Gautam (Indian Institute of Science; Forschungszentrum Jülich; RWTH Aachen). arXiv:2610.20834 [cond-mat.mtrl-sci], submitted 14 Oct 2026. <a href="https://arxiv.org/abs/2610.20834">Read on arXiv</a> · <a href="https://arxiv.org/pdf/2610.20834">PDF</a></p>
+<p style="margin-top:14px">In plain language: an “intercalation” electrode works like the positive side of a lithium-ion battery. Push its voltage down and ions from the water slip into gaps in its crystal; raise it and they come back out into a small rinse stream. Pick an electrode that only lets lithium in and you are mining lithium; pick one that swallows every kind of ion and you are making fresh water. The catch is that water only tolerates a narrow voltage range before it splits into hydrogen or oxygen, and many good battery materials quietly dissolve in salty water.</p>
+<p>The team pulled Li, Na, K, Mg and Ca compounds containing one to three redox-active metals and one to three anions from the Materials Project database, built “seawater Pourbaix diagrams” (maps of what is stable at each pH and voltage, with Cl, Na, Mg and S added to the water), and kept only electrode pairs that (1) decompose with at most 0.3 eV per atom of driving force into a protective solid that is not a pure element, (2) switch ions at an average voltage inside the seawater window across pH 7–8.5, and (3) stay metastable over at least 80 % of that window — the benchmark set by olivine LiFePO₄ (about 88 %). Graphs linking structures that share the same host then reveal which hosts take only one ion (for recovery) and which take several (for desalination). Their voltages match experiment where known — e.g. 0.46 V and 0.29 V vs SHE for Li and Na in olivine FePO₄, and 3.06 V vs Li predicted against a 2.92 V vs Li measured plateau for LiFeP₂O₇.</p>
+</section>
+
+<section class="card" aria-labelledby="demo-h">
+<h2 id="demo-h">Try it</h2>
+<p class="note" style="margin:0 0 14px">Voltages, metastability areas and screening counts below come from the paper (Table 1, Figs. 2 and 4). The water-window lines use the textbook Pourbaix equations with the paper’s −0.3 V / +0.5 V overpotential shifts. The ion-uptake curves are an <strong>illustrative</strong> ideal-solution (Nernst / competitive lattice-gas) model built on those voltages — not the authors’ code, and it ignores kinetics, capacity and structural change.</p>
+
+<h3 class="plot-title">1 · Does the electrode work inside seawater’s safe voltage window?</h3>
+<div class="controls">
+ <div><label for="ph">Water pH <output id="pho"></output></label><input id="ph" type="range" min="4" max="11" step="0.1" value="8"></div>
+ <div><label for="etaH">Hydrogen overpotential (V) <output id="etaHo"></output></label><input id="etaH" type="range" min="0" max="0.6" step="0.05" value="0.3"></div>
+ <div><label for="etaO">Oxygen overpotential (V) <output id="etaOo"></output></label><input id="etaO" type="range" min="0" max="0.8" step="0.05" value="0.5"></div>
+</div>
+<div class="stats">
+ <div class="stat"><div class="v" id="w1"></div><div class="l">Usable window at this pH (V vs SHE)</div></div>
+ <div class="stat"><div class="v" id="w2"></div><div class="l">Window width at this pH</div></div>
+ <div class="stat"><div class="v" id="w3"></div><div class="l">Paper pairs inside window, pH 7–8.5</div></div>
+</div>
+<div style="margin-top:18px"><div class="plot-title">Voltage vs pH: water stability and the paper’s shortlisted electrode voltages</div>
+ <canvas id="pourbaix" role="img" aria-label="Pourbaix-style plot of applied potential against pH showing water stability lines, the seawater window and electrode intercalation voltages"></canvas>
+ <div class="legend"><span style="--k:var(--c2)">Li</span><span style="--k:var(--c5)">Na</span><span style="--k:var(--c4)">K</span><span style="--k:var(--c1)">Mg</span><span style="--k:var(--c3)">Ca</span><span style="--k:var(--muted)">Water lines (dashed: ideal, solid: with overpotential)</span></div>
+</div>
+
+<h3 class="plot-title" style="margin-top:32px">2 · Can voltage control make one electrode pick one ion?</h3>
+<div class="controls">
+ <div class="selwrap"><label for="host">Host electrode (from Table 1)</label><select id="host"></select></div>
+ <div><label for="E">Applied potential (V vs SHE) <output id="Eo"></output></label><input id="E" type="range" min="-1" max="1.5" step="0.01" value="0.40"></div>
+</div>
+<label class="toggle"><input id="sea" type="checkbox"> Use typical seawater ion concentrations (Li 0.026 mM, Na 469 mM, Mg 53 mM, Ca 10 mM, K 10 mM — illustrative, not from the paper)</label>
+<div class="stats" style="margin-top:18px">
+ <div class="stat"><div class="v" id="u1"></div><div class="l">Ion filling most sites (toy)</div></div>
+ <div class="stat"><div class="v" id="u2"></div><div class="l">Its share of captured ions (toy)</div></div>
+ <div class="stat"><div class="v" id="u3"></div><div class="l">Voltage gap to next ion (paper)</div></div>
+ <div class="stat"><div class="v" id="u4"></div><div class="l">Metastability area (paper)</div></div>
+</div>
+<p class="note" id="verdict"></p>
+<div style="margin-top:12px"><div class="plot-title">Fraction of host sites filled by each ion vs applied potential (toy model)</div>
+ <canvas id="uptake" role="img" aria-label="Line chart of the fraction of electrode sites filled by each ion as the applied potential changes"></canvas>
+ <div class="legend" id="uplegend"></div>
+</div>
+
+<h3 class="plot-title" style="margin-top:32px">3 · How hard the screen was (counts from the paper, Figs. 2b and 4)</h3>
+<div class="tablewrap"><table aria-label="Screening funnel by ion">
+<thead><tr><th>Step</th><th>Li</th><th>Mg</th><th>Ca</th><th>Na</th><th>K</th></tr></thead>
+<tbody>
+<tr><td>Structures queried from Materials Project</td><td>12,536</td><td>3,598</td><td>1,344</td><td>1,783</td><td>1,153</td></tr>
+<tr><td>Metastable in seawater somewhere</td><td>10,131</td><td>2,437</td><td>780</td><td>1,185</td><td>559</td></tr>
+<tr><td>Pairs metastable at their own voltage</td><td>754</td><td>195</td><td>95</td><td>68</td><td>21</td></tr>
+<tr><td>…across the whole pH 7–8.5 range</td><td>573</td><td>140</td><td>65</td><td>49</td><td>15</td></tr>
+<tr><td>…with ≥ 80 % metastability area</td><td>69</td><td>13</td><td>10</td><td>10</td><td>3</td></tr>
+<tr class="hl"><td>…with at least one experimentally known phase</td><td>8</td><td>4</td><td>4</td><td>7</td><td>0</td></tr>
+</tbody></table></div>
+</section>
+
+<section class="card" aria-labelledby="math-h">
+<h2 id="math-h">The maths in this page</h2>
+<p style="margin:0"><strong>Water window.</strong> Water is thermodynamically stable between the hydrogen- and oxygen-evolution lines of a Pourbaix diagram. The paper widens it by overpotentials of 0.3 V (H₂) and 0.5 V (O₂), turning about 1.23 V into about 2 V, and takes seawater as pH 7–8.5:</p>
+<div class="eq">E<sub>H₂</sub>(pH) = −0.0592·pH − η<sub>H</sub> &nbsp;&nbsp;&nbsp; E<sub>O₂</sub>(pH) = 1.229 − 0.0592·pH + η<sub>O</sub> &nbsp;&nbsp;(V vs SHE, 25 °C)</div>
+<p>An electrode pair passes the voltage test only if its average intercalation voltage sits inside the narrowest window over pH 7–8.5, i.e. between E<sub>H₂</sub>(7) and E<sub>O₂</sub>(8.5) — about −0.71 V to +1.23 V with the paper’s overpotentials.</p>
+<p><strong>Average intercalation voltage</strong> (standard DFT recipe the paper uses with Materials Project energies; for ion A of charge z going from host composition A<sub>x₁</sub>H to A<sub>x₂</sub>H):</p>
+<div class="eq">V̄ = − [ E(A<sub>x₂</sub>H) − E(A<sub>x₁</sub>H) − (x₂ − x₁)·μ<sub>A</sub> ] / [ (x₂ − x₁)·z·e ]</div>
+<p>Converting to the SHE scale shifts by the metal’s standard potential (e.g. 3.06 V vs Li ≈ 0.02 V vs SHE for LiFeP₂O₇).</p>
+<p><strong>Metastability rules.</strong> Decomposition energy ≤ 0.3 eV/atom into a non-elemental solid; intercalated and empty phases must overlap over ≥ 80 % of the seawater window. Hosts whose ions switch at voltages more than 0.1 V apart can be made selective by holding the potential (potentiostatic control); closer than 0.1 V, they tend to take both ions at once.</p>
+<p><strong>Toy uptake model (illustrative).</strong> Each ion i competes for the same sites with Nernst-weighted activity</p>
+<div class="eq">a<sub>i</sub> = (c<sub>i</sub>/c°) · exp[ −z<sub>i</sub>F(E − V̄<sub>i</sub>) / RT ], &nbsp;&nbsp; θ<sub>i</sub> = a<sub>i</sub> / (1 + Σ<sub>j</sub> a<sub>j</sub>)</div>
+<p style="margin-bottom:0">so an ion floods in once the applied potential E drops below its voltage, and a 0.1 V gap gives roughly a 50-fold preference for a +1 ion at 25 °C (RT/F ≈ 25.7 mV). Concentrations default to 1 M (c/c° = 1); the seawater toggle shows how scarce lithium (≈ 26 µM) is swamped by sodium unless the voltage gap is large. Real electrodes also depend on kinetics, site capacity and phase changes, which this toy ignores.</p>
+<p class="warn">Illustrative teaching model built on published voltages — not the authors’ SPICES workflow and not a process design.</p>
+</section>
+
+<section class="card" aria-labelledby="use-h">
+<h2 id="use-h">How to use it</h2>
+<p style="margin:0">In panel 1, slide the pH and the two overpotentials: the shaded band is where the electrode can work without splitting water, and the coloured ticks are the paper’s shortlisted electrode voltages over seawater pH. Set both overpotentials to zero to see how few electrodes would fit in the ideal 1.23 V window. In panel 2, pick a host — try olivine FePO₄ (Li 0.46 V vs Na 0.34 V) and β′-FePO₄ (Li 0.36 V vs Na 0.30 V) — then move the applied potential and watch which ion fills the sites first; a gap above 0.1 V lets voltage control pick one ion, a smaller gap makes the host take both, which is what you want for desalination. Tick the seawater toggle to see why lithium, about 18,000 times scarcer than sodium in the sea, needs a strongly lithium-selective host. Panel 3 shows how the 20,414 starting structures shrink to a handful of tested-in-the-lab candidates.</p>
+</section>
+</main>
+<script>
+const $=id=>document.getElementById(id),css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+function setup(c){const r=c.getBoundingClientRect(),d=devicePixelRatio||1;c.width=Math.max(1,r.width*d);c.height=Math.max(1,r.height*d);const x=c.getContext('2d');x.setTransform(d,0,0,d,0,0);return [x,r.width,r.height];}
+const ION={Li:{z:1,col:'--c2',c:2.6e-5},Na:{z:1,col:'--c5',c:0.469},K:{z:1,col:'--c4',c:0.0102},Mg:{z:2,col:'--c1',c:0.0528},Ca:{z:2,col:'--c3',c:0.0103}};
+// Paper Table 1 (V vs SHE, intersecting metastability area %). Ion-selective + non-selective entries.
+const TABLE=[
+ ['Fe2(MoO4)3','Li',0.08,91.6],['Fe2(PO4)3','Li',-0.30,88.0],['LiFeP2O7','Li',0.02,88.0],
+ ['NbCoO4','Mg',-0.12,87.3],['Ti(FeO2)4','Mg',0.53,85.1],['TiFe2O5','Mg',-0.63,99.5],
+ ['Ca3Co2(Si2O7)2','Ca',0.76,87.3],['CaFeMoO6','Ca',-0.17,91.6],
+ ['Na2FeSiCO7','Na',1.16,80.1],['NaFe3(PO4)3','Na',1.04,88.0],
+ ['TiO2','K',-0.25,99.5],['TiO2','K',-0.53,99.5],
+ ['FePO4 mp-776288','Na',0.36,88.0],['FePO4 mp-776288','Li',0.28,83.3],
+ ['FePO4 mp-25303','Li',0.36,88.0],['FePO4 mp-25303','Na',0.30,88.0],
+ ['FePO4 mp-752872','Mg',0.30,88.0],['FePO4 mp-752872','Ca',0.28,88.0],
+ ['Fe2(MoO4)3 mp-1042928','Ca',-0.06,81.2],['Fe2(MoO4)3 mp-1042928','Mg',-0.14,83.3],
+ ['Fe(PO3)3','Li',0.65,80.8],['Fe(PO3)3','Na',0.56,87.3],['Fe(PO3)3','Mg',-0.01,84.4],
+ ['FePCO7','K',1.04,79.4],['FePCO7','Na',0.73,79.4],['FePCO7','Na',-0.14,88.0],['FePCO7','K',-0.20,87.3],
+ ['CoPCO7','Na',1.12,83.0],['CoPCO7','Li',1.06,79.0],['CoPCO7','K',0.81,54.2],
+ ['Olivine FePO4','Li',0.46,88.0],['Olivine FePO4','Na',0.34,88.0],['Olivine FePO4','Na',0.21,88.0],['Olivine FePO4','Mg',-0.17,88.0],['Olivine FePO4','K',-0.25,70.4]
+];
+// Hosts for the selectivity panel: first (most deintercalated) step per ion from Table 1.
+const HOSTS=[
+ {n:'Olivine FePO₄ (mp-20361) — closest to a desalination electrode',v:{Li:[0.46,88.0],Na:[0.34,88.0],Mg:[-0.17,88.0],K:[-0.25,70.4]}},
+ {n:'β′-FePO₄ (mp-25303) — Li and Na at similar voltages',v:{Li:[0.36,88.0],Na:[0.30,88.0]}},
+ {n:'Maricite FePO₄ (mp-776288) — Na and Li',v:{Na:[0.36,88.0],Li:[0.28,83.3]}},
+ {n:'Monoclinic FePO₄ (mp-752872) — Mg and Ca (water softening)',v:{Mg:[0.30,88.0],Ca:[0.28,88.0]}},
+ {n:'Fe(PO₃)₃ (mp-25310) — Li, Na, Mg',v:{Li:[0.65,80.8],Na:[0.56,87.3],Mg:[-0.01,84.4]}},
+ {n:'CoPCO₇ — Na, Li, K',v:{Na:[1.12,83.0],Li:[1.06,79.0],K:[0.81,54.2]}},
+ {n:'Fe₂(MoO₄)₃ (mp-21925) — Li-selective',v:{Li:[0.08,91.6]}},
+ {n:'LiFeP₂O₇ (mp-19294) — Li-selective',v:{Li:[0.02,88.0]}}
+];
+const sel=$('host');HOSTS.forEach((h,i)=>{const o=document.createElement('option');o.value=i;o.textContent=h.n;sel.appendChild(o);});
+const RT_F=0.025693; // V at 298.15 K
+const her=(pH,eta)=>-0.0592*pH-eta, oer=(pH,eta)=>1.229-0.0592*pH+eta;
+function uptake(host,E,sea){const ions=Object.keys(host.v);const a={};let s=0;
+ ions.forEach(k=>{const c=sea?ION[k].c:1;const ex=-ION[k].z*(E-host.v[k][0])/RT_F;a[k]=c*Math.exp(Math.min(ex,700));s+=a[k];});
+ const th={};ions.forEach(k=>th[k]=a[k]/(1+s));return th;}
+const fmt=v=>(v>=0?'+':'−')+Math.abs(v).toFixed(2);
+
+function axes(x,W,H,m,xmin,xmax,ymin,ymax,xt,yt,xl,yl){
+ const X=v=>m.l+(v-xmin)/(xmax-xmin)*(W-m.l-m.r),Y=v=>H-m.b-(v-ymin)/(ymax-ymin)*(H-m.t-m.b);
+ x.strokeStyle=css('--grid');x.fillStyle=css('--muted');x.font='12px -apple-system,sans-serif';x.lineWidth=1;
+ xt.forEach(v=>{x.beginPath();x.moveTo(X(v),m.t);x.lineTo(X(v),H-m.b);x.stroke();x.textAlign='center';x.fillText(v,X(v),H-m.b+16);});
+ yt.forEach(v=>{x.beginPath();x.moveTo(m.l,Y(v));x.lineTo(W-m.r,Y(v));x.stroke();x.textAlign='right';x.fillText(typeof v==='number'&&!Number.isInteger(v)?v.toFixed(1):v,m.l-6,Y(v)+4);});
+ x.textAlign='center';x.fillText(xl,(m.l+W-m.r)/2,H-6);
+ x.save();x.translate(14,(m.t+H-m.b)/2);x.rotate(-Math.PI/2);x.fillText(yl,0,0);x.restore();
+ return [X,Y];}
+
+function draw(){
+ const pH=+$('ph').value,eH=+$('etaH').value,eO=+$('etaO').value;
+ $('pho').textContent=pH.toFixed(1);$('etaHo').textContent=eH.toFixed(2)+' V';$('etaOo').textContent=eO.toFixed(2)+' V';
+ const lo=her(pH,eH),hi=oer(pH,eO);
+ $('w1').textContent=fmt(lo)+' to '+fmt(hi);$('w2').textContent=(hi-lo).toFixed(2)+' V';
+ const nlo=her(7,eH),nhi=oer(8.5,eO);
+ const inside=TABLE.filter(r=>r[2]>=nlo&&r[2]<=nhi).length;
+ $('w3').textContent=inside+' / '+TABLE.length;
+
+ // --- Pourbaix-style plot ---
+ let [x,W,H]=setup($('pourbaix'));x.clearRect(0,0,W,H);
+ const m={l:52,r:16,t:16,b:40};
+ const [X,Y]=axes(x,W,H,m,0,14,-1.5,2.2,[0,2,4,6,8,10,12,14],[-1.5,-1,-0.5,0,0.5,1,1.5,2],'pH','V vs SHE');
+ // usable window band
+ x.fillStyle=css('--accent-soft');x.beginPath();x.moveTo(X(0),Y(her(0,eH)));x.lineTo(X(14),Y(her(14,eH)));x.lineTo(X(14),Y(oer(14,eO)));x.lineTo(X(0),Y(oer(0,eO)));x.closePath();x.fill();
+ // seawater pH band
+ x.fillStyle=css('--accent');x.globalAlpha=0.12;x.fillRect(X(7),Y(nhi),X(8.5)-X(7),Y(nlo)-Y(nhi));x.globalAlpha=1;
+ x.strokeStyle=css('--accent');x.setLineDash([3,3]);x.lineWidth=1;x.strokeRect(X(7),Y(nhi),X(8.5)-X(7),Y(nlo)-Y(nhi));x.setLineDash([]);
+ // lines
+ const line=(f,dash,w)=>{x.setLineDash(dash);x.lineWidth=w;x.beginPath();x.moveTo(X(0),Y(f(0)));x.lineTo(X(14),Y(f(14)));x.stroke();};
+ x.strokeStyle=css('--muted');line(p=>her(p,0),[5,4],1.5);line(p=>oer(p,0),[5,4],1.5);
+ x.strokeStyle=css('--text');line(p=>her(p,eH),[],2);line(p=>oer(p,eO),[],2);x.setLineDash([]);
+ x.fillStyle=css('--muted');x.font='12px -apple-system,sans-serif';x.textAlign='left';
+ x.fillText('O₂ evolves above',X(9.6),Y(oer(9.6,eO))-8);x.fillText('H₂ evolves below',X(9.6),Y(her(9.6,eH))+16);
+ x.fillStyle=css('--accent');x.textAlign='center';x.fillText('seawater pH 7–8.5',X(7.75),Y(Math.min(nhi+0.12,2.15)));
+ // electrode ticks across pH 7–8.5
+ TABLE.forEach((r,i)=>{const ok=r[2]>=nlo&&r[2]<=nhi;x.strokeStyle=css(ION[r[1]].col);x.globalAlpha=ok?1:0.3;x.lineWidth=2.5;
+  const off=(i%5)*0.06;x.beginPath();x.moveTo(X(7.05+off),Y(r[2]));x.lineTo(X(8.2+off),Y(r[2]));x.stroke();});
+ x.globalAlpha=1;
+ // pH marker
+ x.strokeStyle=css('--accent');x.lineWidth=2;x.beginPath();x.moveTo(X(pH),Y(lo));x.lineTo(X(pH),Y(hi));x.stroke();
+ x.fillStyle=css('--accent');[lo,hi].forEach(v=>{x.beginPath();x.arc(X(pH),Y(v),4.5,0,6.3);x.fill();});
+
+ // --- Uptake panel ---
+ const host=HOSTS[+sel.value],E=+$('E').value,sea=$('sea').checked;
+ $('Eo').textContent=fmt(E);
+ const th=uptake(host,E,sea),ions=Object.keys(host.v);
+ const tot=ions.reduce((s,k)=>s+th[k],0);
+ const sorted=ions.slice().sort((a,b)=>th[b]-th[a]);const top=sorted[0];
+ $('u1').textContent=tot<0.02?'none yet':top;
+ $('u2').textContent=tot<0.02?'—':(100*th[top]/tot).toFixed(1)+' %';
+ const byV=ions.slice().sort((a,b)=>host.v[b][0]-host.v[a][0]);
+ const gap=byV.length>1?host.v[byV[0]][0]-host.v[byV[1]][0]:null;
+ $('u3').textContent=gap===null?'single ion':gap.toFixed(2)+' V';
+ $('u4').textContent=ions.map(k=>k+' '+host.v[k][1].toFixed(0)+'%').join(' · ');
+ const inWin=E>=nlo&&E<=nhi;
+ let v=gap===null?`Only ${ions[0]} has been found to enter this host in the database, so the paper lists it as ${ions[0]}-selective (absence of other-ion data could also hide false positives, as the authors note).`
+  :gap>0.1?`${byV[0]} and ${byV[1]} switch ${gap.toFixed(2)} V apart (> 0.1 V): by the paper’s rule, holding the potential between them can make this host selective for ${byV[0]}.`
+  :`${byV[0]} and ${byV[1]} switch only ${gap.toFixed(2)} V apart (< 0.1 V): by the paper’s rule this host will tend to take both at once — useful for desalination, not for selective recovery.`;
+ const weak=ions.filter(k=>host.v[k][1]<80);
+ if(weak.length) v+=weak.length>1?` The ${weak.join(' and ')} pairs fall below the paper’s 80 % metastability bar.`:` The ${weak[0]} pair falls below the paper’s 80 % metastability bar.`;
+ v+=inWin?` Your potential ${fmt(E)} V is inside the seawater window.`:` Your potential ${fmt(E)} V is outside the seawater window (${fmt(nlo)} to ${fmt(nhi)} V) — water would split.`;
+ if(sea) v+=(tot>0.02&&top!==byV[0])?` With seawater concentrations, though, ${top} fills most sites at this potential — ${byV[0]} is too scarce to win on its voltage head-start alone.`:' Seawater concentrations on: scarce ions need a bigger voltage head-start to compete.';
+ $('verdict').textContent=v;
+
+ [x,W,H]=setup($('uptake'));x.clearRect(0,0,W,H);
+ const mu={l:52,r:16,t:16,b:40};
+ const [Xu,Yu]=axes(x,W,H,mu,-1,1.5,0,1,[-1,-0.5,0,0.5,1,1.5],[0,0.25,0.5,0.75,1],'Applied potential (V vs SHE)','fraction of sites');
+ // seawater window band
+ x.fillStyle=css('--accent-soft');x.fillRect(Xu(Math.max(-1,nlo)),mu.t,Xu(Math.min(1.5,nhi))-Xu(Math.max(-1,nlo)),H-mu.t-mu.b);
+ // voltage markers
+ ions.forEach(k=>{x.strokeStyle=css(ION[k].col);x.setLineDash([2,4]);x.lineWidth=1.5;x.beginPath();x.moveTo(Xu(host.v[k][0]),mu.t);x.lineTo(Xu(host.v[k][0]),H-mu.b);x.stroke();});
+ x.setLineDash([]);
+ const N=300;
+ ions.forEach(k=>{x.strokeStyle=css(ION[k].col);x.lineWidth=2.5;x.beginPath();
+  for(let i=0;i<=N;i++){const e=-1+2.5*i/N;const t=uptake(host,e,sea)[k];i?x.lineTo(Xu(e),Yu(t)):x.moveTo(Xu(e),Yu(t));}x.stroke();});
+ // total
+ x.strokeStyle=css('--muted');x.setLineDash([6,4]);x.lineWidth=1.5;x.beginPath();
+ for(let i=0;i<=N;i++){const e=-1+2.5*i/N;const t=uptake(host,e,sea);const s=ions.reduce((a,k)=>a+t[k],0);i?x.lineTo(Xu(e),Yu(s)):x.moveTo(Xu(e),Yu(s));}x.stroke();x.setLineDash([]);
+ // applied potential
+ x.strokeStyle=css('--text');x.lineWidth=2;x.beginPath();x.moveTo(Xu(E),mu.t);x.lineTo(Xu(E),H-mu.b);x.stroke();
+ ions.forEach(k=>{x.fillStyle=css(ION[k].col);x.beginPath();x.arc(Xu(E),Yu(th[k]),5,0,6.3);x.fill();});
+ x.fillStyle=css('--muted');x.font='12px -apple-system,sans-serif';x.textAlign='right';x.fillText('← lower potential pulls ions in',W-mu.r-6,mu.t+14);
+ $('uplegend').innerHTML=ions.map(k=>`<span style="--k:var(${ION[k].col})">${k} (${fmt(host.v[k][0])} V)</span>`).join('')+'<span style="--k:var(--muted)">Total filled</span><span style="--k:var(--accent-soft)">Seawater window</span>';
+}
+['ph','etaH','etaO','E','sea','host'].forEach(i=>$(i).addEventListener('input',draw));
+sel.addEventListener('change',draw);
+addEventListener('resize',draw);
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',draw);
+draw();
+</script>
+</body></html>
