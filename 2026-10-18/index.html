@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="light dark">
+<title>Call the repair crews early, or wait for a better forecast? — Research Explorer, 18 Oct 2026</title>
+<link rel="stylesheet" href="../assets/style.css">
+<style>
+/* page-specific: segmented controls, toy-map colours and canvas heights */
+:root{--hit:#248a3d;--miss:#d70015;--fa:#c93400;--cell:rgba(0,0,0,.06)}
+@media (prefers-color-scheme:dark){:root{--hit:#30d158;--miss:#ff453a;--fa:#ff9f0a;--cell:rgba(255,255,255,.07)}}
+canvas#commit{height:340px} canvas#map{height:360px} canvas#money{height:320px} canvas#leak{height:210px}
+.seg{display:flex;flex-direction:column;gap:8px}
+.seg .lbl{font-size:15px;font-weight:600}
+.seg .opts{display:inline-flex;background:var(--accent-soft);border-radius:10px;padding:2px;gap:2px;width:100%}
+.seg button{flex:1;font:inherit;font-size:14px;font-weight:600;border:0;border-radius:8px;padding:7px 6px;background:transparent;color:var(--text);cursor:pointer;min-height:32px}
+.seg button[aria-pressed="true"]{background:var(--card-solid);box-shadow:0 1px 3px rgba(0,0,0,.18)}
+.seg button:disabled{opacity:.35;cursor:not-allowed}
+.btn{font:inherit;font-size:15px;font-weight:600;border:0;border-radius:10px;padding:9px 16px;background:var(--accent);color:#fff;cursor:pointer;min-height:36px}
+@media (prefers-color-scheme:dark){.btn{color:#000}}
+.tablewrap{overflow-x:auto}
+tr.hl td{background:var(--accent-soft)}
+</style></head><body><main>
+<a class="back" href="../">‹ All demos</a>
+<div class="eyebrow">18 Oct 2026 · Climate &amp; AI</div>
+<h1>Call the repair crews early, or wait for a better forecast?</h1>
+<p class="lede">Before a big storm, power companies borrow repair crews from other utilities. Ask early and you get more crews but trust a fuzzier forecast; ask late and the forecast is sharper but the crews may be gone. This study puts numbers on that trade-off using AI weather forecasts for 2,491 US counties.</p>
+<p class="authors">Mohammad Kian Golkar, Luciano Alves de Oliveira &amp; Mohamad Alipour</p>
+
+<section class="card why" aria-labelledby="why-h">
+<h2 id="why-h">Why it matters</h2>
+<p>When a big storm is coming, power companies must decide days ahead whether to call in repair crews from other utilities, and calling early locks in more crews but relies on a shakier forecast. Using GraphCast and FourCastNet forecasts for 2,491 US counties, this study shows that committing five days out catches significantly less of the outage burden than committing three days out (0.238 vs 0.316 of it), and that committing three days out with every requested crew beats waiting until one day out unless a utility can still get more than about 83 % of them — one number it can check against its own records.</p>
+</section>
+
+<section class="card" aria-labelledby="paper-h">
+<h2 id="paper-h">The paper</h2>
+<p style="margin:0 0 6px"><strong>Forecast lead time and the timing of crew deployment for weather-driven power outages using AI weather models</strong></p>
+<p class="cite" style="margin:0">Mohammad Kian Golkar, Luciano Alves de Oliveira &amp; Mohamad Alipour (University of Illinois Urbana-Champaign). arXiv:2610.20918 [physics.ao-ph; cs.AI], submitted 14 Oct 2026. <a href="https://arxiv.org/abs/2610.20918">Read on arXiv</a> · <a href="https://arxiv.org/pdf/2610.20918">PDF</a></p>
+<p style="margin-top:14px">In plain language: the authors joined three years (2022–2024) of county-by-county power-outage records with archived forecasts from two AI weather models, GraphCast and FourCastNet, made 1, 2, 3 and 5 days ahead. A tree-based machine-learning model turns each forecast into a chance of a serious outage in every county. Then they asked a utility’s question: if I had sent crews to the 10 % of counties the model ranked riskiest, what share of the real outage burden would those counties have held? That share — the “captured burden” — falls as the forecast is made further ahead: 0.356 at 24 hours, 0.327 at 48, 0.316 at 72 and 0.238 at 120 hours (a perfect forecast would reach 0.893).</p>
+<p>The big drop is between three and five days. Because waiting also means fewer crews are left, they work out the break-even point: committing at 72 hours with all crews matches committing at 24 hours with 83.4 % of them (95 % range 63.3–100 %). They also uncover a quiet data trap — soil-wetness-type predictors measured at the time the forecast is <em>for</em>, instead of the time it is <em>made</em>, secretly contain the storm’s own rain and inflate skill by 42–53 % — and show that the model’s 90 % uncertainty ranges covered only 47.6 % of hurricane events in 2024, a year with three major US landfalls after a calibration year with none.</p>
+</section>
+
+<section class="card" aria-labelledby="demo-h">
+<h2 id="demo-h">Try it</h2>
+<p class="note" style="margin:0 0 14px">Panels 1, 3 and 4 use numbers published in the paper (Tables 5–8, Section 3.6). Between the paper’s crew-availability points (40, 60, 80, 100 %), panel 1 joins values with straight lines — that interpolation is ours. Panel 2 is an <strong>illustrative</strong> toy storm on a made-up grid of counties that applies the paper’s staging rule (Eq. 8); its track errors and noise are invented for teaching, not taken from the paper.</p>
+
+<h3 class="plot-title">1 · Commit early with every crew, or wait and get fewer?</h3>
+<div class="controls">
+ <div class="seg" role="group" aria-labelledby="eL"><span class="lbl" id="eL">Commit early, this many hours before</span><div class="opts" id="early"></div></div>
+ <div class="seg" role="group" aria-labelledby="lL"><span class="lbl" id="lL">…or wait until this many hours before</span><div class="opts" id="late"></div></div>
+ <div><label for="rho">Crews still free if you wait <output id="rhoo"></output></label><input id="rho" type="range" min="40" max="100" step="1" value="60"></div>
+</div>
+<div class="stats">
+ <div class="stat"><div class="v" id="s1"></div><div class="l" id="s1l">Captured burden, early, all crews</div></div>
+ <div class="stat"><div class="v" id="s2"></div><div class="l" id="s2l">Captured burden, late, fewer crews</div></div>
+ <div class="stat"><div class="v" id="s3"></div><div class="l">Early minus late (percentage points)</div></div>
+ <div class="stat"><div class="v" id="s4"></div><div class="l">Break-even crew share (from table points)</div></div>
+</div>
+<p class="note" id="verdict1"></p>
+<div style="margin-top:12px"><div class="plot-title">Share of outage burden in staged counties vs share of crews secured (paper Table 5, top 10 % of counties, 2024 high-burden windows)</div>
+ <canvas id="commit" role="img" aria-label="Line chart of captured outage burden against the share of requested crews secured, one line per forecast lead time"></canvas>
+ <div class="legend"><span style="--k:var(--c1)">24 h</span><span style="--k:var(--c3)">48 h</span><span style="--k:var(--c4)">72 h</span><span style="--k:var(--c2)">120 h</span><span style="--k:var(--muted)">Climatology (≈ 0.19)</span></div>
+</div>
+
+<h3 class="plot-title" style="margin-top:32px">2 · Where would the crews go? (illustrative toy storm)</h3>
+<div class="controls">
+ <div><label for="mlead">Forecast lead time <output id="mleado"></output></label><input id="mlead" type="range" min="24" max="120" step="6" value="72"></div>
+ <div><label for="mK">Counties staged <output id="mKo"></output></label><input id="mK" type="range" min="4" max="25" step="1" value="10"></div>
+ <div><label for="mrho">Crews secured <output id="mrhoo"></output></label><input id="mrho" type="range" min="40" max="100" step="5" value="100"></div>
+</div>
+<p style="margin:0 0 14px"><button class="btn" id="reseed" type="button">New storm</button></p>
+<div class="stats">
+ <div class="stat"><div class="v" id="m1"></div><div class="l">Captured burden Φ (toy)</div></div>
+ <div class="stat"><div class="v" id="m2"></div><div class="l">Perfect-foresight Φ, same crews (toy)</div></div>
+ <div class="stat"><div class="v" id="m3"></div><div class="l">Counties staged</div></div>
+</div>
+<div style="margin-top:12px"><div class="plot-title">Toy map: each square is a county; the faint line is the real storm track</div>
+ <canvas id="map" role="img" aria-label="Grid of squares representing counties coloured by whether crews were staged and whether an outage happened"></canvas>
+ <div class="legend"><span style="--k:var(--hit)">Staged, had an outage</span><span style="--k:var(--fa)">Staged, no outage</span><span style="--k:var(--miss)">Outage, no crews</span><span style="--k:var(--cell)">Neither</span></div>
+</div>
+
+<h3 class="plot-title" style="margin-top:32px">3 · Is staging crews worth the money? (paper Eqs. 11–12, 72-hour commitment)</h3>
+<div class="controls">
+ <div><label for="voll">Value of lost load, $/MWh <output id="vollo"></output></label><input id="voll" type="range" min="500" max="5000" step="100" value="1000"></div>
+ <div><label for="eta">Restoration speed-up, η <output id="etao"></output></label><input id="eta" type="range" min="0.10" max="0.50" step="0.01" value="0.25"></div>
+ <div><label for="beta">Demand per customer, β <output id="betao"></output></label><input id="beta" type="range" min="0.8" max="2.0" step="0.1" value="1.2"></div>
+ <div><label for="mcrew">Crews per county, m <output id="mcrewo"></output></label><input id="mcrew" type="range" min="1" max="4" step="1" value="1"></div>
+</div>
+<div class="stats">
+ <div class="stat"><div class="v" id="e1"></div><div class="l">Avoided interruption cost, staging at 72 h</div></div>
+ <div class="stat"><div class="v" id="e2"></div><div class="l">Extra value of 72 h over 120 h</div></div>
+ <div class="stat"><div class="v" id="e3"></div><div class="l">Break-even cost per county-day</div></div>
+ <div class="stat"><div class="v" id="e4"></div><div class="l">Break-even cost per crew-day</div></div>
+</div>
+<div style="margin-top:12px"><div class="plot-title">Break-even staging cost per county-day vs value of lost load (staging pays when real cost is below the line)</div>
+ <canvas id="money" role="img" aria-label="Line chart of break-even staging cost per county-day against value of lost load for several restoration speed-ups"></canvas>
+ <div class="legend" id="moneylegend"></div>
+</div>
+
+<h3 class="plot-title" style="margin-top:32px">4 · The hidden-rain trap (temporal leakage)</h3>
+<div class="controls">
+ <div class="seg" role="group" aria-labelledby="kL"><span class="lbl" id="kL">Forecast lead time</span><div class="opts" id="klead"></div></div>
+</div>
+<div class="stats">
+ <div class="stat"><div class="v" id="k1"></div><div class="l">Overlap of the two 72 h rain windows (simple geometry)</div></div>
+ <div class="stat"><div class="v" id="k2"></div><div class="l">Correlation, 72 h rain: valid vs issue time (paper)</div></div>
+ <div class="stat"><div class="v" id="k3"></div><div class="l">Correlation, deep soil moisture (paper)</div></div>
+</div>
+<div style="margin-top:12px"><div class="plot-title">Which rain does the predictor “see”? Hours before the moment the forecast is for</div>
+ <canvas id="leak" role="img" aria-label="Timeline comparing a 72-hour rain window ending at the forecast valid time with one ending at the forecast issue time"></canvas>
+ <div class="legend"><span style="--k:var(--miss)">Window ending at valid time (leaky — includes the storm)</span><span style="--k:var(--hit)">Window ending at issue time (honest)</span><span style="--k:var(--accent)">Forecast issued</span></div>
+</div>
+<div class="tablewrap" style="margin-top:14px"><table aria-label="Land-surface-only skill under each joining convention">
+<thead><tr><th>Occurrence skill (AUC-PR, 2024)</th><th>24 h</th><th>120 h</th></tr></thead>
+<tbody>
+<tr><td>Land surface alone, joined at valid time (leaky)</td><td>0.0775</td><td>0.0779</td></tr>
+<tr class="hl"><td>Land surface alone, joined at issue time (correct)</td><td>0.0452</td><td>0.0369</td></tr>
+<tr><td>Forecast meteorology alone</td><td>0.1027</td><td>0.0625</td></tr>
+<tr><td>County climatology reference</td><td>0.047</td><td>0.047</td></tr>
+</tbody></table></div>
+<p class="note">With the leaky join, land-surface predictors appear to beat the weather forecast at 120 h (0.0779 vs 0.0625); joined correctly they fall below the county climatology reference.</p>
+</section>
+
+<section class="card" aria-labelledby="math-h">
+<h2 id="math-h">The maths in this page</h2>
+<p style="margin:0"><strong>Two-part (hurdle) outage model.</strong> Severity s = customers out ÷ housing units. Expected severity is split into the chance of an outage event (s ≥ 0.05 for at least 24 h) and its size if it happens, each fitted with LightGBM on 66 predictors:</p>
+<div class="eq">E[s | x] = π · μ, &nbsp;&nbsp; π = Pr(y = 1 | x), &nbsp; μ = E[s | y = 1, x]</div>
+<p><strong>Captured burden</strong> (Eq. 8). Rank counties by π, stage crews in the top K, and measure the share of observed severity they hold:</p>
+<div class="eq">Φ<sub>t</sub>(K) = Σ<sub>c ∈ S<sub>t</sub>(K)</sub> s<sub>c,t</sub> ⁄ Σ<sub>c</sub> s<sub>c,t</sub></div>
+<p><strong>Fewer crews and break-even</strong> (Eq. 9). Getting only a fraction ρ of crews means staging the top ρK counties. The break-even ratio solves</p>
+<div class="eq">Φ(ρ*K; L = 24 h) = Φ(K; L = 72 h) &nbsp;⇒&nbsp; ρ* = 83.4 % (paper, block bootstrap)</div>
+<p>Panel 1 solves the same equation by straight-line interpolation between the published table points, which gives about 83.3 % for 24 h vs 72 h.</p>
+<p><strong>Money</strong> (Eqs. 11–12). Avoided customer-interruption cost and total staging commitment:</p>
+<div class="eq">A<sub>C</sub> = H<sub>s</sub> · β · η · VoLL, &nbsp;&nbsp; D = m · d · Σ<sub>t</sub> K<sub>t</sub></div>
+<p>with H<sub>s</sub> = 178.8 million customer-hours in counties staged at 72 h, Σ K<sub>t</sub> = 11,570 county stagings over 72 high-burden windows and d = 3 days, so D = 34,710 county-days (for m = 1). Break-even cost = A<sub>C</sub> ⁄ D. The 72 h vs 120 h difference is 72.5 million customer-hours. Central case in the paper (β = 1.2 kW, η = 0.25, VoLL = 1,000 USD/MWh): 53.7 million USD avoided, 21.7 million USD for the timing choice, 1,546 USD per county-day. The calculator recomputes these from the rounded published inputs, so it can differ in the last digit (e.g. $1,545).</p>
+<p><strong>Leakage check.</strong> A 72 h rain total ending at valid time t and one ending at issue time t − L share max(0, 72 − L) of their 72 hours; at L ≥ 72 h they share none, and the paper’s measured correlation drops from 0.782 (24 h) to 0.053 (120 h).</p>
+<p style="margin-bottom:0"><strong>Toy map (illustrative).</strong> Panel 2 builds a fake storm, gives each county a true severity, then makes a “forecast” by shifting the track sideways by an amount that grows with lead time (about 0.9 squares per day, invented) and adding noise. It then applies Eq. 8 exactly. It only shows the idea; real numbers come from panels 1, 3 and 4.</p>
+<p class="warn">Teaching demo built on published results — not the authors’ code (archived at Zenodo, doi:10.5281/zenodo.23326163) and not operational guidance.</p>
+</section>
+
+<section class="card" aria-labelledby="use-h">
+<h2 id="use-h">How to use it</h2>
+<p style="margin:0">In panel 1, pick when you would commit early (48, 72 or 120 hours ahead) and when you would otherwise wait, then slide the share of crews you would still get by waiting. The dashed line is what committing early with every crew captures; the dot is what waiting captures. Where the waiting line crosses the dashed line is the break-even crew share — for 72 h vs 24 h it is about 83 %, so unless more than about 83 % of crews would still be free, early wins. The note under the stats says whether the paper found the gap between those two lead times statistically significant. In panel 2, drag the lead time from 24 to 120 hours and watch the green squares slide off the storm track and red “missed” squares appear; press <em>New storm</em> for another try. In panel 3, set your own value of lost load, how much faster pre-staged crews restore power, and crews per county to see the most a utility could pay per county-day and still come out ahead. In panel 4, step through lead times to see why a rain total that ends at the moment being forecast secretly includes the storm itself.</p>
+</section>
+</main>
+<script>
+const $=id=>document.getElementById(id),css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+function setup(c){const r=c.getBoundingClientRect(),d=devicePixelRatio||1;c.width=Math.max(1,r.width*d);c.height=Math.max(1,r.height*d);const x=c.getContext('2d');x.setTransform(d,0,0,d,0,0);return [x,r.width,r.height];}
+const FONT='12px -apple-system,BlinkMacSystemFont,sans-serif';
+function axes(x,W,H,m,xmin,xmax,ymin,ymax,xt,yt,xl,yl,xf,yf){
+ const X=v=>m.l+(v-xmin)/(xmax-xmin)*(W-m.l-m.r),Y=v=>H-m.b-(v-ymin)/(ymax-ymin)*(H-m.t-m.b);
+ x.strokeStyle=css('--grid');x.fillStyle=css('--muted');x.font=FONT;x.lineWidth=1;
+ xt.forEach(v=>{x.beginPath();x.moveTo(X(v),m.t);x.lineTo(X(v),H-m.b);x.stroke();x.textAlign='center';x.fillText(xf?xf(v):v,X(v),H-m.b+16);});
+ yt.forEach(v=>{x.beginPath();x.moveTo(m.l,Y(v));x.lineTo(W-m.r,Y(v));x.stroke();x.textAlign='right';x.fillText(yf?yf(v):v,m.l-6,Y(v)+4);});
+ x.textAlign='center';x.fillText(xl,(m.l+W-m.r)/2,H-6);
+ x.save();x.translate(13,(m.t+H-m.b)/2);x.rotate(-Math.PI/2);x.fillText(yl,0,0);x.restore();
+ return [X,Y];}
+
+/* ---------- Panel 1: paper Table 5 ---------- */
+const RHO=[0.4,0.6,0.8,1.0];
+const PHI={24:[0.204,0.258,0.308,0.356],48:[0.187,0.240,0.285,0.327],72:[0.176,0.241,0.279,0.316],120:[0.116,0.158,0.198,0.238]};
+const CI={24:[0.264,0.454],48:[0.254,0.414],72:[0.260,0.384],120:[0.167,0.312]};
+const COL={24:'--c1',48:'--c3',72:'--c4',120:'--c2'};
+// Table 6 paired differences (earlier minus later lead)
+const PAIR={'24-48':[0.029,0.004,0.065,true],'48-72':[0.012,-0.021,0.054,false],'24-72':[0.040,-0.006,0.102,false],'72-120':[0.079,0.036,0.120,true],'24-120':[0.120,0.067,0.187,true]};
+function phiAt(L,r){const a=PHI[L];if(r<=RHO[0])return a[0];for(let i=1;i<RHO.length;i++){if(r<=RHO[i]){const f=(r-RHO[i-1])/(RHO[i]-RHO[i-1]);return a[i-1]+f*(a[i]-a[i-1]);}}return a[3];}
+function breakEven(late,target){const a=PHI[late];if(a[0]>=target)return -1;if(a[3]<target)return 2;for(let i=1;i<4;i++){if(a[i]>=target){return RHO[i-1]+(target-a[i-1])/(a[i]-a[i-1])*(RHO[i]-RHO[i-1]);}}return 2;}
+let early=72,late=24,klead=72;
+function seg(id,vals,get,set){const box=$(id);box.innerHTML='';vals.forEach(v=>{const b=document.createElement('button');b.type='button';b.textContent=v+' h';b.dataset.v=v;b.addEventListener('click',()=>{set(v);refreshSeg();drawAll();});box.appendChild(b);});}
+function refreshSeg(){
+ [['early',early],['late',late],['klead',klead]].forEach(([id,cur])=>{$(id).querySelectorAll('button').forEach(b=>{b.setAttribute('aria-pressed',+b.dataset.v===cur?'true':'false');});});
+ $('late').querySelectorAll('button').forEach(b=>{b.disabled=+b.dataset.v>=early;});
+}
+seg('early',[48,72,120],()=>early,v=>{early=v;if(late>=early)late=[24,48,72].filter(u=>u<early).pop();});
+seg('late',[24,48,72],()=>late,v=>{if(v<early)late=v;});
+seg('klead',[24,48,72,120],()=>klead,v=>{klead=v;});
+refreshSeg();
+const pct=v=>(100*v).toFixed(0)+' %';
+function drawCommit(){
+ const r=+$('rho').value/100;$('rhoo').textContent=pct(r);
+ const pe=PHI[early][3],pl=phiAt(late,r),be=breakEven(late,pe);
+ $('s1').textContent=pe.toFixed(3);$('s1l').textContent=`Captured burden, ${early} h, all crews`;
+ $('s2').textContent=pl.toFixed(3);$('s2l').textContent=`Captured burden, ${late} h, ${pct(r)} of crews`;
+ const d=100*(pe-pl);$('s3').textContent=(d>=0?'+':'−')+Math.abs(d).toFixed(1);
+ $('s4').textContent=be<0?'< 40 %':be>1?'never':(100*be).toFixed(1)+' %';
+ const key=late+'-'+early,p=PAIR[key];
+ let v=pe>=pl?`Committing at ${early} h with every crew captures more (${pe.toFixed(3)} vs ${pl.toFixed(3)}).`:`Waiting until ${late} h captures more, even with ${pct(r)} of crews (${pl.toFixed(3)} vs ${pe.toFixed(3)}).`;
+ if(be>=0&&be<=1)v+=` Waiting only pays if more than about ${(100*be).toFixed(0)} % of crews are still free.`;
+ if(early===72&&late===24)v+=' The paper’s bootstrap estimate of this break-even is 83.4 % (95 % range 63.3–100 %).';
+ v+=p?` With all crews, the paper’s paired test puts the ${late} h vs ${early} h gap at +${p[0].toFixed(3)} (95 % interval ${p[1]>=0?'+':'−'}${Math.abs(p[1]).toFixed(3)} to +${p[2].toFixed(3)}), which ${p[3]?'is':'is not'} statistically significant.`:` The paper does not report a paired test for ${late} h vs ${early} h.`;
+ if(early===72&&late===24)v+=' Counting only outages that had not started yet (within 24 h of onset), the 24 h vs 72 h gap does become significant: +0.075 (+0.030 to +0.121).';
+ $('verdict1').textContent=v;
+ let [x,W,H]=setup($('commit'));x.clearRect(0,0,W,H);
+ const m={l:52,r:44,t:16,b:40};
+ const [X,Y]=axes(x,W,H,m,40,100,0.08,0.40,[40,50,60,70,80,90,100],[0.1,0.15,0.2,0.25,0.3,0.35,0.4],'Share of requested crews secured','captured burden Φ',v=>v+'%',v=>v.toFixed(2));
+ // climatology
+ x.strokeStyle=css('--muted');x.setLineDash([3,4]);x.lineWidth=1.5;x.beginPath();x.moveTo(X(40),Y(0.192));x.lineTo(X(100),Y(0.192));x.stroke();x.setLineDash([]);
+ x.fillStyle=css('--muted');x.textAlign='left';x.font=FONT;x.fillText('climatology',X(41),Y(0.192)-6);
+ // CI bars at 100%
+ [24,48,72,120].forEach((L,i)=>{const c=css(COL[L]);x.strokeStyle=c;x.globalAlpha=0.35;x.lineWidth=6;x.beginPath();const xx=X(100)+12+i*7;x.moveTo(xx,Y(Math.min(CI[L][1],0.40)));x.lineTo(xx,Y(CI[L][0]));x.stroke();x.globalAlpha=1;});
+ [24,48,72,120].forEach(L=>{const c=css(COL[L]);const on=(L===early||L===late);x.strokeStyle=c;x.fillStyle=c;x.globalAlpha=on?1:0.35;x.lineWidth=on?3:2;x.beginPath();RHO.forEach((r0,i)=>{i?x.lineTo(X(100*r0),Y(PHI[L][i])):x.moveTo(X(100*r0),Y(PHI[L][i]));});x.stroke();
+  RHO.forEach((r0,i)=>{x.beginPath();x.arc(X(100*r0),Y(PHI[L][i]),on?4:3,0,6.3);x.fill();});x.globalAlpha=1;});
+ // early line
+ x.strokeStyle=css(COL[early]);x.setLineDash([7,5]);x.lineWidth=2;x.beginPath();x.moveTo(X(40),Y(pe));x.lineTo(X(100),Y(pe));x.stroke();x.setLineDash([]);
+ x.fillStyle=css(COL[early]);x.textAlign='left';x.fillText(`${early} h, all crews`,X(41),Y(pe)-7);
+ // break-even
+ if(be>=0.4&&be<=1){x.strokeStyle=css('--text');x.globalAlpha=0.5;x.setLineDash([2,3]);x.lineWidth=1.2;x.beginPath();x.moveTo(X(100*be),Y(0.08));x.lineTo(X(100*be),Y(pe));x.stroke();x.setLineDash([]);x.globalAlpha=1;
+  x.fillStyle=css('--text');x.textAlign='center';x.fillText('break-even '+(100*be).toFixed(0)+'%',X(100*be),Y(0.08)-6);}
+ // late marker
+ x.fillStyle=css(COL[late]);x.strokeStyle=css('--card-solid');x.lineWidth=3;x.beginPath();x.arc(X(100*r),Y(pl),8,0,6.3);x.stroke();x.fill();
+ x.fillStyle=css('--muted');x.textAlign='right';x.fillText('bars right of 100 % = 95 % intervals',W-m.r-8,m.t+12);
+}
+
+/* ---------- Panel 2: illustrative toy map ---------- */
+const COLS=32,ROWS=18,N=COLS*ROWS;
+let seed=7,world=null;
+function rng(s){return function(){s|=0;s=s+0x6D2B79F5|0;let t=Math.imul(s^s>>>15,1|s);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+function gauss(r){let u=0,v=0;while(!u)u=r();v=r();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+function makeWorld(){const r=rng(seed*7919+13);
+ const y0=ROWS*(0.65+0.25*r()),slope=-(0.25+0.35*r())*ROWS/COLS,curve=(r()-0.5)*0.03;
+ const track=c=>y0+slope*c+curve*(c-COLS/2)*(c-COLS/2);
+ const vul=[],bg=[],noise=[];for(let i=0;i<N;i++){vul.push(0.5+r());bg.push(r()<0.08?0.02+0.06*r():0);noise.push(gauss(r));}
+ const zOff=gauss(r)>=0?1:-1,zCurve=gauss(r);
+ const sev=[];for(let i=0;i<N;i++){const c=i%COLS,rr=Math.floor(i/COLS);const d=rr+0.5-track(c+0.5);sev.push(Math.max(bg[i],vul[i]*0.9*Math.exp(-d*d/(2*1.3*1.3))*(0.35+0.65*Math.sin(Math.PI*(c+0.5)/COLS))));}
+ world={track,vul,noise,sev,zOff,zCurve};}
+function forecast(L){const w=world,days=L/24,off=w.zOff*0.55*days,cv=w.zCurve*0.003*days,wid=1.4+0.25*days,amp=0.03+0.04*days;
+ const p=[];for(let i=0;i<N;i++){const c=i%COLS,rr=Math.floor(i/COLS);const t=w.track(c+0.5)+off+cv*(c-COLS/2)*(c-COLS/2);const d=rr+0.5-t;
+  p.push(Math.exp(-d*d/(2*wid*wid))*(0.7+0.3*w.vul[i])*(0.35+0.65*Math.sin(Math.PI*(c+0.5)/COLS))+amp*w.noise[i]);}return p;}
+function topK(arr,k){return arr.map((v,i)=>[v,i]).sort((a,b)=>b[0]-a[0]).slice(0,k).map(a=>a[1]);}
+function drawMap(){
+ const L=+$('mlead').value,Kf=+$('mK').value/100,r=+$('mrho').value/100;
+ $('mleado').textContent=L+' h';$('mKo').textContent=$('mK').value+' %';$('mrhoo').textContent=$('mrho').value+' %';
+ const k=Math.max(1,Math.round(r*Kf*N)),p=forecast(L),S=new Set(topK(p,k)),O=new Set(topK(world.sev,k));
+ const tot=world.sev.reduce((a,b)=>a+b,0);let cap=0,orc=0;S.forEach(i=>cap+=world.sev[i]);O.forEach(i=>orc+=world.sev[i]);
+ $('m1').textContent=(cap/tot).toFixed(2);$('m2').textContent=(orc/tot).toFixed(2);$('m3').textContent=k+' of '+N;
+ let [x,W,H]=setup($('map'));x.clearRect(0,0,W,H);
+ const pad=10,cw=(W-2*pad)/COLS,ch=(H-2*pad)/ROWS,g=Math.min(2,cw*0.12);
+ const thr=0.1;
+ for(let i=0;i<N;i++){const c=i%COLS,rr=Math.floor(i/COLS);const out=world.sev[i]>=thr,st=S.has(i);
+  x.fillStyle=st&&out?css('--hit'):st?css('--fa'):out?css('--miss'):css('--cell');
+  x.globalAlpha=out?Math.min(1,0.55+0.5*world.sev[i]):1;
+  const rx=pad+c*cw+g/2,ry=pad+rr*ch+g/2,rw=cw-g,rh=ch-g;if(rw<=0||rh<=0)continue;x.beginPath();x.roundRect?x.roundRect(rx,ry,rw,rh,Math.max(0,Math.min(4,rw/4,rh/4))):x.rect(rx,ry,rw,rh);x.fill();}
+ x.globalAlpha=1;x.strokeStyle=css('--text');x.globalAlpha=0.55;x.lineWidth=2;x.setLineDash([6,5]);x.beginPath();
+ for(let c=0;c<=COLS;c+=0.5){const yy=pad+world.track(c)*ch;c?x.lineTo(pad+c*cw,yy):x.moveTo(pad,yy);}x.stroke();x.setLineDash([]);x.globalAlpha=1;
+}
+$('reseed').addEventListener('click',()=>{seed++;makeWorld();drawMap();});
+
+/* ---------- Panel 3: economics (Eqs. 11–12) ---------- */
+const HS72=178.8e6,DH=72.5e6,D=34710;
+const usd=v=>v>=1e6?'$'+(v/1e6).toFixed(1)+' M':'$'+Math.round(v).toLocaleString('en-US');
+function drawMoney(){
+ const voll=+$('voll').value,eta=+$('eta').value,beta=+$('beta').value,m=+$('mcrew').value;
+ $('vollo').textContent='$'+voll.toLocaleString('en-US');$('etao').textContent=(100*eta).toFixed(0)+' %';$('betao').textContent=beta.toFixed(1)+' kW';$('mcrewo').textContent=m;
+ const A=HS72*beta*eta*voll/1000,dA=DH*beta*eta*voll/1000,be=A/D;
+ $('e1').textContent=usd(A);$('e2').textContent=usd(dA);$('e3').textContent=usd(be);$('e4').textContent=usd(be/m);
+ let [x,W,H]=setup($('money'));x.clearRect(0,0,W,H);
+ const mm={l:64,r:18,t:16,b:40};const ymax=Math.max(5000,Math.ceil(HS72*beta*Math.max(0.5,eta)*5000/1000/D/5000)*5000);
+ const yt=[];const st=ymax>20000?5000:2500;for(let v=0;v<=ymax;v+=st)yt.push(v);
+ const [X,Y]=axes(x,W,H,mm,500,5000,0,ymax,[500,1000,2000,3000,4000,5000],yt,'Value of lost load (USD per MWh)','USD per county-day',v=>'$'+v.toLocaleString('en-US'),v=>v?'$'+(v/1000)+'k':'$0');
+ const etas=[0.10,0.25,0.50],cols=['--c3','--c4','--c2'];
+ etas.forEach((e,j)=>{x.strokeStyle=css(cols[j]);x.globalAlpha=0.45;x.lineWidth=1.5;x.setLineDash([5,4]);x.beginPath();x.moveTo(X(500),Y(HS72*beta*e*500/1000/D));x.lineTo(X(5000),Y(HS72*beta*e*5000/1000/D));x.stroke();});
+ x.setLineDash([]);x.globalAlpha=1;
+ x.strokeStyle=css('--c1');x.lineWidth=3;x.beginPath();x.moveTo(X(500),Y(HS72*beta*eta*500/1000/D));x.lineTo(X(5000),Y(HS72*beta*eta*5000/1000/D));x.stroke();
+ x.fillStyle=css('--c1');x.strokeStyle=css('--card-solid');x.lineWidth=3;x.beginPath();x.arc(X(voll),Y(be),7,0,6.3);x.stroke();x.fill();
+ x.fillStyle=css('--text');x.font='600 13px -apple-system,sans-serif';x.textAlign=X(voll)>W-150?'right':'left';x.fillText(usd(be)+' / county-day',X(voll)+(X(voll)>W-150?-12:12),Y(be)-10);
+ $('moneylegend').innerHTML=`<span style="--k:var(--c1)">Your η = ${(100*eta).toFixed(0)} %</span><span style="--k:var(--c3)">η = 10 %</span><span style="--k:var(--c4)">η = 25 % (central)</span><span style="--k:var(--c2)">η = 50 %</span>`;
+}
+
+/* ---------- Panel 4: leakage timeline ---------- */
+const CORR={24:[0.782,0.984],48:[0.449,0.968],72:[0.171,0.953],120:[0.053,0.926]};
+function drawLeak(){
+ const L=klead,ov=Math.max(0,72-L)/72;
+ $('k1').textContent=(100*ov).toFixed(0)+' %';$('k2').textContent=CORR[L][0].toFixed(3);$('k3').textContent=CORR[L][1].toFixed(3);
+ let [x,W,H]=setup($('leak'));x.clearRect(0,0,W,H);
+ const m={l:24,r:24,t:20,b:40};const X=v=>m.l+(v+200)/200*(W-m.l-m.r);
+ x.strokeStyle=css('--grid');x.fillStyle=css('--muted');x.font=FONT;x.lineWidth=1;x.textAlign='center';
+ for(let v=-200;v<=0;v+=24){x.beginPath();x.moveTo(X(v),m.t);x.lineTo(X(v),H-m.b);x.stroke();x.fillText(v===0?'valid':v+' h',X(v),H-m.b+16);}
+ x.fillText('time (hours, 0 = the moment being forecast)',(m.l+W-m.r)/2,H-6);
+ const bar=(a,b,y,col,txt)=>{x.fillStyle=css(col);x.globalAlpha=0.85;const bw=X(b)-X(a);if(bw<=0)return;const r=Math.max(0,Math.min(8,bw/2));x.beginPath();x.roundRect?x.roundRect(X(a),y,bw,26,r):x.rect(X(a),y,X(b)-X(a),26);x.fill();x.globalAlpha=1;x.fillStyle=css('--card-solid');x.font='600 12px -apple-system,sans-serif';x.textAlign='center';if(X(b)-X(a)>90)x.fillText(txt,(X(a)+X(b))/2,y+17);};
+ // storm period shading
+ x.fillStyle=css('--accent-soft');x.fillRect(X(-L),m.t,X(0)-X(-L),H-m.t-m.b);
+ x.fillStyle=css('--accent');x.font=FONT;x.textAlign='center';x.fillText('forecast period (weather not yet known)',(X(-L)+X(0))/2,m.t+12);
+ bar(-72,0,m.t+28,'--miss','72 h rain, leaky');
+ bar(-L-72,-L,m.t+66,'--hit','72 h rain, honest');
+ x.strokeStyle=css('--accent');x.lineWidth=2.5;x.beginPath();x.moveTo(X(-L),m.t+20);x.lineTo(X(-L),H-m.b);x.stroke();
+ x.fillStyle=css('--accent');x.beginPath();x.arc(X(-L),H-m.b,5,0,6.3);x.fill();
+ x.font='600 12px -apple-system,sans-serif';x.textAlign=X(-L)<120?'left':'right';x.fillText('issued '+L+' h before',X(-L)+(X(-L)<120?8:-8),H-m.b-8);
+}
+
+function drawAll(){drawCommit();drawMap();drawMoney();drawLeak();}
+['rho'].forEach(i=>$(i).addEventListener('input',drawCommit));
+['mlead','mK','mrho'].forEach(i=>$(i).addEventListener('input',drawMap));
+['voll','eta','beta','mcrew'].forEach(i=>$(i).addEventListener('input',drawMoney));
+addEventListener('resize',drawAll);
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',drawAll);
+makeWorld();drawAll();
+</script>
+</body></html>
