@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="light dark">
+<title>Where will my blood sugar be in an hour? — Research Explorer, 19 Oct 2026</title>
+<link rel="stylesheet" href="../assets/style.css">
+<style>
+/* page-specific: glucose range colours, segmented controls, canvas heights */
+:root{--inrange:rgba(36,138,61,.10);--low:#d70015;--high:#c93400;--c5:#8e8e93;--c6:#d1306b}
+@media (prefers-color-scheme:dark){:root{--inrange:rgba(48,209,88,.12);--low:#ff453a;--high:#ff9f0a;--c5:#98989d;--c6:#ff6482}}
+canvas#fc{height:360px} canvas#push{height:240px} canvas#mae{height:300px} canvas#cal{height:280px}
+.seg{display:flex;flex-direction:column;gap:8px}
+.seg .lbl{font-size:15px;font-weight:600}
+.seg .opts{display:inline-flex;background:var(--accent-soft);border-radius:10px;padding:2px;gap:2px;width:100%}
+.seg button{flex:1;font:inherit;font-size:14px;font-weight:600;border:0;border-radius:8px;padding:7px 6px;background:transparent;color:var(--text);cursor:pointer;min-height:32px}
+.seg button[aria-pressed="true"]{background:var(--card-solid);box-shadow:0 1px 3px rgba(0,0,0,.18)}
+.subhead{font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:22px 0 6px}
+.tablewrap{overflow-x:auto}
+.controls .toggle{justify-content:flex-start;font-weight:500}
+tr.hl td{background:var(--accent-soft)}
+.stat .v small{font-size:15px;font-weight:500;color:var(--muted);margin-left:4px}
+</style></head><body><main>
+<a class="back" href="../">‹ All demos</a>
+<div class="eyebrow">19 Oct 2026 · Medicine &amp; AI</div>
+<h1>Where will my blood sugar be in an hour?</h1>
+<p class="lede">People with type 1 diabetes juggle meals, insulin and a glucose sensor all day. This study pairs an AI forecaster with a tiny four-number model of the body, so the forecast stays accurate and still reacts the right way when you add insulin or eat.</p>
+<p class="authors">Yaowen Zhang, Shuhao Que &amp; Ying Wang</p>
+
+<section class="card why" aria-labelledby="why-h">
+<h2 id="why-h">Why it matters</h2>
+<p>A blood-sugar forecast 30 to 60 minutes ahead could warn someone with type 1 diabetes before their glucose goes dangerously high or low, but a pure AI forecaster can learn that insulin goes with rising sugar (pumps give more insulin when glucose is already climbing) and so react the wrong way to an extra dose. By training the AI to agree with a simple four-number body model, this study beat the body model alone in all six tests (a typical miss of about 15–16 mg/dL at 30 minutes) and lowered its forecast after a 2-unit correction dose in 85 % of tested cases, against 11 % for a standard recurrent network (GRU).</p>
+</section>
+
+<section class="card" aria-labelledby="paper-h">
+<h2 id="paper-h">The paper</h2>
+<p style="margin:0 0 6px"><strong>PMB-NN: Physiological-Model-Based Neural Network for Glucose Forecasting in Type 1 Diabetes</strong></p>
+<p class="cite" style="margin:0">Yaowen Zhang, Shuhao Que &amp; Ying Wang. arXiv:2610.15456 [physics.med-ph; cs.LG], v1 submitted 11 Oct 2026, revised 15 Oct 2026. <a href="https://arxiv.org/abs/2610.15456">Read on arXiv</a> · <a href="https://arxiv.org/pdf/2610.15456">PDF</a></p>
+<p style="margin-top:14px">In plain language: the team used 6–8 weeks of real-life sensor, insulin-pump and meal records from 25 people with type 1 diabetes (the public AZT1D dataset) and asked a neural network to predict glucose 30, 60 and 120 minutes ahead from the last three hours. While it learned, the network was also asked to agree with a very small model of the body that has just four personal numbers: the level a person’s glucose drifts back to, how fast it drifts there, how strongly active insulin pulls it down, and how strongly carbohydrate still being digested pushes it up. The body model learns those four numbers for each person at the same time.</p>
+<p>The result, called PMB–NN, had a median typical error (mean absolute error) of 16.24, 25.00 and 30.20 mg/dL at 30, 60 and 120 minutes when basal-insulin records were available, and 15.38, 24.21 and 31.79 mg/dL without them. It beat the body model alone in all six settings and was the most accurate model at 30 and 60 minutes without basal records. It also behaved more sensibly: a 2-unit correction bolus at high glucose lowered its forecast in 85 % of tested cases (median), and 20 g of rescue carbohydrate at low glucose raised it in 100 %. A three-term variant that also fitted the body model directly to glucose did not lower overall error and reacted less sensibly, so the authors favour the simpler two-term version.</p>
+</section>
+
+<section class="card" aria-labelledby="demo-h">
+<h2 id="demo-h">Try it</h2>
+<p class="note" style="margin:0 0 14px">Panel 1 runs the paper’s <strong>physiological branch</strong> exactly as written (Eqs. 2 and 5, with the 240-min insulin and 120-min carbohydrate decay filters and the paper’s parameter bounds). The default personal numbers are the cohort medians from Table 2. The neural network’s own forecast needs the trained weights and each person’s data, so it is not reproduced here. Panels 2 and 3 plot the published results (Tables 1 and 3, Section 5.2). The scenarios you build — meal size, dose, timing — are your own inputs, not patient data. This is a teaching demo, not dosing advice.</p>
+
+<h3 class="plot-title">1 · Forecast the next two hours with the four-number body model</h3>
+<div class="subhead">What just happened</div>
+<div class="controls">
+ <div><label for="g0"><span>Glucose right now</span> <output id="g0o"></output></label><input id="g0" type="range" min="60" max="300" step="5" value="140"></div>
+ <div><label for="carb"><span>Carbs eaten</span> <output id="carbo"></output></label><input id="carb" type="range" min="0" max="100" step="5" value="45"></div>
+ <div><label for="carbAge"><span>…this long ago</span> <output id="carbAgeo"></output></label><input id="carbAge" type="range" min="0" max="180" step="5" value="15"></div>
+ <div><label for="bol"><span>Bolus insulin given</span> <output id="bolo"></output></label><input id="bol" type="range" min="0" max="10" step="0.5" value="4.5"></div>
+ <div><label for="bolAge"><span>…this long ago</span> <output id="bolAgeo"></output></label><input id="bolAge" type="range" min="0" max="180" step="5" value="15"></div>
+ <div><label for="basal"><span>Basal rate (steady, past day)</span> <output id="basalo"></output></label><input id="basal" type="range" min="0" max="2" step="0.05" value="0"></div>
+</div>
+<div class="subhead">Personal numbers (the four parameters)</div>
+<div class="controls">
+ <div class="seg" role="group" aria-labelledby="pL"><span class="lbl" id="pL">Start from</span><div class="opts" id="preset"></div></div>
+</div>
+<div class="controls">
+ <div><label for="gb"><span>Drift-back level G<sub>b</sub></span> <output id="gbo"></output></label><input id="gb" type="range" min="70" max="250" step="0.5" value="167.73"></div>
+ <div><label for="kg"><span>Drift-back speed k<sub>G</sub></span> <output id="kgo"></output></label><input id="kg" type="range" min="0.001" max="0.03" step="0.0001" value="0.00882"></div>
+ <div><label for="si"><span>Insulin strength S<sub>I</sub></span> <output id="sio"></output></label><input id="si" type="range" min="0" max="0.3" step="0.0005" value="0.0776"></div>
+ <div><label for="kc"><span>Carb strength k<sub>carb</sub></span> <output id="kco"></output></label><input id="kc" type="range" min="0" max="0.08" step="0.0001" value="0.02282"></div>
+</div>
+<div class="controls" style="margin-top:-6px">
+ <label class="toggle"><input type="checkbox" id="band" checked> Show PMB–NN’s typical miss (median MAE, Table 1)</label>
+ <label class="toggle"><input type="checkbox" id="mmol"> Show mmol/L (used in Australia)</label>
+</div>
+<div class="stats">
+ <div class="stat"><div class="v" id="f30"></div><div class="l">Forecast in 30 min</div></div>
+ <div class="stat"><div class="v" id="f60"></div><div class="l">Forecast in 60 min</div></div>
+ <div class="stat"><div class="v" id="f120"></div><div class="l">Forecast in 120 min</div></div>
+ <div class="stat"><div class="v" id="warn"></div><div class="l" id="warnl">Early warning</div></div>
+</div>
+<div style="margin-top:12px"><div class="plot-title">Body-model forecast from right now (dots mark the paper’s 30, 60 and 120 min horizons)</div>
+ <canvas id="fc" role="img" aria-label="Line chart of forecast glucose over the next 180 minutes with the 70 to 180 mg/dL target range shaded"></canvas>
+ <div class="legend"><span style="--k:var(--c1)">Forecast with your meal and insulin</span><span style="--k:var(--c5)">Same start, no meal and no bolus</span><span style="--k:var(--c4)">Drift-back level G<sub>b</sub></span><span style="--k:var(--c3)">Target range 70–180 mg/dL (3.9–10 mmol/L)</span></div>
+</div>
+<p class="note" id="bandnote"></p>
+<div style="margin-top:12px"><div class="plot-title">What is pushing glucose each minute (the three terms of Eq. 2)</div>
+ <canvas id="push" role="img" aria-label="Line chart of the carbohydrate push, insulin pull, drift-back term and their sum over time"></canvas>
+ <div class="legend"><span style="--k:var(--c2)">Carbs push up, +k<sub>carb</sub>·COB</span><span style="--k:var(--c1)">Insulin pulls down, −S<sub>I</sub>·IOB</span><span style="--k:var(--c4)">Drift back, −k<sub>G</sub>(G − G<sub>b</sub>)</span><span style="--k:var(--cx)">Net change, dG/dt</span></div>
+</div>
+<div class="stats" style="margin-top:14px">
+ <div class="stat"><div class="v" id="iob"></div><div class="l">Insulin on board now (IOB)</div></div>
+ <div class="stat"><div class="v" id="cob"></div><div class="l">Carbs on board now (COB)</div></div>
+ <div class="stat"><div class="v" id="dbol"></div><div class="l">Extra 2 U bolus now → change at 60 min (body model, these settings)</div></div>
+ <div class="stat"><div class="v" id="dres"></div><div class="l">Extra 20 g carbs now → change at 60 min (body model, these settings)</div></div>
+</div>
+<p class="note">For comparison, the paper reports that in the trained PMB–NN a 2-U correction bolus lowered the median 60-min forecast by 3.90 mg/dL and a 20-g rescue raised it by 14.10 mg/dL — much smaller responses than the standalone body model, because the network also leans on the recent glucose trend.</p>
+
+<h3 class="plot-title" style="margin-top:32px">2 · How accurate were the forecasters? (paper Table 1)</h3>
+<div class="controls">
+ <div class="seg" role="group" aria-labelledby="cL"><span class="lbl" id="cL">Records available</span><div class="opts" id="ctx"></div></div>
+</div>
+<div class="stats">
+ <div class="stat"><div class="v" id="a30"></div><div class="l">PMB–NN typical miss at 30 min</div></div>
+ <div class="stat"><div class="v" id="a60"></div><div class="l">PMB–NN typical miss at 60 min</div></div>
+ <div class="stat"><div class="v" id="a120"></div><div class="l">PMB–NN typical miss at 120 min</div></div>
+</div>
+<div style="margin-top:12px"><div class="plot-title">Median mean absolute error across 25 people (lower is better; * = significantly worse than PMB–NN; number = lowest in each group)</div>
+ <canvas id="mae" role="img" aria-label="Grouped bar chart of median mean absolute error for six models at three forecast horizons"></canvas>
+ <div class="legend" id="maelegend"></div>
+</div>
+
+<h3 class="plot-title" style="margin-top:32px">3 · How many days of personal data does it need? (paper Table 3, with basal records)</h3>
+<div class="controls">
+ <div><label for="days"><span>Days of personal data</span> <output id="dayso"></output></label><input id="days" type="range" min="0" max="5" step="1" value="2"></div>
+</div>
+<div class="stats">
+ <div class="stat"><div class="v" id="c30"></div><div class="l">Typical miss at 30 min</div></div>
+ <div class="stat"><div class="v" id="c60"></div><div class="l">Typical miss at 60 min</div></div>
+ <div class="stat"><div class="v" id="c120"></div><div class="l">Typical miss at 120 min</div></div>
+</div>
+<div style="margin-top:12px"><div class="plot-title">Median error after calibrating on 1–15 days vs the full protocol (median 22.2 days before testing)</div>
+ <canvas id="cal" role="img" aria-label="Line chart of median forecast error against days of personal calibration data for three horizons"></canvas>
+ <div class="legend"><span style="--k:var(--c1)">30 min</span><span style="--k:var(--c3)">60 min</span><span style="--k:var(--c2)">120 min</span></div>
+</div>
+
+<div class="subhead" style="margin-top:28px">Does the forecast react the right way? (paper Fig. 3e, largest tested doses)</div>
+<div class="tablewrap"><table aria-label="Share of test cases where the forecast moved in the expected direction">
+<thead><tr><th>Model</th><th>More active insulin</th><th>More active carbs</th><th>Correction bolus (2 U)</th><th>Rescue carbs (20 g)</th></tr></thead>
+<tbody>
+<tr class="hl"><td>PMB–NN (two-term)</td><td>0.57</td><td>0.56</td><td>0.85</td><td>1.00</td></tr>
+<tr><td>TCN, no body model</td><td>—</td><td>—</td><td>0.71</td><td>≈ 1</td></tr>
+<tr><td>Transformer</td><td>—</td><td>—</td><td>0.41</td><td>≈ 1</td></tr>
+<tr><td>GRU</td><td>—</td><td>—</td><td>0.11</td><td>≈ 1</td></tr>
+<tr><td>LSTM</td><td>—</td><td>—</td><td>0.01</td><td>≈ 1</td></tr>
+<tr><td>Body model alone</td><td>1.00</td><td>1.00</td><td>1.00</td><td>1.00</td></tr>
+</tbody></table></div>
+<p class="note">1.00 means every tested forecast moved the expected way. “—” = not stated in the paper’s text; “≈ 1” = the paper says all models responded correctly to rescue carbs “in nearly every tested record”. The body model scores 1.00 by construction, because its equation fixes the signs.</p>
+</section>
+
+<section class="card" aria-labelledby="math-h">
+<h2 id="math-h">The maths in this page</h2>
+<p style="margin:0"><strong>Reduced personal body model</strong> (Eq. 2). For each person, glucose G (mg/dL) drifts back toward an operating level, is pulled down by insulin on board and pushed up by carbohydrate on board:</p>
+<div class="eq">dG/dt = −k<sub>G</sub> (G − G<sub>b</sub>) − S<sub>I</sub> · IOB + k<sub>carb</sub> · COB</div>
+<p><strong>Action filters.</strong> On a 5-minute grid, doses D (units) and carbs C (grams) decay with fixed time constants:</p>
+<div class="eq">IOB(t+5) = e<sup>−5/240</sup> IOB(t) + D(t), &nbsp;&nbsp; COB(t+5) = e<sup>−5/120</sup> COB(t) + C(t)</div>
+<p><strong>Exact 5-minute step</strong> (Eq. 5), holding IOB and COB fixed within each step, with b = k<sub>G</sub> and a = k<sub>G</sub>G<sub>b</sub> − S<sub>I</sub>·IOB + k<sub>carb</sub>·COB:</p>
+<div class="eq">G(t + Δt) = a⁄b + [G(t) − a⁄b] · e<sup>−bΔt</sup></div>
+<p>As in the paper, the forecast starts from the current glucose and lets the current IOB and COB decay; doses after “now” are not known, so they are not added. Parameter bounds (Eqs. 3–4): 70 ≤ G<sub>b</sub> ≤ 250 mg/dL, 0.001 ≤ k<sub>G</sub> ≤ 0.03 /min, 0 ≤ S<sub>I</sub> ≤ 2.0 mg/dL/min/U, 0 ≤ k<sub>carb</sub> ≤ 0.08 mg/dL/min/g. The S<sub>I</sub> slider stops at 0.3 to give fine control over the range the cohort actually used.</p>
+<div class="tablewrap"><table aria-label="Cohort median and interquartile range of the four fitted parameters">
+<thead><tr><th>Parameter (Table 2, median [IQR])</th><th>With basal records</th><th>No basal records</th></tr></thead>
+<tbody>
+<tr><td>G<sub>b</sub>, mg/dL</td><td>167.73 [148.87–174.57]</td><td>156.24 [146.08–166.97]</td></tr>
+<tr><td>k<sub>G</sub>, /min</td><td>0.00882 [0.00757–0.01000]</td><td>0.00752 [0.00685–0.00884]</td></tr>
+<tr><td>S<sub>I</sub>, mg/dL/min/U</td><td>0.0776 [0.0615–0.0836]</td><td>0.0854 [0.0699–0.0967]</td></tr>
+<tr><td>k<sub>carb</sub>, mg/dL/min/g</td><td>0.02282 [0.01849–0.02984]</td><td>0.01932 [0.01548–0.02478]</td></tr>
+</tbody></table></div>
+<p><strong>Training objective</strong> (Eqs. 7–9). A temporal convolutional network f<sub>TCN</sub> reads 36 five-minute steps of 9 inputs and outputs Ĝ<sub>NN</sub> at 30, 60, 120 min. It is trained jointly with the body model’s forecast Ĝ<sub>PM</sub>:</p>
+<div class="eq">L<sub>2L</sub> = MSE(Ĝ<sub>NN</sub>, G) + MSE(Ĝ<sub>NN</sub>, Ĝ<sub>PM</sub>) &nbsp;&nbsp; (three-term variant: L<sub>f</sub> + 0.5 L<sub>c</sub> + L<sub>p</sub>)</div>
+<p><strong>Our additions (not from the paper).</strong> The basal slider assumes a steady rate over the past day, so basal IOB = (rate × 5⁄60) ⁄ (1 − e<sup>−5/240</sup>); the paper itself assigns each recorded hourly rate to at most 75 minutes. The shaded “typical miss” band joins the paper’s median MAE at 0, 30, 60 and 120 min with straight lines (0 at “now”, our assumption) and wraps it around the body-model curve; it is a size guide, not a confidence interval. The “early warning” stat flags when that curve crosses 70 or 180 mg/dL within 120 min. 1 mmol/L = 18 mg/dL.</p>
+<p class="warn" style="margin-bottom:0">Teaching demo built from the paper’s equations and published results — not the authors’ code and not medical or dosing advice.</p>
+</section>
+
+<section class="card" aria-labelledby="use-h">
+<h2 id="use-h">How to use it</h2>
+<p style="margin:0">In panel 1, set today’s glucose, then say how many carbs were eaten and how much bolus insulin was given, and how long ago. The blue line is the body model’s forecast; the grey line shows where glucose would go with no meal and no bolus, so the gap between them is the effect of your inputs. Slide the meal time back and watch the carb push fade faster than the insulin pull — carbs decay with a 120-minute filter and insulin with a 240-minute one, so in this model insulin keeps pulling glucose down after the meal’s push has faded. Switch between the two cohort-median profiles, or drag the four personal numbers to see a person whose insulin works harder or whose glucose settles higher. Turn on mmol/L if that is what your meter shows. In panel 2, flip between “with basal” and “no basal” records to compare the six forecasters at each horizon. In panel 3, drag the days slider to see how quickly the forecaster improves as it gets to know a new person.</p>
+</section>
+</main>
+<script>
+const $=id=>document.getElementById(id),css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+function setup(c){const r=c.getBoundingClientRect(),d=devicePixelRatio||1;c.width=Math.max(1,r.width*d);c.height=Math.max(1,r.height*d);const x=c.getContext('2d');x.setTransform(d,0,0,d,0,0);return [x,r.width,r.height];}
+const FONT='12px -apple-system,BlinkMacSystemFont,sans-serif',BOLD='600 12px -apple-system,BlinkMacSystemFont,sans-serif';
+function axes(x,W,H,m,xmin,xmax,ymin,ymax,xt,yt,xl,yl,xf,yf){
+ const X=v=>m.l+(v-xmin)/(xmax-xmin)*(W-m.l-m.r),Y=v=>H-m.b-(v-ymin)/(ymax-ymin)*(H-m.t-m.b);
+ x.strokeStyle=css('--grid');x.fillStyle=css('--muted');x.font=FONT;x.lineWidth=1;
+ xt.forEach(v=>{x.beginPath();x.moveTo(X(v),m.t);x.lineTo(X(v),H-m.b);x.stroke();x.textAlign='center';x.fillText(xf?xf(v):v,X(v),H-m.b+16);});
+ yt.forEach(v=>{x.beginPath();x.moveTo(m.l,Y(v));x.lineTo(W-m.r,Y(v));x.stroke();x.textAlign='right';x.fillText(yf?yf(v):v,m.l-6,Y(v)+4);});
+ x.textAlign='center';x.fillText(xl,(m.l+W-m.r)/2,H-6);
+ x.save();x.translate(13,(m.t+H-m.b)/2);x.rotate(-Math.PI/2);x.fillText(yl,0,0);x.restore();
+ return [X,Y];}
+function seg(id,items,cur,set){const box=$(id);box.innerHTML='';items.forEach(([v,t])=>{const b=document.createElement('button');b.type='button';b.textContent=t;b.dataset.v=v;b.setAttribute('aria-pressed',v===cur()?'true':'false');b.addEventListener('click',()=>{set(v);box.querySelectorAll('button').forEach(q=>q.setAttribute('aria-pressed',q.dataset.v===String(cur())?'true':'false'));});box.appendChild(b);});}
+function markSeg(id,v){$(id).querySelectorAll('button').forEach(q=>q.setAttribute('aria-pressed',q.dataset.v===v?'true':'false'));}
+
+/* ---------- Units ---------- */
+const mmol=()=>$('mmol').checked;
+const gU=v=>mmol()?(v/18).toFixed(1):Math.round(v).toString();
+const unit=()=>mmol()?'mmol/L':'mg/dL';
+
+/* ---------- Paper data ---------- */
+const P={basal:{gb:167.73,kg:0.00882,si:0.0776,kc:0.02282},nobasal:{gb:156.24,kg:0.00752,si:0.0854,kc:0.01932}};
+const MAEPMB={basal:[16.24,25.00,30.20],nobasal:[15.38,24.21,31.79]};
+const MODELS=['PMB–NN','TCN','GRU','LSTM','Transformer','Body model'];
+const T1={basal:[[16.24,16.23,15.81,17.52,16.03,18.89],[25.00,23.66,23.00,24.41,24.27,28.01],[30.20,30.46,30.32,31.18,30.12,33.53]],
+ nobasal:[[15.38,16.65,17.32,18.90,18.65,16.60],[24.21,24.46,24.77,25.23,26.10,25.72],[31.79,31.26,32.93,30.73,31.54,33.23]]};
+const SIG={basal:[[0,0,0,0,0,1],[0,0,0,0,0,1],[0,0,0,0,0,1]],nobasal:[[0,1,1,1,1,1],[0,1,1,1,1,1],[0,0,0,0,0,1]]};
+const CAL=[{d:1,l:'1 day',v:[27.17,34.37,42.41]},{d:3,l:'3 days',v:[20.61,29.69,36.59]},{d:6,l:'6 days',v:[19.12,28.03,32.90]},{d:10,l:'10 days',v:[19.05,27.40,35.96]},{d:15,l:'15 days',v:[18.29,25.84,33.13]},{d:22.2,l:'Full (≈22 days)',v:[16.24,25.00,30.20]}];
+
+/* ---------- Panel 1: body model ---------- */
+const DT=5,EI=Math.exp(-5/240),EC=Math.exp(-5/120),HOR=180;
+let preset='basal',ctx='basal';
+function params(){return {gb:+$('gb').value,kg:+$('kg').value,si:+$('si').value,kc:+$('kc').value};}
+function initState(o){
+ const nb=Math.round(o.bolAge/5),nc=Math.round(o.carbAge/5);
+ const basalD=o.basal*5/60,basalIOB=basalD/(1-EI);
+ return {iob:o.bol*Math.pow(EI,nb)+basalIOB,cob:o.carb*Math.pow(EC,nc)};}
+function simulate(G0,iob,cob,p){ // Eq. 5 exact step, IOB/COB decaying, no future doses
+ const out=[{t:0,G:G0,iob,cob}];let G=G0;
+ for(let t=DT;t<=HOR;t+=DT){const a=p.kg*p.gb-p.si*iob+p.kc*cob,b=p.kg;G=a/b+(G-a/b)*Math.exp(-b*DT);iob*=EI;cob*=EC;out.push({t,G,iob,cob});}
+ return out;}
+function at(tr,t){return tr[Math.round(t/DT)].G;}
+function inputs(){return {g0:+$('g0').value,carb:+$('carb').value,carbAge:+$('carbAge').value,bol:+$('bol').value,bolAge:+$('bolAge').value,basal:+$('basal').value};}
+function bandAt(t){const m=MAEPMB[ctx];if(t<=0)return 0;if(t<=30)return m[0]*t/30;if(t<=60)return m[0]+(m[1]-m[0])*(t-30)/30;if(t<=120)return m[1]+(m[2]-m[1])*(t-60)/60;return m[2];}
+function drawForecast(){
+ const o=inputs(),p=params();
+ $('g0o').textContent=gU(o.g0)+' '+unit();$('carbo').textContent=o.carb+' g';$('carbAgeo').textContent=o.carbAge+' min';
+ $('bolo').textContent=o.bol.toFixed(1)+' U';$('bolAgeo').textContent=o.bolAge+' min';$('basalo').textContent=o.basal?o.basal.toFixed(2)+' U/h':'off';
+ $('gbo').textContent=gU(p.gb)+' '+unit();$('kgo').textContent=p.kg.toFixed(4)+' /min';$('sio').textContent=p.si.toFixed(4);$('kco').textContent=p.kc.toFixed(4);
+ const s=initState(o),tr=simulate(o.g0,s.iob,s.cob,p);
+ const basalIOB=(o.basal*5/60)/(1-EI),base=simulate(o.g0,basalIOB,0,p);
+ const u=' <small>'+unit()+'</small>';
+ $('f30').innerHTML=gU(at(tr,30))+u;$('f60').innerHTML=gU(at(tr,60))+u;$('f120').innerHTML=gU(at(tr,120))+u;
+ let lowT=null,highT=null;for(const q of tr){if(q.t>120)break;if(lowT===null&&q.G<70)lowT=q.t;if(highT===null&&q.G>180)highT=q.t;}
+ const w=$('warn');
+ if(lowT!==null&&(highT===null||lowT<=highT)){w.textContent='Low in '+lowT+' min';w.style.color=css('--low');}
+ else if(highT!==null){w.textContent=highT===0?'High now':'High in '+highT+' min';w.style.color=css('--high');}
+ else{w.textContent='In range';w.style.color=css('--c3');}
+ $('warnl').textContent='Body-model curve vs 70–180 mg/dL, next 120 min';
+ $('iob').textContent=s.iob.toFixed(2)+' U';$('cob').textContent=s.cob.toFixed(1)+' g';
+ const tb=simulate(o.g0,s.iob+2,s.cob,p),tc=simulate(o.g0,s.iob,s.cob+20,p);
+ const db=at(tb,60)-at(tr,60),dc=at(tc,60)-at(tr,60);
+ const dU=v=>(v>=0?'+':'−')+(mmol()?Math.abs(v/18).toFixed(2):Math.abs(v).toFixed(1))+' <small>'+unit()+'</small>';
+ $('dbol').innerHTML=dU(db);$('dres').innerHTML=dU(dc);
+ $('bandnote').textContent=$('band').checked?`Band = PMB–NN’s median typical miss for “${ctx==='basal'?'with basal':'no basal'}” records (${MAEPMB[ctx].map(v=>v.toFixed(2)).join(', ')} mg/dL at 30, 60, 120 min), drawn around the body-model curve as a size guide. Beyond 120 min (shaded grey) is past the paper’s longest forecast.`:'Beyond 120 min (shaded grey) is past the paper’s longest forecast.';
+ // chart
+ let [x,W,H]=setup($('fc'));x.clearRect(0,0,W,H);
+ const m={l:52,r:18,t:16,b:40};
+ let lo=40,hi=320;tr.concat(base).forEach(q=>{lo=Math.min(lo,q.G-35);hi=Math.max(hi,q.G+35);});lo=Math.max(0,Math.floor(lo/20)*20);hi=Math.ceil(hi/20)*20;
+ const yt=[];const st=mmol()?36:(hi-lo>300?50:40);for(let v=Math.ceil(lo/st)*st;v<=hi;v+=st)yt.push(v);
+ const [X,Y]=axes(x,W,H,m,0,HOR,lo,hi,[0,30,60,90,120,150,180],yt,'minutes from now','glucose ('+unit()+')',v=>v===0?'now':'+'+v,v=>mmol()?(v/18).toFixed(0):v);
+ x.fillStyle=css('--inrange');x.fillRect(m.l,Y(180),W-m.l-m.r,Y(70)-Y(180));
+ x.strokeStyle=css('--low');x.globalAlpha=.5;x.setLineDash([4,4]);x.beginPath();x.moveTo(m.l,Y(70));x.lineTo(W-m.r,Y(70));x.stroke();
+ x.strokeStyle=css('--high');x.beginPath();x.moveTo(m.l,Y(180));x.lineTo(W-m.r,Y(180));x.stroke();x.setLineDash([]);x.globalAlpha=1;
+ x.fillStyle=css('--muted');x.font=FONT;x.textAlign='left';x.fillText(mmol()?'3.9':'70',m.l+6,Y(70)-5);x.fillText(mmol()?'10':'180',m.l+6,Y(180)-5);
+ x.fillStyle=css('--grid');x.fillRect(X(120),m.t,X(HOR)-X(120),H-m.t-m.b);
+ // Gb
+ if(p.gb>lo&&p.gb<hi){x.strokeStyle=css('--c4');x.lineWidth=1.5;x.setLineDash([2,4]);x.beginPath();x.moveTo(m.l,Y(p.gb));x.lineTo(W-m.r,Y(p.gb));x.stroke();x.setLineDash([]);x.fillStyle=css('--c4');x.textAlign='right';x.fillText('Gb',W-m.r-6,Y(p.gb)+14);}
+ // band
+ if($('band').checked){x.fillStyle=css('--accent-soft');x.beginPath();tr.forEach((q,i)=>{const yy=Y(Math.min(hi,q.G+bandAt(q.t)));i?x.lineTo(X(q.t),yy):x.moveTo(X(q.t),yy);});for(let i=tr.length-1;i>=0;i--){const q=tr[i];x.lineTo(X(q.t),Y(Math.max(lo,q.G-bandAt(q.t))));}x.closePath();x.fill();}
+ // baseline
+ x.strokeStyle=css('--c5');x.lineWidth=2;x.setLineDash([6,5]);x.beginPath();base.forEach((q,i)=>i?x.lineTo(X(q.t),Y(q.G)):x.moveTo(X(q.t),Y(q.G)));x.stroke();x.setLineDash([]);
+ // forecast
+ x.strokeStyle=css('--c1');x.lineWidth=3;x.lineJoin='round';x.beginPath();tr.forEach((q,i)=>i?x.lineTo(X(q.t),Y(q.G)):x.moveTo(X(q.t),Y(q.G)));x.stroke();
+ [30,60,120].forEach(h=>{const g=at(tr,h);x.fillStyle=css('--c1');x.strokeStyle=css('--card-solid');x.lineWidth=3;x.beginPath();x.arc(X(h),Y(g),7,0,6.3);x.stroke();x.fill();
+  x.fillStyle=css('--text');x.font=BOLD;x.textAlign='center';x.fillText(gU(g),X(h),Y(g)-13);});
+ x.fillStyle=css('--text');x.beginPath();x.arc(X(0),Y(o.g0),4,0,6.3);x.fill();
+ x.fillStyle=css('--muted');x.font=FONT;x.textAlign='center';x.fillText('beyond paper horizon',(X(120)+X(HOR))/2,m.t+14);
+ drawPush(tr,p);
+}
+function drawPush(tr,p){
+ const k=mmol()?18:1;
+ const c=tr.map(q=>p.kc*q.cob/k),i=tr.map(q=>-p.si*q.iob/k),d=tr.map(q=>-p.kg*(q.G-p.gb)/k),n=tr.map((q,j)=>c[j]+i[j]+d[j]);
+ let mx=0.02;[c,i,d,n].forEach(a=>a.forEach(v=>mx=Math.max(mx,Math.abs(v))));
+ const st=[0.005,0.01,0.02,0.025,0.05,0.1,0.25,0.5,1,2].find(v=>mx/v<=4)||5;mx=Math.ceil(mx/st-1e-9)*st;
+ let [x,W,H]=setup($('push'));x.clearRect(0,0,W,H);
+ const m={l:52,r:18,t:14,b:40};const yt=[];for(let v=-mx;v<=mx+1e-9;v+=st)yt.push(+v.toFixed(3));
+ const dec=st<0.01?3:st<0.1?2:st<1?2:0;
+ const [X,Y]=axes(x,W,H,m,0,HOR,-mx,mx,[0,30,60,90,120,150,180],yt,'minutes from now',unit()+' per min',v=>v===0?'now':'+'+v,v=>v.toFixed(dec));
+ x.strokeStyle=css('--muted');x.lineWidth=1;x.beginPath();x.moveTo(m.l,Y(0));x.lineTo(W-m.r,Y(0));x.stroke();
+ const line=(a,col,w,dash)=>{x.strokeStyle=css(col);x.lineWidth=w;x.setLineDash(dash||[]);x.beginPath();a.forEach((v,j)=>j?x.lineTo(X(tr[j].t),Y(v)):x.moveTo(X(tr[j].t),Y(v)));x.stroke();x.setLineDash([]);};
+ line(c,'--c2',2);line(i,'--c1',2);line(d,'--c4',2,[5,4]);line(n,'--cx',3);
+}
+
+/* ---------- Panel 2: Table 1 bars ---------- */
+const MCOL=['--c1','--c3','--c4','--c2','--c5','--c6'];
+function drawMAE(){
+ const t=T1[ctx],sg=SIG[ctx];
+ $('a30').innerHTML=MAEPMB[ctx][0].toFixed(2)+' <small>mg/dL</small>';$('a60').innerHTML=MAEPMB[ctx][1].toFixed(2)+' <small>mg/dL</small>';$('a120').innerHTML=MAEPMB[ctx][2].toFixed(2)+' <small>mg/dL</small>';
+ let [x,W,H]=setup($('mae'));x.clearRect(0,0,W,H);
+ const m={l:52,r:14,t:18,b:40};
+ const [X,Y]=axes(x,W,H,m,0,3,0,40,[],[0,10,20,30,40],'forecast horizon','median MAE (mg/dL)');
+ const gw=(W-m.l-m.r)/3,bw=Math.min(28,(gw-24)/6);
+ ['30 min','60 min','120 min'].forEach((lab,h)=>{const cx=m.l+gw*(h+.5);x.fillStyle=css('--muted');x.font=FONT;x.textAlign='center';x.fillText(lab,cx,H-m.b+16);
+  const best=Math.min(...t[h]);
+  t[h].forEach((v,j)=>{const bx=cx-3*bw+j*bw+1;x.fillStyle=css(MCOL[j]);x.globalAlpha=j===0?1:.55;const top=Y(v);const r=Math.min(5,bw/3);x.beginPath();x.roundRect?x.roundRect(bx,top,bw-2,Y(0)-top,[r,r,0,0]):x.rect(bx,top,bw-2,Y(0)-top);x.fill();x.globalAlpha=1;
+   if(sg[h][j]){x.fillStyle=css('--text');x.font=BOLD;x.fillText('*',bx+(bw-2)/2,top-4);}
+   if(v===best){x.fillStyle=css('--text');x.font=BOLD;x.fillText(v.toFixed(1),bx+(bw-2)/2,top-(sg[h][j]?16:4));}});
+ });
+ $('maelegend').innerHTML=MODELS.map((n,j)=>`<span style="--k:var(${MCOL[j]})">${n}</span>`).join('');
+}
+
+/* ---------- Panel 3: calibration ---------- */
+function drawCal(){
+ const k=+$('days').value,c=CAL[k];$('dayso').textContent=c.l;
+ ['c30','c60','c120'].forEach((id,h)=>$(id).innerHTML=c.v[h].toFixed(2)+' <small>mg/dL</small>');
+ let [x,W,H]=setup($('cal'));x.clearRect(0,0,W,H);
+ const m={l:52,r:18,t:16,b:40};
+ const [X,Y]=axes(x,W,H,m,0,24,10,45,[1,3,6,10,15,22.2],[10,20,30,40],'days of personal data used to calibrate','median MAE (mg/dL)',v=>v===22.2?'full':v);
+ const cols=['--c1','--c3','--c2'];
+ x.strokeStyle=css('--text');x.globalAlpha=.35;x.setLineDash([2,3]);x.beginPath();x.moveTo(X(c.d),m.t);x.lineTo(X(c.d),H-m.b);x.stroke();x.setLineDash([]);x.globalAlpha=1;
+ [0,1,2].forEach(h=>{x.strokeStyle=css(cols[h]);x.fillStyle=css(cols[h]);x.lineWidth=2.5;x.beginPath();CAL.slice(0,5).forEach((q,i)=>i?x.lineTo(X(q.d),Y(q.v[h])):x.moveTo(X(q.d),Y(q.v[h])));x.stroke();
+  x.setLineDash([4,4]);x.beginPath();x.moveTo(X(15),Y(CAL[4].v[h]));x.lineTo(X(22.2),Y(CAL[5].v[h]));x.stroke();x.setLineDash([]);
+  CAL.forEach((q,i)=>{x.beginPath();x.arc(X(q.d),Y(q.v[h]),i===k?7:3.5,0,6.3);x.fill();if(i===k){x.strokeStyle=css('--card-solid');x.lineWidth=2;x.stroke();x.strokeStyle=css(cols[h]);}});});
+ x.fillStyle=css('--muted');x.font=FONT;x.textAlign='right';x.fillText('dashed: different checkpoint rule (paper §4.3.2)',W-m.r-6,m.t+12);
+}
+
+/* ---------- Wiring ---------- */
+function applyPreset(v){preset=v;if(v!=='custom'){const q=P[v];$('gb').value=q.gb;$('kg').value=q.kg;$('si').value=q.si;$('kc').value=q.kc;ctx=v;markSeg('ctx',ctx);drawMAE();}drawForecast();}
+seg('preset',[['basal','Median, with basal'],['nobasal','Median, no basal'],['custom','Custom']],()=>preset,applyPreset);
+seg('ctx',[['basal','With basal'],['nobasal','No basal']],()=>ctx,v=>{ctx=v;drawMAE();drawForecast();});
+['g0','carb','carbAge','bol','bolAge','basal','band','mmol'].forEach(id=>$(id).addEventListener('input',drawForecast));
+['gb','kg','si','kc'].forEach(id=>$(id).addEventListener('input',()=>{preset='custom';markSeg('preset','custom');drawForecast();}));
+$('days').addEventListener('input',drawCal);
+function drawAll(){drawForecast();drawMAE();drawCal();}
+addEventListener('resize',drawAll);
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',drawAll);
+drawAll();
+</script>
+</body></html>
