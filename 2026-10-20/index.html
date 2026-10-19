@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="light dark">
+<title>Green hydrogen with seven times less iridium — Research Explorer, 20 Oct 2026</title>
+<link rel="stylesheet" href="../assets/style.css">
+<style>
+/* page-specific: two extra anode colours, segmented controls, canvas heights */
+:root{--c5:#0a7d8c;--c6:#d1306b;--target:rgba(36,138,61,.12);--act:rgba(201,52,0,.16);--ohm:rgba(0,98,204,.16)}
+@media (prefers-color-scheme:dark){:root{--c5:#5ac8d8;--c6:#ff6482;--target:rgba(48,209,88,.14);--act:rgba(255,159,10,.2);--ohm:rgba(100,168,255,.2)}}
+canvas#map{height:340px} canvas#pol{height:360px} canvas#drift{height:260px}
+.seg{display:flex;flex-direction:column;gap:8px}
+.seg .lbl{font-size:15px;font-weight:600}
+.seg .opts{display:flex;flex-wrap:wrap;background:var(--accent-soft);border-radius:10px;padding:2px;gap:2px;width:100%}
+.seg button{flex:1 1 auto;font:inherit;font-size:14px;font-weight:600;border:0;border-radius:8px;padding:7px 10px;background:transparent;color:var(--text);cursor:pointer;min-height:32px}
+.seg button[aria-pressed="true"]{background:var(--card-solid);box-shadow:0 1px 3px rgba(0,0,0,.18)}
+.subhead{font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:22px 0 6px}
+.tablewrap{overflow-x:auto}
+tr.hl td{background:var(--accent-soft)}
+.stat .v small{font-size:15px;font-weight:500;color:var(--muted);margin-left:4px}
+.controls .toggle{justify-content:flex-start;font-weight:500}
+.legend span.sw::before{display:none}
+</style></head><body><main>
+<a class="back" href="../">‹ All demos</a>
+<div class="eyebrow">20 Oct 2026 · Materials &amp; Climate</div>
+<h1>Green hydrogen with seven times less iridium</h1>
+<p class="lede">The electrolysers that split water into hydrogen using solar and wind power need iridium, one of the rarest metals on Earth. This team grew the iridium catalyst a few atoms at a time, straight onto the electrode, and got close to commercial performance with a fraction of the metal.</p>
+<p class="authors">Peter M. Piechulla, Iris Blommestein, Anne van Gerven, Henri Pelzer, Ezgi Demiröz, Jonas Englhard, Mingliang Chen, Julien Bachmann &amp; J. Ruud van Ommen</p>
+
+<section class="card why" aria-labelledby="why-h">
+<h2 id="why-h">Why it matters</h2>
+<p>Hydrogen made from water with solar and wind power could replace fossil fuels both as a fuel and as a raw material for industry, but the proton-exchange-membrane electrolysers that make it need iridium on their anodes, and the whole world mines only about 7 tonnes of it a year. Growing the iridium one atomic layer at a time, this team reached about 83 % of a commercial anode’s current at the same 1.8 V while using 7× less iridium (0.21 vs 1.4 mg/cm²), and it held up through a test equivalent to at least 600 hours of stop-start solar or wind operation.</p>
+</section>
+
+<section class="card" aria-labelledby="paper-h">
+<h2 id="paper-h">The paper</h2>
+<p style="margin:0 0 6px"><strong>Ionomer-free Iridium Anodes with Low Loading for Zero-gap Electrolyzers via Direct Atomic Layer Deposition</strong></p>
+<p class="cite" style="margin:0">Peter M. Piechulla, Iris Blommestein, Anne van Gerven, Henri Pelzer, Ezgi Demiröz, Jonas Englhard, Mingliang Chen, Julien Bachmann &amp; J. Ruud van Ommen (TU Delft and FAU Erlangen-Nürnberg). arXiv:2610.15798 [cond-mat.mtrl-sci], submitted 11 Oct 2026. <a href="https://arxiv.org/abs/2610.15798">Read on arXiv</a> · <a href="https://arxiv.org/pdf/2610.15798">PDF</a></p>
+<p style="margin-top:14px">In plain language: a PEM water electrolyser is a sandwich. Water goes in at the anode, where an iridium catalyst pulls oxygen out of it, and hydrogen comes out at the other side. Normally the iridium is mixed into an ink with a plastic binder (the “ionomer”) and sprayed onto the membrane at more than 1 mg per cm². Here the team used <em>atomic layer deposition</em> (ALD), which builds a coating one layer of atoms per cycle, to grow iridium directly onto a porous titanium felt, sometimes topped with a finer layer of sintered titanium nanoparticles (a “microporous layer”, MPL). No ink and no binder are needed.</p>
+<p>With ozone-based thermal ALD (75 cycles on the MPL) the anode held only 0.21 mg/cm² of iridium yet drew 1.24 A/cm² at 1.8 V, against 1.49 A/cm² for a commercial catalyst-coated membrane with 1.4 mg/cm². Halving the ALD cycles from 150 to 75 cut the iridium by 74 % with no loss in current, showing that only the iridium within about 2.5 µm of the membrane does useful work. A plasma-based ALD process cut the iridium to 0.04 mg/cm², but it made a less active, crystalline IrO₂ and wore out faster on the MPL. Because there is no binder, the same kind of anode also worked in a CO₂ electrolyser with a different, alkaline membrane.</p>
+</section>
+
+<section class="card" aria-labelledby="demo-h">
+<h2 id="demo-h">Try it</h2>
+<p class="note" style="margin:0 0 14px">Every measured number on this page comes from the paper (Table 1 and Sections 2.4, 3.1–3.2). The iridium-per-kilowatt figures are our arithmetic on Table 1. Panel 2 uses the paper’s Tafel equation (Eq. 3) plus the series-resistance term as a simple two-loss model. It leaves out mass transport, so treat its what-if answers as rough guides, not predictions (see “The maths”).</p>
+
+<div class="controls">
+ <div class="seg" role="group" aria-labelledby="aL" style="grid-column:1/-1"><span class="lbl" id="aL">Anode</span><div class="opts" id="anode"></div></div>
+</div>
+
+<h3 class="plot-title" style="margin-top:8px">1 · How much iridium does each kilowatt need?</h3>
+<div class="stats">
+ <div class="stat"><div class="v" id="sLoad"></div><div class="l">Iridium on the anode (Table 1)</div></div>
+ <div class="stat"><div class="v" id="sJ"></div><div class="l">Current at 1.8 V (Table 1)</div></div>
+ <div class="stat"><div class="v" id="sP"></div><div class="l">Electrical power at 1.8 V</div></div>
+ <div class="stat"><div class="v" id="sG"></div><div class="l">Iridium per kilowatt (target 0.1–0.4)</div></div>
+</div>
+<div style="margin-top:12px"><div class="plot-title">Iridium per kilowatt vs current at 1.8 V, like the paper’s Fig. 11 (lower and further right is better)</div>
+ <canvas id="map" role="img" aria-label="Scatter chart of grams of iridium per kilowatt against current density at 1.8 volts for six anodes, with the 0.1 to 0.4 gram per kilowatt target band shaded"></canvas>
+ <div class="legend" id="mapleg"></div>
+</div>
+<div class="controls" style="margin-top:14px">
+ <label class="toggle"><input type="checkbox" id="thin"> Also show a thinner membrane (series resistance − 60 mΩ·cm², as in Fig. 11; hollow dots, our model estimate)</label>
+</div>
+<div class="subhead">Scale it up</div>
+<div class="controls">
+ <div><label for="gw"><span>Electrolysers to build</span> <output id="gwo"></output></label><input id="gw" type="range" min="1" max="100" step="1" value="10"></div>
+</div>
+<div class="stats">
+ <div class="stat"><div class="v" id="tSel"></div><div class="l" id="tSelL">Iridium for the selected anode</div></div>
+ <div class="stat"><div class="v" id="tCcm"></div><div class="l">Iridium with the commercial anode (CCM)</div></div>
+ <div class="stat"><div class="v" id="tYr"></div><div class="l">Share of one year’s world iridium mining (≈ 7 t), selected anode</div></div>
+ <div class="stat"><div class="v" id="tMax"></div><div class="l">Capacity one year of world iridium could supply, selected anode</div></div>
+</div>
+<p class="note">Anode iridium only, at 1.8 V and about 70 % efficiency, with every gram mined in a year going to anodes and no recycling. A real plant also needs catalyst for the cathode, spares and stack hardware, so these are lower bounds. World supply: about 7 t in 2025 (<a href="https://www.ipa-news.com/assets/pdfs/factsheets/2026-05-ipa-iridium-factsheet.pdf">International Platinum Group Metals Association iridium factsheet, 2026</a>).</p>
+
+<h3 class="plot-title" style="margin-top:32px">2 · Where do the volts go?</h3>
+<div class="controls">
+ <div class="seg" role="group" aria-labelledby="bL"><span class="lbl" id="bL">Kinetic slope</span><div class="opts" id="slope"></div></div>
+ <div><label for="rom"><span>Series resistance R<sub>Ω</sub></span> <output id="romo"></output></label><input id="rom" type="range" min="40" max="200" step="1" value="135"></div>
+ <div><label for="jop"><span>Operating current j</span> <output id="jopo"></output></label><input id="jop" type="range" min="0.05" max="2.5" step="0.05" value="1"></div>
+</div>
+<p class="note" id="slopenote" style="margin-top:-6px"></p>
+<div class="stats">
+ <div class="stat"><div class="v" id="pV"></div><div class="l">Cell voltage at j</div></div>
+ <div class="stat"><div class="v" id="pEff"></div><div class="l">Energy efficiency (vs hydrogen’s lower heating value)</div></div>
+ <div class="stat"><div class="v" id="pH2"></div><div class="l">Hydrogen made per m² of cell</div></div>
+ <div class="stat"><div class="v" id="pJ18"></div><div class="l">Model current at 1.8 V with this R<sub>Ω</sub></div></div>
+</div>
+<div style="margin-top:12px"><div class="plot-title">Cell voltage vs current: the minimum water-splitting voltage, plus catalyst (activation) loss, plus resistance loss</div>
+ <canvas id="pol" role="img" aria-label="Polarisation curve of cell voltage against current density, with the reversible voltage, activation loss and ohmic loss shaded, and the measured 1.8 volt point marked"></canvas>
+ <div class="legend"><span style="--k:var(--muted)">E<sub>rev</sub> = 1.168 V (80 °C)</span><span class="sw"><i style="background:var(--act);height:10px"></i>+ activation loss b·log₁₀(j/j₀)</span><span class="sw"><i style="background:var(--ohm);height:10px"></i>+ resistance loss j·R<sub>Ω</sub></span><span style="--k:var(--cx)">Model cell voltage, selected anode</span><span style="--k:var(--c2)">Commercial CCM, same model (dashed)</span></div>
+</div>
+<div class="stats" style="margin-top:14px">
+ <div class="stat"><div class="v" id="pAct"></div><div class="l">Activation loss at j</div></div>
+ <div class="stat"><div class="v" id="pOhm"></div><div class="l">Resistance loss at j</div></div>
+ <div class="stat"><div class="v" id="pGk"></div><div class="l">Iridium per kW at this operating point</div></div>
+ <div class="stat"><div class="v" id="pThin"></div><div class="l">Thinner membrane (R<sub>Ω</sub> − 60): change in current at 1.8 V</div></div>
+</div>
+<p class="note" id="thinnote"></p>
+
+<h3 class="plot-title" style="margin-top:32px">3 · Does it last? (paper Section 2.4)</h3>
+<div class="controls">
+ <div><label for="hrs"><span>Hours at 1 A/cm²</span> <output id="hrso"></output></label><input id="hrs" type="range" min="0" max="1000" step="10" value="600"></div>
+</div>
+<div class="stats">
+ <div class="stat"><div class="v" id="d1"></div><div class="l">ThALD 75c MPL (+16 µV/h)</div></div>
+ <div class="stat"><div class="v" id="d2"></div><div class="l">PEALD 450c MPL (+583 µV/h)</div></div>
+ <div class="stat"><div class="v" id="d3"></div><div class="l">PEALD 450c on bare felt (−23 µV/h)</div></div>
+</div>
+<div style="margin-top:12px"><div class="plot-title">Extra cell voltage if each 12–24 h drift rate carried on in a straight line (our extrapolation)</div>
+ <canvas id="drift" role="img" aria-label="Line chart of extrapolated cell-voltage drift over time for three anodes"></canvas>
+ <div class="legend"><span style="--k:var(--c1)">ThALD 75c MPL</span><span style="--k:var(--c3)">PEALD 450c MPL</span><span style="--k:var(--c6)">PEALD 450c bare felt</span></div>
+</div>
+<div class="subhead" style="margin-top:22px">After the stop-start stress test (25,000 cycles of 5 s at 1.45 V and 5 s at 2.00 V)</div>
+<div class="tablewrap"><table aria-label="Change in Tafel slope after the accelerated durability test">
+<thead><tr><th>Anode</th><th>Drift over 12–24 h at 1 A/cm²</th><th>Tafel-slope change after the test</th><th>What the paper saw</th></tr></thead>
+<tbody>
+<tr class="hl"><td>ThALD 75c MPL</td><td>+16 µV/h</td><td>+1 mV/dec</td><td style="text-align:left">Only minor changes to the polarisation curve</td></tr>
+<tr><td>PEALD 450c MPL</td><td>+583 µV/h</td><td>+10 mV/dec</td><td style="text-align:left">Severe loss of activity</td></tr>
+<tr><td>PEALD 450c bare felt</td><td>−23 µV/h</td><td>−11 mV/dec</td><td style="text-align:left">Got better; part of the IrO₂ turned into a more active IrO<sub>x</sub></td></tr>
+</tbody></table></div>
+<p class="note">The paper calls the stress test equivalent to at least 600 h of intermittent operation, for example on wind or solar power. A straight-line extrapolation of a 12-hour drift rate is only a size guide; real electrolysers age in more complicated ways.</p>
+</section>
+
+<section class="card" aria-labelledby="math-h">
+<h2 id="math-h">The maths in this page</h2>
+<p style="margin:0"><strong>Tafel analysis</strong> (paper Eq. 3). The authors fit the low-current part of each polarisation curve (10⁻³ to 10⁻² A/cm²) with</p>
+<div class="eq">V<sub>cell</sub>(j) − j·R<sub>Ω</sub> − E<sub>rev</sub> = η<sub>act,Tafel</sub> = b · log₁₀(j ⁄ j₀), &nbsp;&nbsp; E<sub>rev</sub> = 1.168 V at 80 °C</div>
+<p>where b is the Tafel slope (mV per decade of current) and R<sub>Ω</sub> the series resistance from impedance fitting. <strong>Our simplification:</strong> panel 2 turns this around into a two-loss model, V(j) = E<sub>rev</sub> + b·log₁₀(j⁄j₀) + j·R<sub>Ω</sub>. The paper does not report j₀ (it calls it too uncertain), so we pick j₀ for each anode so that the curve passes through its measured point (j at 1.8 V, Table 1, with the Table 1 R<sub>Ω</sub>). The model leaves out mass-transport losses.</p>
+<p><strong>Low-current b vs effective b<sub>eff</sub>.</strong> By integrating impedance data (Eqs. 1–2, V<sub>cell</sub>(j) ≈ ∫ LFR(j) dj), the authors found that the low-current slopes understate the real catalyst losses at high current. Fitting the charge-transfer loss gave b<sub>eff</sub> = 84 mV/dec for ThALD 75c MPL (vs 44–45 from the low-current fit) and 76 mV/dec for the CCM (vs 43). With b<sub>eff</sub> our model gives about +61 % more current at 1.8 V for a membrane 60 mΩ·cm² thinner, close to the paper’s +59 % for ThALD 75c MPL. With the low-current b it gives about +69 %, which is too optimistic.</p>
+<div class="tablewrap"><table aria-label="Paper Table 1 and derived iridium per kilowatt">
+<thead><tr><th>Anode (paper Table 1)</th><th>Ir loading, mg/cm²</th><th>R<sub>Ω</sub>, mΩ·cm²</th><th>b, mV/dec</th><th>j at 1.8 V, A/cm²</th><th>g Ir/kW (ours)</th></tr></thead>
+<tbody id="t1"></tbody></table></div>
+<p><strong>Our additions (not from the paper).</strong> Iridium per kilowatt = loading ⁄ (j × V<sub>cell</sub>). Since mg/cm² ÷ W/cm² = mg/W = g/kW, this is the paper’s “power-specific loading” at 1.8 V. Efficiency = 1.253 V ⁄ V<sub>cell</sub>, where 1.253 V is hydrogen’s lower heating value (241.8 kJ/mol) divided by 2F. This gives 70 % at 1.8 V, matching the paper’s “≈ 70 %<sub>LHV</sub>”. Hydrogen output follows Faraday’s law: ṁ = j ⁄ (2F) × 2.016 g/mol, which is about 0.376 kg per hour per m² for each A/cm². In panel 1 the hollow thin-membrane dots come from the same model with R<sub>Ω</sub> − 60 mΩ·cm². The paper instead shifted its measured curves, so expect differences.</p>
+<p class="warn" style="margin-bottom:0">Teaching demo built from the paper’s equation and published numbers. It is not the authors’ code or data.</p>
+</section>
+
+<section class="card" aria-labelledby="use-h">
+<h2 id="use-h">How to use it</h2>
+<p style="margin:0">Pick an anode at the top; every panel follows it. In panel 1, find your anode on the map: dots low down use little iridium per kilowatt, and dots to the right push more current, and so more hydrogen, through the same size of cell. The green band is the 0.1–0.4 g/kW goal from electrolyser roadmaps. Drag “Electrolysers to build” to see how many tonnes of iridium a hydrogen roll-out would need with each anode, compared with the roughly 7 tonnes the world mines each year. Tick the thinner-membrane box to see the dots slide right. In panel 2, slide the operating current to see the cell voltage split into the unavoidable 1.168 V, the catalyst’s activation loss and the resistance loss. Lower the series resistance to mimic a thinner membrane, and switch to the effective slope b<sub>eff</sub> (ThALD 75c MPL and CCM only) to see why the simple Tafel picture flatters the ALD anode at high current. In panel 3, drag the hours to compare how fast each anode’s voltage creeps up.</p>
+</section>
+</main>
+<script>
+const $=id=>document.getElementById(id),css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+function setup(c){const r=c.getBoundingClientRect(),d=devicePixelRatio||1;c.width=Math.max(1,r.width*d);c.height=Math.max(1,r.height*d);const x=c.getContext('2d');x.setTransform(d,0,0,d,0,0);return [x,r.width,r.height];}
+const FONT='12px -apple-system,BlinkMacSystemFont,sans-serif',BOLD='600 12px -apple-system,BlinkMacSystemFont,sans-serif';
+function axes(x,W,H,m,xmin,xmax,ymin,ymax,xt,yt,xl,yl,xf,yf){
+ const X=v=>m.l+(v-xmin)/(xmax-xmin)*(W-m.l-m.r),Y=v=>H-m.b-(v-ymin)/(ymax-ymin)*(H-m.t-m.b);
+ x.strokeStyle=css('--grid');x.fillStyle=css('--muted');x.font=FONT;x.lineWidth=1;
+ xt.forEach(v=>{x.beginPath();x.moveTo(X(v),m.t);x.lineTo(X(v),H-m.b);x.stroke();x.textAlign='center';x.fillText(xf?xf(v):v,X(v),H-m.b+16);});
+ yt.forEach(v=>{x.beginPath();x.moveTo(m.l,Y(v));x.lineTo(W-m.r,Y(v));x.stroke();x.textAlign='right';x.fillText(yf?yf(v):v,m.l-6,Y(v)+4);});
+ x.textAlign='center';x.fillText(xl,(m.l+W-m.r)/2,H-6);
+ x.save();x.translate(13,(m.t+H-m.b)/2);x.rotate(-Math.PI/2);x.fillText(yl,0,0);x.restore();
+ return [X,Y];}
+function seg(id,items,cur,set){const box=$(id);box.innerHTML='';items.forEach(([v,t])=>{const b=document.createElement('button');b.type='button';b.textContent=t;b.dataset.v=v;b.setAttribute('aria-pressed',v===cur()?'true':'false');b.addEventListener('click',()=>{set(v);box.querySelectorAll('button').forEach(q=>q.setAttribute('aria-pressed',q.dataset.v===String(cur())?'true':'false'));});box.appendChild(b);});}
+
+/* ---------- Paper data (Table 1; Sections 2.4, 3.1.2) ---------- */
+const A=[
+ {id:'th75',name:'ThALD 75c MPL',load:0.21,R:135,b:44,beff:84,j:1.240,col:'--c1'},
+ {id:'ccm', name:'Commercial CCM',load:1.4,R:139,b:43,beff:76,j:1.491,col:'--c2'},
+ {id:'pe450',name:'PEALD 450c MPL',load:0.04,R:128,b:55,beff:null,j:0.949,col:'--c3'},
+ {id:'th150m',name:'ThALD 150c MPL',load:0.82,R:141,b:47,beff:null,j:1.180,col:'--c4'},
+ {id:'th150',name:'ThALD 150c bare felt',load:0.47,R:130,b:51,beff:null,j:0.994,col:'--c5'},
+ {id:'pe150',name:'PEALD 150c bare felt',load:0.007,R:148,b:66,beff:null,j:0.438,col:'--c6'}];
+const ERV=1.168,V18=1.8,LHV=1.253,F=96485.33,WORLD=7;
+let sel='th75',slope='b';
+const an=()=>A.find(a=>a.id===sel);
+const gkw=(load,j,V)=>load/(j*V);               // mg/cm2 / (W/cm2) = g/kW
+const slopeOf=a=>(slope==='beff'&&a.beff)?a.beff:a.b; // mV/dec
+function j0Of(a,b){const eta=V18-ERV-a.j*a.R/1000;return a.j/Math.pow(10,eta/(b/1000));}
+function Vmodel(a,b,R,j){const j0=j0Of(a,b);return ERV+Math.max(0,(b/1000)*Math.log10(j/j0))+j*R/1000;}
+function jAt(a,b,R,V){let lo=1e-6,hi=20;for(let i=0;i<80;i++){const mid=Math.sqrt(lo*hi);(Vmodel(a,b,R,mid)>V)?hi=mid:lo=mid;}return Math.sqrt(lo*hi);}
+const fmt=(v,d)=>v.toLocaleString('en-AU',{minimumFractionDigits:d,maximumFractionDigits:d});
+const sm=s=>' <small>'+s+'</small>';
+
+/* ---------- Panel 1 ---------- */
+function drawMap(){
+ const a=an(),g=gkw(a.load,a.j,V18);
+ $('sLoad').innerHTML=(a.load<0.1?fmt(a.load,3):fmt(a.load,2))+sm('mg/cm²');
+ $('sJ').innerHTML=fmt(a.j,3)+sm('A/cm²');
+ $('sP').innerHTML=fmt(a.j*V18,2)+sm('W/cm²');
+ $('sG').innerHTML=(g<0.1?fmt(g,3):fmt(g,2))+sm('g/kW');
+ const thin=$('thin').checked;
+ let [x,W,H]=setup($('map'));x.clearRect(0,0,W,H);
+ const m={l:56,r:18,t:16,b:40};
+ const [X,Y]=axes(x,W,H,m,0,2.6,0,0.6,[0,0.5,1,1.5,2,2.5],[0,0.1,0.2,0.3,0.4,0.5,0.6],'current density at 1.8 V (A/cm²)','g iridium per kW',v=>v.toFixed(1),v=>v.toFixed(1));
+ x.fillStyle=css('--target');x.fillRect(m.l,Y(0.4),W-m.l-m.r,Y(0.1)-Y(0.4));
+ x.fillStyle=css('--c3');x.font=BOLD;x.textAlign='left';x.fillText('roadmap goal 0.1–0.4 g/kW',m.l+8,Y(0.4)+16);
+ A.forEach(q=>{
+  const gx=gkw(q.load,q.j,V18),c=css(q.col),isSel=q.id===sel;
+  if(thin){const bq=slopeOf(q),jt=jAt(q,bq,q.R-60,V18),gt=gkw(q.load,jt,V18);
+   x.strokeStyle=c;x.globalAlpha=.6;x.setLineDash([3,3]);x.lineWidth=1.5;x.beginPath();x.moveTo(X(q.j),Y(gx));x.lineTo(X(Math.min(2.6,jt)),Y(gt));x.stroke();x.setLineDash([]);x.globalAlpha=1;
+   x.beginPath();x.arc(X(Math.min(2.6,jt)),Y(gt),isSel?7:5,0,6.3);x.lineWidth=2;x.strokeStyle=c;x.fillStyle=css('--card-solid');x.fill();x.stroke();}
+  x.beginPath();x.arc(X(q.j),Y(gx),isSel?8:5.5,0,6.3);x.fillStyle=c;x.fill();
+  if(isSel){x.lineWidth=3;x.strokeStyle=css('--card-solid');x.stroke();x.lineWidth=1.5;x.strokeStyle=c;x.beginPath();x.arc(X(q.j),Y(gx),11,0,6.3);x.stroke();}
+  x.fillStyle=css('--text');x.font=isSel?BOLD:FONT;x.textAlign=q.id==='ccm'?'right':'left';
+  const lab=q.name+' · '+(gx<0.1?gx.toFixed(3):gx.toFixed(2));
+  const dy={th75:-12,ccm:-12,pe450:16,th150m:-12,th150:-12,pe150:-12}[q.id];
+  x.fillText(lab,X(q.j)+(q.id==='ccm'?-10:10),Y(gx)+dy);});
+ $('mapleg').innerHTML=A.map(q=>`<span style="--k:var(${q.col})">${q.name}</span>`).join('')+(thin?'<span style="--k:var(--muted)">hollow = thinner membrane (model)</span>':'');
+ drawScale();}
+function drawScale(){
+ const a=an(),gw=+$('gw').value,g=gkw(a.load,a.j,V18),c=A[1],gc=gkw(c.load,c.j,V18);
+ $('gwo').textContent=gw+' GW';
+ const t=g*gw,tc=gc*gw; // g/kW * GW = tonnes (1e6 kW * g /1e6)
+ const tf=v=>v<1?fmt(v*1000,0)+sm('kg'):fmt(v,v<10?2:1)+sm('t');
+ $('tSel').innerHTML=tf(t);$('tSelL').textContent='Iridium for '+a.name;
+ $('tCcm').innerHTML=tf(tc);
+ $('tYr').innerHTML=fmt(t/WORLD*100,t/WORLD<0.1?1:0)+sm('%');
+ $('tMax').innerHTML=fmt(WORLD/g,0)+sm('GW per year');}
+
+/* ---------- Panel 2 ---------- */
+function drawPol(){
+ const a=an(),b=slopeOf(a),R=+$('rom').value,j=+$('jop').value;
+ $('romo').textContent=R+' mΩ·cm²'+(R===a.R?' (Table 1)':'');$('jopo').textContent=j.toFixed(2)+' A/cm²';
+ $('slopenote').textContent=(slope==='beff'&&!a.beff)?`The paper reports b_eff only for ThALD 75c MPL and the CCM, so ${a.name} uses its low-current b = ${a.b} mV/dec.`:`Using b = ${b} mV/dec (${slope==='beff'&&a.beff?'effective slope from impedance, Sec. 3.1.2':'low-current Tafel fit, Table 1'}); j₀ = ${j0Of(a,b).toExponential(1)} A/cm², back-calculated so the curve passes through the measured 1.8 V point.`;
+ const V=Vmodel(a,b,R,j),eta=V-ERV-j*R/1000;
+ $('pV').innerHTML=fmt(V,3)+sm('V');$('pEff').innerHTML=fmt(LHV/V*100,1)+sm('%');
+ $('pH2').innerHTML=fmt(j*1e4/(2*F)*2.016e-3*3600,2)+sm('kg/h');
+ const j18=jAt(a,b,R,V18);$('pJ18').innerHTML=fmt(j18,2)+sm('A/cm²');
+ $('pAct').innerHTML=fmt(eta*1000,0)+sm('mV');$('pOhm').innerHTML=fmt(j*R,0)+sm('mV');
+ const gk=gkw(a.load,j,V);$('pGk').innerHTML=(gk<0.1?fmt(gk,3):fmt(gk,2))+sm('g/kW');
+ const jt=jAt(a,b,a.R-60,V18),jb=jAt(a,b,a.R,V18);$('pThin').innerHTML='+'+fmt((jt/jb-1)*100,0)+sm('%');
+ const paper={th75:'the paper estimates +59 % from its measured curve',pe450:'the paper estimates +54 % from its measured curve',ccm:'the paper expects a similar gain for the CCM'}[a.id];
+ $('thinnote').textContent='Thinner-membrane stat: Table 1 RΩ − 60 mΩ·cm² (typical N117 → N212 difference, Sec. 3.2), model with b = '+b+' mV/dec'+(paper?'; '+paper+'.':'.');
+ let [x,W,H]=setup($('pol'));x.clearRect(0,0,W,H);
+ const m={l:52,r:18,t:16,b:40},JM=2.5;
+ const [X,Y]=axes(x,W,H,m,0,JM,1.0,2.3,[0,0.5,1,1.5,2,2.5],[1.0,1.2,1.4,1.6,1.8,2.0,2.2],'current density j (A/cm²)','cell voltage (V)',v=>v.toFixed(1),v=>v.toFixed(1));
+ const N=200,js=[];for(let i=1;i<=N;i++)js.push(JM*i/N);
+ const j0=j0Of(a,b),act=jj=>Math.max(0,(b/1000)*Math.log10(jj/j0));
+ const clipY=v=>Y(Math.min(2.3,v));
+ // ohmic band
+ x.fillStyle=css('--ohm');x.beginPath();js.forEach((jj,i)=>{const v=ERV+act(jj)+jj*R/1000;i?x.lineTo(X(jj),clipY(v)):x.moveTo(X(jj),clipY(v));});for(let i=N-1;i>=0;i--){const jj=js[i];x.lineTo(X(jj),clipY(ERV+act(jj)));}x.closePath();x.fill();
+ // activation band
+ x.fillStyle=css('--act');x.beginPath();js.forEach((jj,i)=>{const v=ERV+act(jj);i?x.lineTo(X(jj),clipY(v)):x.moveTo(X(jj),clipY(v));});x.lineTo(X(JM),Y(ERV));x.lineTo(X(js[0]),Y(ERV));x.closePath();x.fill();
+ // Erev
+ x.strokeStyle=css('--muted');x.lineWidth=1.5;x.setLineDash([5,4]);x.beginPath();x.moveTo(m.l,Y(ERV));x.lineTo(W-m.r,Y(ERV));x.stroke();
+ // 1.8 V
+ x.strokeStyle=css('--text');x.globalAlpha=.35;x.beginPath();x.moveTo(m.l,Y(V18));x.lineTo(W-m.r,Y(V18));x.stroke();x.globalAlpha=1;x.setLineDash([]);
+ x.fillStyle=css('--muted');x.font=FONT;x.textAlign='left';x.fillText('1.8 V ≈ 70 % efficient',m.l+6,Y(V18)-6);x.fillText('E_rev 1.168 V',m.l+6,Y(ERV)+15);
+ // CCM reference
+ if(a.id!=='ccm'){const c=A[1],bc=slopeOf(c);x.strokeStyle=css('--c2');x.lineWidth=2;x.setLineDash([6,5]);x.beginPath();js.forEach((jj,i)=>{const v=Vmodel(c,bc,c.R,jj);i?x.lineTo(X(jj),clipY(v)):x.moveTo(X(jj),clipY(v));});x.stroke();x.setLineDash([]);}
+ // model curve
+ x.strokeStyle=css('--cx');x.lineWidth=3;x.lineJoin='round';x.beginPath();js.forEach((jj,i)=>{const v=ERV+act(jj)+jj*R/1000;i?x.lineTo(X(jj),clipY(v)):x.moveTo(X(jj),clipY(v));});x.stroke();
+ // measured point
+ x.fillStyle=css(a.col);x.strokeStyle=css('--card-solid');x.lineWidth=3;x.beginPath();x.arc(X(a.j),Y(V18),7,0,6.3);x.stroke();x.fill();
+ x.fillStyle=css('--text');x.font=BOLD;x.textAlign='right';x.fillText('measured: '+a.j.toFixed(3)+' A/cm² at 1.8 V',X(a.j)-10,Y(V18)-12);
+ // operating point
+ x.strokeStyle=css('--accent');x.lineWidth=1.5;x.setLineDash([2,3]);x.beginPath();x.moveTo(X(j),m.t);x.lineTo(X(j),H-m.b);x.stroke();x.setLineDash([]);
+ if(V<=2.3){x.fillStyle=css('--accent');x.beginPath();x.arc(X(j),Y(V),5,0,6.3);x.fill();}
+ x.fillStyle=css('--muted');x.font=FONT;x.textAlign='center';
+ const ja=Math.min(2.3,Math.max(0.25,j));
+ if(eta*1000>40)x.fillText('activation loss',X(ja),Y(ERV+act(ja)/2)+4);
+ const jr=2.3,vr=ERV+act(jr)+jr*R/1000;if(jr*R>60&&vr<=2.3)x.fillText('resistance loss',X(jr)-30,Y(ERV+act(jr)+jr*R/1000*0.3)+4);
+}
+
+/* ---------- Panel 3 ---------- */
+const DR=[{r:16,col:'--c1',id:'d1'},{r:583,col:'--c3',id:'d2'},{r:-23,col:'--c6',id:'d3'}];
+function drawDrift(){
+ const h=+$('hrs').value;$('hrso').textContent=h+' h';
+ DR.forEach(d=>{const v=d.r*h/1000;$(d.id).innerHTML=(v>=0?'+':'−')+fmt(Math.abs(v),v!==0&&Math.abs(v)<10?1:0)+sm('mV');});
+ let [x,W,H]=setup($('drift'));x.clearRect(0,0,W,H);
+ const m={l:56,r:18,t:16,b:40};
+ const [X,Y]=axes(x,W,H,m,0,1000,-100,600,[0,200,400,600,800,1000],[-100,0,100,200,300,400,500,600],'hours of operation','extra cell voltage (mV)');
+ x.strokeStyle=css('--muted');x.lineWidth=1;x.beginPath();x.moveTo(m.l,Y(0));x.lineTo(W-m.r,Y(0));x.stroke();
+ DR.forEach(d=>{x.strokeStyle=css(d.col);x.lineWidth=2.5;x.beginPath();x.moveTo(X(0),Y(0));x.lineTo(X(1000),Y(Math.min(600,d.r)));x.stroke();
+  const v=d.r*h/1000;x.fillStyle=css(d.col);x.beginPath();x.arc(X(h),Y(Math.min(600,v)),5.5,0,6.3);x.fill();});
+ x.strokeStyle=css('--text');x.globalAlpha=.3;x.setLineDash([2,3]);x.beginPath();x.moveTo(X(h),m.t);x.lineTo(X(h),H-m.b);x.stroke();x.setLineDash([]);x.globalAlpha=1;
+}
+
+/* ---------- Table ---------- */
+function drawTable(){$('t1').innerHTML=A.map(a=>{const g=gkw(a.load,a.j,V18);return `<tr${a.id===sel?' class="hl"':''}><td>${a.name}</td><td>${a.load}</td><td>${a.R}</td><td>${a.b}${a.beff?' (b<sub>eff</sub> '+a.beff+')':''}</td><td>${a.j.toFixed(3)}</td><td>${g<0.1?g.toFixed(3):g.toFixed(2)}</td></tr>`;}).join('');}
+
+/* ---------- Wiring ---------- */
+function pickAnode(v){sel=v;$('rom').value=an().R;drawAll();}
+seg('anode',A.map(a=>[a.id,a.name]),()=>sel,pickAnode);
+seg('slope',[['b','Low-current b (Table 1)'],['beff','Effective b_eff (EIS)']],()=>slope,v=>{slope=v;drawAll();});
+$('thin').addEventListener('input',drawMap);$('gw').addEventListener('input',drawScale);
+['rom','jop'].forEach(id=>$(id).addEventListener('input',drawPol));
+$('hrs').addEventListener('input',drawDrift);
+function drawAll(){drawMap();drawPol();drawDrift();drawTable();}
+addEventListener('resize',drawAll);
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',drawAll);
+drawAll();
+</script>
+</body></html>
