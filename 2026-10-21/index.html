@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="light dark">
+<title>Teaching a PET scanner to see depth, with no answer key — Research Explorer, 21 Oct 2026</title>
+<link rel="stylesheet" href="../assets/style.css">
+<style>
+/* page-specific: segmented controls, buttons, canvas heights */
+canvas#ring{height:420px} canvas#prof{height:420px} canvas#loss{height:300px} canvas#ratio{height:300px}
+.seg{display:flex;flex-direction:column;gap:8px}
+.seg .lbl{font-size:15px;font-weight:600}
+.seg .opts{display:flex;flex-wrap:wrap;background:var(--accent-soft);border-radius:10px;padding:2px;gap:2px;width:100%}
+.seg button{flex:1 1 auto;font:inherit;font-size:14px;font-weight:600;border:0;border-radius:8px;padding:7px 10px;background:transparent;color:var(--text);cursor:pointer;min-height:32px}
+.seg button[aria-pressed="true"]{background:var(--card-solid);box-shadow:0 1px 3px rgba(0,0,0,.18)}
+.btns{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+.btns button{font:inherit;font-size:15px;font-weight:600;border:0;border-radius:980px;padding:9px 20px;min-height:44px;cursor:pointer;background:var(--accent);color:#fff}
+.btns button.sec{background:var(--accent-soft);color:var(--accent)}
+@media (prefers-color-scheme:dark){.btns button{color:#000}.btns button.sec{color:var(--accent)}}
+.subhead{font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:22px 0 6px}
+.tablewrap{overflow-x:auto}
+.stat .v small{font-size:15px;font-weight:500;color:var(--muted);margin-left:4px}
+</style></head><body><main>
+<a class="back" href="../">‹ All demos</a>
+<div class="eyebrow">21 Oct 2026 · Medicine &amp; AI</div>
+<h1>Teaching a PET scanner to see depth, with no answer key</h1>
+<p class="lede">PET scanners find cancer by catching pairs of gamma rays, but they blur the picture because they can’t tell how deep inside each detector crystal a ray stopped. This team trained a neural network to work out that depth using nothing but a radioactive dot placed at a few known spots, then calibrated all 144 detectors of a real scanner in under an hour.</p>
+<p class="authors">Mojahed Abushawish, Pablo Galve, Iván Colmenarejo Allavena, Carlos Galindo Morata, Sara Gaitan Dominguez &amp; Jose Manuel Udias</p>
+
+<section class="card why" aria-labelledby="why-h">
+<h2 id="why-h">Why it matters</h2>
+<p>Sharp PET images need every detector to know how deep each gamma ray hit, but today that calibration takes collimators, motorised stages and hours per detector, which doesn’t scale to new total-body scanners with hundreds or thousands of modules. Using only a point source placed by hand at 11 spots for 55 minutes, this label-free method calibrated a whole 144-module scanner and sharpened its radial resolution from 4.99 to 2.90 mm (42 %), enough to separate 1.2 mm rods that stayed merged without it.</p>
+</section>
+
+<section class="card" aria-labelledby="paper-h">
+<h2 id="paper-h">The paper</h2>
+<p style="margin:0 0 6px"><strong>PhysiCal-PET: Physics-driven neural networks for the rapid position Calibration of PET Scanners</strong></p>
+<p class="cite" style="margin:0">Mojahed Abushawish, Pablo Galve, Iván Colmenarejo Allavena, Carlos Galindo Morata, Sara Gaitan Dominguez &amp; Jose Manuel Udias (Grupo de Física Nuclear, Universidad Complutense de Madrid). arXiv:2610.24193 [physics.med-ph], submitted 16 Oct 2026. <a href="https://arxiv.org/abs/2610.24193">Read on arXiv</a> · <a href="https://arxiv.org/pdf/2610.24193">PDF</a></p>
+<p style="margin-top:14px">In plain language: in a PET scan, each radioactive decay in the body sends two gamma rays flying in opposite directions. The scanner draws a straight line, the <em>line of response</em> (LOR), between the two detector crystals that caught them, and builds the image from millions of such lines. The crystals are 15 mm deep, though, and a ray can stop anywhere along that depth. If the scanner just guesses the same depth every time, lines from points away from the centre come out shifted. This “parallax error” smears the image outwards (radially).</p>
+<p>Detectors can sense depth from how the light splits between their two ends, but turning that signal into millimetres normally needs a lab calibration with a narrow, collimated beam. PhysiCal-PET skips that step. It puts an ordinary point source at a few <em>known</em> spots inside the assembled scanner and trains a neural network to predict each ray’s depth so that every line passes as close as possible to the known spot. No one ever tells the network the true depth. In simulation it reached a depth error of 0.98 mm, almost the same as a network trained on perfect answers (0.96 mm). On the real scanner it improved every image measure the team checked.</p>
+</section>
+
+<section class="card" aria-labelledby="demo-h">
+<h2 id="demo-h">Try it</h2>
+<p class="note" style="margin:0 0 14px">This is a 2-D toy version of the paper’s method. The scanner geometry comes from the paper: 24 blocks around a 166 mm ring, 22 mm wide and 15 mm deep, 1.375 mm crystals, LYSO attenuation 0.087 /mm, ±0.5 mm source blurring and the 20 % trimmed loss. The detector’s depth signal and its noise are <strong>illustrative</strong>, tuned so the best possible depth error is about 1 mm as in the paper. A straight-line rule per block stands in for the paper’s neural network. The toy’s output numbers are not the paper’s results. Those are in the table below.</p>
+
+<h3 class="plot-title">1 · Teach the depth without labels</h3>
+<div class="controls">
+ <div><label for="crad"><span>Calibration source distance from centre</span> <output id="crado"></output></label><input id="crad" type="range" min="0" max="70" step="1" value="50"></div>
+ <div><label for="npos"><span>Number of source positions</span> <output id="nposo"></output></label><input id="npos" type="range" min="1" max="11" step="1" value="6"></div>
+ <div class="btns"><button id="train">Train</button><button id="reset" class="sec">Reset</button></div>
+</div>
+<div class="stats">
+ <div class="stat"><div class="v" id="sIt"></div><div class="l">Training steps (500 events each)</div></div>
+ <div class="stat"><div class="v" id="sL"></div><div class="l">Trimmed distance from source to line (the loss)</div></div>
+ <div class="stat"><div class="v" id="sM"></div><div class="l">Depth error, label-free (never seen in training)</div></div>
+ <div class="stat"><div class="v" id="sS"></div><div class="l">Depth error, supervised with true depths (the floor)</div></div>
+</div>
+<div class="grid" style="margin-top:12px">
+ <div><div class="plot-title">The loss and the hidden depth error fall together (like the paper’s Fig. 2)</div>
+  <canvas id="loss" role="img" aria-label="Training curves: trimmed source-to-line distance and depth mean absolute error against training steps, with the supervised error shown dashed"></canvas>
+  <div class="legend"><span style="--k:var(--c1)">Loss: trimmed distance to line (mm)</span><span style="--k:var(--c2)">Depth error, label-free (mm)</span><span style="--k:var(--c3)">Depth error, supervised (mm, dashed)</span></div></div>
+ <div><div class="plot-title">Learned depth vs light-sharing signal, one block (like Fig. 6)</div>
+  <canvas id="ratio" role="img" aria-label="Scatter of true interaction depth against the dual-ended signal ratio for one detector block, with the learned depth rule drawn as a line"></canvas>
+  <div class="legend"><span style="--k:var(--muted)">Events: true depth vs signal ratio</span><span style="--k:var(--c1)">Learned rule</span><span style="--k:var(--c2)">Before training: fixed 5 mm</span></div></div>
+</div>
+<p class="note">Try moving the calibration source to the centre (0 mm) and press Reset then Train. From the centre almost every line hits the crystals head-on, so a wrong depth barely moves the line and the loss has little to learn from. That is why the paper put its sources 50 mm off-centre.</p>
+
+<h3 class="plot-title" style="margin-top:32px">2 · See what calibration does to the image</h3>
+<div class="controls">
+ <div><label for="trad"><span>Test point source distance from centre</span> <output id="trado"></output></label><input id="trad" type="range" min="0" max="72" step="1" value="50"></div>
+ <div class="seg" role="group" aria-labelledby="mL"><span class="lbl" id="mL">Depth used for the lines in the ring</span><div class="opts" id="mode"></div></div>
+</div>
+<div class="stats">
+ <div class="stat"><div class="v" id="fFix"></div><div class="l">Radial blur (FWHM), fixed 5 mm depth</div></div>
+ <div class="stat"><div class="v" id="fLrn"></div><div class="l">Radial blur, label-free learned depth</div></div>
+ <div class="stat"><div class="v" id="fTru"></div><div class="l">Radial blur, true depth (best case)</div></div>
+ <div class="stat"><div class="v" id="fGain"></div><div class="l">Sharper with learned depth vs fixed</div></div>
+</div>
+<div class="grid" style="margin-top:12px">
+ <div><div class="plot-title">The scanner ring: lines of response from the test source</div>
+  <canvas id="ring" role="img" aria-label="Ring of 24 detector blocks with lines of response drawn from the test point source, plus a magnified inset around the source"></canvas>
+  <p class="note" style="margin-top:6px">Dots show where each ray was placed in the crystal. The inset zooms in 6× on a 14 mm square around the source (marked with a cross).</p></div>
+ <div><div class="plot-title">How far lines miss the source, along the radius</div>
+  <canvas id="prof" role="img" aria-label="Histograms of radial miss distance of lines of response for fixed depth, learned depth and true depth"></canvas>
+  <div class="legend"><span style="--k:var(--c2)">Fixed 5 mm</span><span style="--k:var(--c1)">Learned (label-free)</span><span style="--k:var(--c3)">True depth</span></div></div>
+</div>
+<p class="note">Blur = full width at half maximum of the miss distance, measured along the radius, for the lines that cross the radius within 30° of a right angle. These are the lines that pin down a point’s radial position. It uses 6,000 simulated pairs in this 2-D toy. It is not a reconstructed image, so compare it with the paper’s numbers by trend only. Panel 2 uses whatever Panel 1 has learned so far.</p>
+</section>
+
+<section class="card" aria-labelledby="res-h">
+<h2 id="res-h">What the paper measured</h2>
+<div class="tablewrap"><table>
+<thead><tr><th>Measure (real preclinical scanner unless noted)</th><th>Fixed depth 5 mm</th><th>PhysiCal-PET</th><th>Change</th></tr></thead>
+<tbody>
+<tr><td>Trimmed mean source-to-line distance</td><td>1.49 mm</td><td>1.14 mm</td><td>−24 %</td></tr>
+<tr><td>Untrimmed mean source-to-line distance</td><td>2.23 mm</td><td>1.92 mm</td><td>−14 %</td></tr>
+<tr><td>Point-source FWHM, radial</td><td>4.99 ± 0.16 mm</td><td>2.90 ± 0.09 mm</td><td>−42 %</td></tr>
+<tr><td>Point-source FWHM, axial</td><td>2.03 ± 0.34 mm</td><td>1.60 ± 0.10 mm</td><td>−21 %</td></tr>
+<tr><td>Point-source FWHM, tangential</td><td>1.57 ± 0.12 mm</td><td>1.50 ± 0.06 mm</td><td>≈ same</td></tr>
+<tr><td>Derenzo 1.7 mm rods, peak-to-valley ratio</td><td>1.28 ± 0.04</td><td>1.88 ± 0.33</td><td>+47 %</td></tr>
+<tr><td>Derenzo 1.2 mm rods, valleys resolved</td><td>1 of 5</td><td>4 of 5</td><td></td></tr>
+<tr><td>Simulation: depth error (MAE), label-free vs supervised floor</td><td>0.96 mm (supervised)</td><td>0.98 mm</td><td>+0.02 mm</td></tr>
+</tbody></table></div>
+<p class="note">Calibration: a <sup>22</sup>Na point source (≈ 281 kBq) at 11 positions, 50 mm off-axis, 5 min each (≈ 55 min, 5.3 × 10⁷ coincidences) on a scanner with 144 LYSO modules in 6 rings of 24 blocks. Source: Sections III-A to III-F of the paper.</p>
+</section>
+
+<section class="card" aria-labelledby="math-h">
+<h2 id="math-h">The maths</h2>
+<p>Each ray’s position is the crystal’s known spot on the block face plus the predicted depth ẑ along the block’s normal (Eq. 3):</p>
+<div class="math">r̂ = R_b + v_b1·x_cryst + v_b2·y_cryst + v_b3·ẑ,   ẑ = f_θ(signals, block, crystal)</div>
+<p>The loss is the perpendicular distance from the known source to the line through the two predicted positions (Eqs. 4–5), with the source position jittered by up to Δ<sub>s</sub> = 0.5 mm in each direction (Eq. 6):</p>
+<div class="eq math">d<sub>LOR</sub> = ‖û × (s̃ − r̂₁)‖ / ‖û‖,   û = r̂₂ − r̂₁,   s̃ = s + η, η ~ U(−Δ<sub>s</sub>, Δ<sub>s</sub>)</div>
+<p>To ignore randoms and scattered events, each batch of 500 keeps only the 80 % of events with the smallest distances (α = 0.2) and averages them (Eqs. 7–8):</p>
+<div class="eq math">𝓛 = (1/|K|) Σ<sub>n∈K</sub> d<sub>LOR,n</sub>,   K = the ⌊(1−α)|B|⌋ smallest distances</div>
+<p>The depth signal is the share of light reaching the back of the crystal, R = S<sub>DPC</sub>/(S<sub>DPC</sub>+S<sub>front</sub>) (Eq. 9). Deeper hits send more light to the back.</p>
+<p class="note">In this toy, ẑ = a<sub>b</sub> + w<sub>b</sub>(R − 0.4) for each block b, starting from a = 5 mm and w = 0 (the paper’s fixed-depth baseline). It is trained with Adam using numerical gradients of the trimmed loss. The toy detector’s true response, R = o<sub>b</sub> + k<sub>b</sub>·z/15 + noise (σ = 0.03), with a different made-up o<sub>b</sub> and k<sub>b</sub> for each block, is illustrative. The paper used a FiLM-conditioned residual network with per-module and per-crystal embeddings, trained in two stages (Δ<sub>s</sub> = 1 mm, then 0.5 mm). Photons stop at a random depth drawn from e<sup>−μl</sup> with μ = 0.087 /mm, so the mean depth over 15 mm is about 5.9 mm, as the paper states.</p>
+</section>
+
+<section class="card" aria-labelledby="how-h">
+<h2 id="how-h">How to use it</h2>
+<ul>
+<li><strong>Panel 1:</strong> press <em>Train</em>. The blue curve is the only thing the method can see, the distance between lines and the known source. The orange curve is the true depth error, which it never sees, and it falls in step. The green dashed line is the best you could do if you knew every true depth.</li>
+<li>Move the <em>calibration source</em> slider to 0 mm, press <em>Reset</em>, then <em>Train</em> again. Learning is slower and stops short, because head-on lines carry little depth information. Fewer source positions also leave some blocks with fewer oblique hits.</li>
+<li><strong>Panel 2:</strong> move the <em>test source</em> outwards. With a fixed depth guess, the orange histogram widens as the source moves off-centre (parallax). With learned depth, the blue one stays close to the green best case. Right at the centre there is no parallax to fix, so all three are about the same (differences under a millimetre there come from the 1.375 mm crystal size).</li>
+<li>Switch the <em>depth</em> buttons to see the lines in the ring and the zoomed inset tighten around the source.</li>
+</ul>
+</section>
+
+<p class="note" style="margin-top:24px">Demo by Grok Bot for the Daily Research Explorer. Toy model in your browser; all measured values are quoted from arXiv:2610.24193.</p>
+</main>
+<script>
+"use strict";
+const $=id=>document.getElementById(id);
+const css=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const FONT='12px -apple-system,BlinkMacSystemFont,"SF Pro Text",Helvetica,Arial,sans-serif';
+const sm=u=>'<small>'+u+'</small>';
+/* ---------- Geometry (from the paper, Sec. II-D/F) ---------- */
+const NB=24,RIN=83,HALF=11,DEPTH=15,PITCH=1.375,MU=0.087,DS=0.5,ALPHA=0.2,BATCH=500,SIGR=0.03;
+function mkRng(s){return()=>{s=(s*1664525+1013904223)>>>0;return s/4294967296;};}
+let rnd=mkRng(20261021);
+function gaussOf(r){let u=0;while(u===0)u=r();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*r());}
+const blockRng=mkRng(7);
+const B=[];for(let b=0;b<NB;b++){const p=b*2*Math.PI/NB;B.push({nx:Math.cos(p),ny:Math.sin(p),tx:-Math.sin(p),ty:Math.cos(p),o:0.25+0.1*blockRng(),k:0.30+0.15*blockRng()});}
+function hit(r,sx,sy,dx,dy){let best=null;
+ for(let b=0;b<NB;b++){const q=B[b],dn=dx*q.nx+dy*q.ny;if(dn<=1e-6)continue;const lam=(RIN-(sx*q.nx+sy*q.ny))/dn;
+  const t=(sx+lam*dx)*q.tx+(sy+lam*dy)*q.ty;if(Math.abs(t)>HALF)continue;if(!best||lam<best.lam)best={b,lam,t,dn,dt:dx*q.tx+dy*q.ty};}
+ if(!best)return null;const l=-Math.log(1-r())/MU,z=l*best.dn;if(z>DEPTH)return null;const ti=best.t+l*best.dt;if(Math.abs(ti)>=HALF)return null;
+ const c=Math.floor((ti+HALF)/PITCH),tc=-HALF+(c+.5)*PITCH,q=B[best.b];
+ return {b:best.b,tc,z,R:q.o+q.k*z/DEPTH+SIGR*gaussOf(r)};}
+function event(r,sx,sy){const th=Math.PI*r(),dx=Math.cos(th),dy=Math.sin(th);const h1=hit(r,sx,sy,dx,dy);if(!h1)return null;const h2=hit(r,sx,sy,-dx,-dy);if(!h2)return null;return {h1,h2,sx,sy};}
+function pos(h,z){const q=B[h.b];return [RIN*q.nx+h.tc*q.tx+z*q.nx,RIN*q.ny+h.tc*q.ty+z*q.ny];}
+function dist(r1,r2,sx,sy){const ux=r2[0]-r1[0],uy=r2[1]-r1[1],wx=sx-r1[0],wy=sy-r1[1];return Math.abs(ux*wy-uy*wx)/Math.hypot(ux,uy);}
+/* ---------- Models ---------- */
+function mk(){return {a:new Float64Array(NB).fill(5),w:new Float64Array(NB),ma:new Float64Array(NB),va:new Float64Array(NB),mw:new Float64Array(NB),vw:new Float64Array(NB),t:0};}
+const pred=(m,h)=>m.a[h.b]+m.w[h.b]*(h.R-0.4);
+let M=mk(),S=mk(),hist=[],running=false,it=0;const MAXIT=600,LR=0.02,PER=4;
+function batch(){const rad=+$('crad').value,ns=+$('npos').value,ev=[];
+ while(ev.length<BATCH){const k=Math.floor(rnd()*ns),ph=k*2*Math.PI/ns+0.3,e=event(rnd,rad*Math.cos(ph),rad*Math.sin(ph));if(e)ev.push(e);}return ev;}
+function adam(m,ga,gw){m.t++;const b1=.9,b2=.999,c1=1-b1**m.t,c2=1-b2**m.t;
+ for(let b=0;b<NB;b++){m.ma[b]=b1*m.ma[b]+(1-b1)*ga[b];m.va[b]=b2*m.va[b]+(1-b2)*ga[b]**2;m.mw[b]=b1*m.mw[b]+(1-b1)*gw[b];m.vw[b]=b2*m.vw[b]+(1-b2)*gw[b]**2;
+  m.a[b]-=LR*(m.ma[b]/c1)/(Math.sqrt(m.va[b]/c2)+1e-8);m.w[b]-=LR*20*(m.mw[b]/c1)/(Math.sqrt(m.vw[b]/c2)+1e-8);}}
+function stepLOR(m,ev){const ga=new Float64Array(NB),gw=new Float64Array(NB),eps=0.01;
+ const rows=ev.map(e=>{const sx=e.sx+(rnd()*2-1)*DS,sy=e.sy+(rnd()*2-1)*DS,z1=pred(m,e.h1),z2=pred(m,e.h2);return {e,sx,sy,z1,z2,d:dist(pos(e.h1,z1),pos(e.h2,z2),sx,sy)};});
+ const ds=rows.map(r=>r.d).sort((a,b)=>a-b),K=Math.floor((1-ALPHA)*rows.length),thr=ds[K-1];let n=0,L=0,mae=0;
+ for(const r of rows){mae+=Math.abs(r.z1-r.e.h1.z)+Math.abs(r.z2-r.e.h2.z);if(r.d>thr)continue;n++;L+=r.d;
+  const p1p=pos(r.e.h1,r.z1+eps),p1m=pos(r.e.h1,r.z1-eps),p1=pos(r.e.h1,r.z1),p2=pos(r.e.h2,r.z2),p2p=pos(r.e.h2,r.z2+eps),p2m=pos(r.e.h2,r.z2-eps);
+  const g1=(dist(p1p,p2,r.sx,r.sy)-dist(p1m,p2,r.sx,r.sy))/(2*eps),g2=(dist(p1,p2p,r.sx,r.sy)-dist(p1,p2m,r.sx,r.sy))/(2*eps);
+  ga[r.e.h1.b]+=g1;gw[r.e.h1.b]+=g1*(r.e.h1.R-0.4);ga[r.e.h2.b]+=g2;gw[r.e.h2.b]+=g2*(r.e.h2.R-0.4);}
+ for(let b=0;b<NB;b++){ga[b]/=n;gw[b]/=n;}adam(m,ga,gw);return {L:L/n,mae:mae/(2*rows.length)};}
+function stepSup(m,ev){const ga=new Float64Array(NB),gw=new Float64Array(NB);let mae=0;
+ for(const e of ev)for(const h of [e.h1,e.h2]){const z=pred(m,h),g=Math.sign(z-h.z);mae+=Math.abs(z-h.z);ga[h.b]+=g;gw[h.b]+=g*(h.R-0.4);}
+ const n=ev.length*2;for(let b=0;b<NB;b++){ga[b]/=n;gw[b]/=n;}adam(m,ga,gw);return mae/n;}
+function evalNow(){const ev=batch();const rows=ev.map(e=>{const z1=pred(M,e.h1),z2=pred(M,e.h2);return {d:dist(pos(e.h1,z1),pos(e.h2,z2),e.sx,e.sy),m:(Math.abs(z1-e.h1.z)+Math.abs(z2-e.h2.z))/2,ms:(Math.abs(pred(S,e.h1)-e.h1.z)+Math.abs(pred(S,e.h2)-e.h2.z))/2};});
+ const ds=rows.map(r=>r.d).sort((a,b)=>a-b),K=Math.floor((1-ALPHA)*rows.length);let L=0;for(let i=0;i<K;i++)L+=ds[i];
+ return {L:L/K,mae:rows.reduce((s,r)=>s+r.m,0)/rows.length,sup:rows.reduce((s,r)=>s+r.ms,0)/rows.length};}
+function reset(){running=false;M=mk();S=mk();it=0;rnd=mkRng(20261021);const e=evalNow();hist=[{it:0,L:e.L,mae:e.mae,sup:e.sup}];$('train').textContent='Train';drawTrain();drawTest();}
+function loop(){if(!running)return;for(let k=0;k<PER&&it<MAXIT;k++){const ev=batch();const a=stepLOR(M,ev),s=stepSup(S,ev);it++;hist.push({it,L:a.L,mae:a.mae,sup:s});}
+ drawTrain();if(it%20===0||it>=MAXIT)drawTest();
+ if(it>=MAXIT){running=false;$('train').textContent='Train';drawTest();document.body.dataset.trained='1';return;}requestAnimationFrame(loop);}
+$('train').addEventListener('click',()=>{if(it>=MAXIT){reset();}running=!running;$('train').textContent=running?'Pause':'Train';if(running)requestAnimationFrame(loop);});
+$('reset').addEventListener('click',reset);
+/* ---------- Canvas helpers ---------- */
+function setup(c){const dpr=window.devicePixelRatio||1,W=c.clientWidth,H=c.clientHeight;c.width=Math.round(W*dpr);c.height=Math.round(H*dpr);const x=c.getContext('2d');x.setTransform(dpr,0,0,dpr,0,0);return [x,W,H];}
+function axes(x,W,H,m,x0,x1,y0,y1,xt,yt,xl,yl,fy){const X=v=>m.l+(v-x0)/(x1-x0)*(W-m.l-m.r),Y=v=>H-m.b-(v-y0)/(y1-y0)*(H-m.t-m.b);
+ x.font=FONT;x.lineWidth=1;x.strokeStyle=css('--grid');x.fillStyle=css('--muted');
+ x.textAlign='center';xt.forEach(v=>{x.beginPath();x.moveTo(X(v),m.t);x.lineTo(X(v),H-m.b);x.stroke();x.fillText(v,X(v),H-m.b+16);});
+ x.textAlign='right';yt.forEach(v=>{x.beginPath();x.moveTo(m.l,Y(v));x.lineTo(W-m.r,Y(v));x.stroke();x.fillText(fy?fy(v):v,m.l-6,Y(v)+4);});
+ x.textAlign='center';x.fillText(xl,(m.l+W-m.r)/2,H-6);x.save();x.translate(13,(m.t+H-m.b)/2);x.rotate(-Math.PI/2);x.fillText(yl,0,0);x.restore();return [X,Y];}
+function line(x,pts,X,Y,col,w,dash){x.strokeStyle=col;x.lineWidth=w;x.setLineDash(dash||[]);x.beginPath();pts.forEach((p,i)=>i?x.lineTo(X(p[0]),Y(p[1])):x.moveTo(X(p[0]),Y(p[1])));x.stroke();x.setLineDash([]);}
+/* ---------- Panel 1 drawing ---------- */
+let SCAT=null;
+function drawTrain(){$('crado').textContent=$('crad').value+' mm';$('nposo').textContent=$('npos').value;
+ const h=hist[hist.length-1];$('sIt').textContent=it;$('sL').innerHTML=h.L.toFixed(2)+sm('mm');$('sM').innerHTML=h.mae.toFixed(2)+sm('mm');$('sS').innerHTML=h.sup.toFixed(2)+sm('mm');
+ let [x,W,H]=setup($('loss'));x.clearRect(0,0,W,H);const m={l:44,r:14,t:14,b:38};
+ const [X,Y]=axes(x,W,H,m,0,MAXIT,0,4,[0,100,200,300,400,500,600],[0,1,2,3,4],'training step','millimetres');
+ const sm5=k=>{const out=[];for(let i=0;i<hist.length;i++){let s=0,n=0;for(let j=Math.max(0,i-5);j<=i;j++){s+=hist[j][k];n++;}out.push([hist[i].it,s/n]);}return out;};
+ line(x,sm5('sup'),X,Y,css('--c3'),2,[6,5]);line(x,sm5('mae'),X,Y,css('--c2'),2.5);line(x,sm5('L'),X,Y,css('--c1'),2.5);
+ // ratio scatter for block 3
+ const bi=3;[x,W,H]=setup($('ratio'));x.clearRect(0,0,W,H);const m2={l:44,r:14,t:14,b:38};
+ const [X2,Y2]=axes(x,W,H,m2,0.2,0.8,-2,17,[0.2,0.3,0.4,0.5,0.6,0.7,0.8],[0,5,10,15],'signal ratio R = S_DPC / (S_DPC + S_front)','depth (mm)');
+ if(!SCAT){SCAT=[];const r=mkRng(99);let guard=0;while(SCAT.length<500&&guard<200000){guard++;const e=event(r,50*Math.cos(1.1),50*Math.sin(1.1));if(!e)continue;for(const hh of [e.h1,e.h2])if(hh.b===bi)SCAT.push(hh);}}
+ x.fillStyle=css('--muted');x.globalAlpha=.35;SCAT.forEach(hh=>{x.beginPath();x.arc(X2(hh.R),Y2(hh.z),1.8,0,6.3);x.fill();});
+ x.globalAlpha=1;line(x,[[0.2,5],[0.8,5]],X2,Y2,css('--c2'),2,[6,5]);
+ line(x,[[0.2,M.a[bi]+M.w[bi]*(0.2-0.4)],[0.8,M.a[bi]+M.w[bi]*(0.8-0.4)]].map(p=>[p[0],Math.max(-2,Math.min(17,p[1]))]),X2,Y2,css('--c1'),3);
+ x.strokeStyle=css('--text');x.globalAlpha=.3;x.setLineDash([2,3]);[0,15].forEach(v=>{x.beginPath();x.moveTo(m2.l,Y2(v));x.lineTo(W-m2.r,Y2(v));x.stroke();});x.setLineDash([]);x.globalAlpha=1;
+ x.fillStyle=css('--muted');x.font=FONT;x.textAlign='right';x.fillText('front of crystal (0 mm)',W-m2.r-6,Y2(0)-5);x.textAlign='left';x.fillText('back (15 mm)',m2.l+6,Y2(15)+14);
+}
+/* ---------- Panel 2 ---------- */
+let mode='lrn';const MODES=[['fix','Fixed 5 mm'],['lrn','Learned'],['tru','True depth']];
+function seg(id,opts,get,set){const el=$(id);el.innerHTML='';opts.forEach(([v,t])=>{const b=document.createElement('button');b.type='button';b.textContent=t;b.setAttribute('aria-pressed',get()===v);b.addEventListener('click',()=>{set(v);[...el.children].forEach((c,i)=>c.setAttribute('aria-pressed',opts[i][0]===get()));});el.appendChild(b);});}
+const zOf={fix:()=>5,lrn:h=>pred(M,h),tru:h=>h.z};
+function radialMiss(e,zf,ex,ey){const p1=pos(e.h1,zf(e.h1)),p2=pos(e.h2,zf(e.h2));const ux=p2[0]-p1[0],uy=p2[1]-p1[1],L2=ux*ux+uy*uy;const t=((e.sx-p1[0])*ux+(e.sy-p1[1])*uy)/L2;
+ const cx=p1[0]+t*ux-e.sx,cy=p1[1]+t*uy-e.sy;const nr=Math.abs(ux*ey-uy*ex)/Math.sqrt(L2);return {r:cx*ex+cy*ey,p1,p2,keep:nr>0.866};}
+function fwhm(h,bw,lo){const s=h.map((v,i)=>(h[i-1]||0)*.25+v*.5+(h[i+1]||0)*.25);let mi=0;s.forEach((v,i)=>{if(v>s[mi])mi=i;});const half=s[mi]/2;
+ let a=mi;while(a>0&&s[a]>half)a--;let b=mi;while(b<s.length-1&&s[b]>half)b++;
+ const xa=a+(half-s[a])/(s[a+1]-s[a]),xb=b-(half-s[b])/(s[b-1]-s[b]);return {w:(xb-xa)*bw,s,peak:s[mi]};}
+function drawTest(){const rad=+$('trad').value;$('trado').textContent=rad+' mm';
+ const ang=-0.6,sx=rad*Math.cos(ang),sy=rad*Math.sin(ang),ex=Math.cos(ang),ey=Math.sin(ang);
+ const r=mkRng(4242),ev=[];let g=0;while(ev.length<6000&&g<60000){g++;const e=event(r,sx,sy);if(e)ev.push(e);}
+ const LO=-8,HI=8,BW=0.2,NBIN=Math.round((HI-LO)/BW),res={};
+ for(const k of ['fix','lrn','tru']){const h=new Array(NBIN).fill(0);for(const e of ev){const o=radialMiss(e,zOf[k],ex,ey);if(!o.keep)continue;const v=o.r;const i=Math.floor((v-LO)/BW);if(i>=0&&i<NBIN)h[i]++;}res[k]=fwhm(h,BW,LO);}
+ $('fFix').innerHTML=res.fix.w.toFixed(2)+sm('mm');$('fLrn').innerHTML=res.lrn.w.toFixed(2)+sm('mm');$('fTru').innerHTML=res.tru.w.toFixed(2)+sm('mm');
+ const gain=(1-res.lrn.w/res.fix.w)*100;$('fGain').innerHTML=Math.abs(res.fix.w-res.lrn.w)<0.2?'≈ same':(gain>=0?'':'−')+Math.abs(gain).toFixed(0)+sm('%');
+ // profile
+ let [x,W,H]=setup($('prof'));x.clearRect(0,0,W,H);const m={l:44,r:14,t:14,b:38};
+ const ymax=Math.max(res.fix.peak,res.lrn.peak,res.tru.peak)*1.08;
+ const [X,Y]=axes(x,W,H,m,LO,HI,0,1,[-8,-6,-4,-2,0,2,4,6,8],[0,.25,.5,.75,1],'radial miss distance (mm, + = outward)','share of peak',v=>v.toFixed(2));
+ [['tru','--c3'],['fix','--c2'],['lrn','--c1']].forEach(([k,c])=>{const pts=res[k].s.map((v,i)=>[LO+(i+.5)*BW,v/ymax]);x.fillStyle=css(c);x.globalAlpha=.12;x.beginPath();x.moveTo(X(LO),Y(0));pts.forEach(p=>x.lineTo(X(p[0]),Y(p[1])));x.lineTo(X(HI),Y(0));x.fill();x.globalAlpha=1;line(x,pts,X,Y,css(c),2.5);});
+ // ring
+ [x,W,H]=setup($('ring'));x.clearRect(0,0,W,H);const S2=Math.min(W,H)/2-10,sc=S2/(RIN+DEPTH+4),cx0=W/2,cy0=H/2;const P=(px,py)=>[cx0+px*sc,cy0-py*sc];
+ x.fillStyle=css('--accent-soft');x.strokeStyle=css('--line');x.lineWidth=1;
+ B.forEach(q=>{const c=[[-HALF,0],[HALF,0],[HALF,DEPTH],[-HALF,DEPTH]].map(([t,z])=>P((RIN+z)*q.nx+t*q.tx,(RIN+z)*q.ny+t*q.ty));x.beginPath();c.forEach((p,i)=>i?x.lineTo(p[0],p[1]):x.moveTo(p[0],p[1]));x.closePath();x.fill();x.stroke();});
+ const zf=zOf[mode],col=css({fix:'--c2',lrn:'--c1',tru:'--c3'}[mode]);x.strokeStyle=col;x.globalAlpha=.28;x.lineWidth=1;
+ const show=ev.slice(0,90).map(e=>radialMiss(e,zf,ex,ey));show.forEach(o=>{const a=P(...o.p1),b=P(...o.p2);x.beginPath();x.moveTo(a[0],a[1]);x.lineTo(b[0],b[1]);x.stroke();});
+ x.globalAlpha=.9;x.fillStyle=col;show.forEach(o=>[o.p1,o.p2].forEach(p=>{const q=P(...p);x.beginPath();x.arc(q[0],q[1],1.8,0,6.3);x.fill();}));x.globalAlpha=1;
+ const sp=P(sx,sy);x.fillStyle=css('--text');x.beginPath();x.arc(sp[0],sp[1],3,0,6.3);x.fill();
+ // inset: 14 mm window at 6x
+ const IW=Math.min(150,W*0.36),half=7,isc=IW/(2*half),ix=W-IW-10,iy=10;
+ x.fillStyle=css('--card-solid');x.strokeStyle=css('--muted');x.lineWidth=1;x.fillRect(ix,iy,IW,IW);x.strokeRect(ix,iy,IW,IW);
+ x.save();x.beginPath();x.rect(ix,iy,IW,IW);x.clip();const IP=(px,py)=>[ix+IW/2+(px-sx)*isc,iy+IW/2-(py-sy)*isc];
+ x.strokeStyle=col;x.globalAlpha=.35;x.lineWidth=1;ev.slice(0,160).map(e=>radialMiss(e,zf,ex,ey)).forEach(o=>{const a=IP(...o.p1),b=IP(...o.p2);x.beginPath();x.moveTo(a[0],a[1]);x.lineTo(b[0],b[1]);x.stroke();});x.globalAlpha=1;
+ x.strokeStyle=css('--text');x.lineWidth=2;const c=IP(sx,sy);x.beginPath();x.moveTo(c[0]-6,c[1]);x.lineTo(c[0]+6,c[1]);x.moveTo(c[0],c[1]-6);x.lineTo(c[0],c[1]+6);x.stroke();
+ // radial direction arrow
+ x.strokeStyle=css('--muted');x.setLineDash([3,3]);x.beginPath();x.moveTo(c[0]-ex*IW,c[1]+ey*IW);x.lineTo(c[0]+ex*IW,c[1]-ey*IW);x.stroke();x.setLineDash([]);x.restore();
+ x.fillStyle=css('--muted');x.font=FONT;x.textAlign='left';x.fillText('6× zoom · dashed = radial',ix,iy+IW+15);
+ x.textAlign='center';x.fillText('ring Ø 166 mm, crystals 15 mm deep',cx0,H-6);
+}
+seg('mode',MODES,()=>mode,v=>{mode=v;drawTest();});
+$('trad').addEventListener('input',drawTest);
+['crad','npos'].forEach(id=>$(id).addEventListener('input',()=>{drawTrain();}));
+function drawAll(){drawTrain();drawTest();}
+addEventListener('resize',drawAll);
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',drawAll);
+reset();
+// start training automatically so the page shows the result
+if(!/[?&]notrain/.test(location.search)){running=true;$('train').textContent='Pause';requestAnimationFrame(loop);}
+</script>
+</body></html>
