@@ -1,0 +1,347 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="light dark">
+<title>Do the weather stations see the city’s heat? — Research Explorer, 23 Oct 2026</title>
+<link rel="stylesheet" href="../assets/style.css">
+<style>
+/* page-specific: map canvases, colour bar, segmented model picker, button */
+:root{--lake:#c9d6e3;--cold:#2166ac;--mid:#f4f4f6;--hot:#b2182b}
+@media (prefers-color-scheme:dark){:root{--lake:#26323e;--cold:#4f9be0;--mid:#2c2c2e;--hot:#ff5a4f}}
+canvas.map{height:auto;aspect-ratio:6/5}
+canvas#pca{height:340px} canvas#curve,canvas#cvc{height:300px}
+.cbar{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);margin-top:8px;font-variant-numeric:tabular-nums}
+.cbar b{flex:1;height:10px;border-radius:5px;background:linear-gradient(90deg,var(--cold),var(--mid),var(--hot))}
+fieldset{border:0;margin:0;padding:0;min-width:0}
+legend.lbl{font-size:15px;font-weight:600;padding:0;margin-bottom:8px}
+.seg{display:flex;flex-wrap:wrap;gap:4px;background:var(--accent-soft);border-radius:12px;padding:3px}
+.seg label{flex:1;justify-content:center;position:relative;font-weight:500;font-size:14px;padding:0;border-radius:9px;cursor:pointer}
+.seg input{position:absolute;opacity:0;inset:0;margin:0;cursor:pointer}
+.seg span{display:block;width:100%;text-align:center;padding:9px 8px;min-height:36px;border-radius:9px}
+.seg input:checked+span{background:var(--card-solid);color:var(--text);font-weight:600;box-shadow:0 1px 3px rgba(0,0,0,.15)}
+.seg input:focus-visible+span{outline:3px solid var(--accent);outline-offset:1px}
+.btns{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+.btns button{font:inherit;font-size:15px;font-weight:600;border:0;border-radius:980px;padding:9px 20px;min-height:44px;cursor:pointer;background:var(--accent);color:#fff}
+@media (prefers-color-scheme:dark){.btns button{color:#000}}
+.tablewrap{overflow-x:auto}
+.stat .v small{font-size:15px;font-weight:500;color:var(--muted);margin-left:4px}
+.stat .v.bad{color:var(--c2)}
+</style></head><body><main>
+<a class="back" href="../">‹ All demos</a>
+<div class="eyebrow">23 Oct 2026 · Climate &amp; AI</div>
+<h1>Do the weather stations see the city’s heat?</h1>
+<p class="lede">Cities map heat street by street by training a regression on a few thermometers and the buildings, trees and hills around them. Using Zurich, this team showed that the four official weather stations sit in middling places, so the maps they train shrink the city’s night-time temperature spread. Cross-validation does not catch the error. Adding low-cost sensors fixes most of it.</p>
+<p class="authors">Martí Bosch, Aldo Brandi, Christoph Bachofen, Perrine Hamel, Roy P. Remme, Emma E. Ramsay, Gabriele Manoli, Martin A. Schlaepfer &amp; Moritz Burger</p>
+
+<section class="card why" aria-labelledby="why-h">
+<h2 id="why-h">Why it matters</h2>
+<p>Cities increasingly rely on fine-scale heat maps, built from a handful of weather stations, to decide where to plant trees, cool buildings and warn residents during heatwaves. In Zurich, models trained on the four reference stations alone predicted a city-wide night-time temperature spread of at most 2.4 °C, against 4.1–5.2 °C once 117 low-cost sensors were added, yet cross-validation scored them as good fits (R² ≈ 0.79, RMSE ≈ 0.70 °C).</p>
+</section>
+
+<section class="card" aria-labelledby="paper-h">
+<h2 id="paper-h">The paper</h2>
+<p style="margin:0 0 6px"><strong>Urban climate regressions require representative monitoring networks</strong></p>
+<p class="cite" style="margin:0">Martí Bosch, Aldo Brandi, Christoph Bachofen, Perrine Hamel, Roy P. Remme, Emma E. Ramsay, Gabriele Manoli, Martin A. Schlaepfer &amp; Moritz Burger (ETH Zürich, MeteoSwiss, EPFL, WSL, NTU Singapore, Leiden, Geneva, Bern). arXiv:2610.29423 [physics.ao-ph], submitted 21 Oct 2026. <a href="https://arxiv.org/abs/2610.29423">Read on arXiv</a> · <a href="https://arxiv.org/pdf/2610.29423">PDF</a></p>
+<p style="margin-top:14px">In plain language: a <em>land use regression</em> learns how much warmer or cooler each thermometer is than the network average from the surroundings of the site, such as building volume, tree canopy, elevation, hill shape and distance to the lake, each measured within 100, 250 and 500 m. It then applies that rule to every 100 m cell to draw a heat map. The authors used the 23:00 readings on 78 hot summer days (2022–2025) from 4 reference weather stations and 117 low-cost sensors. They compared a linear model (MLR), an additive model (GAM) and a random forest (RF) as more and more sensors were added.</p>
+<p>The four reference stations cover only a narrow slice of the city’s mix of surroundings. They miss both the densely built lakeshore core and the cool, forested, elevated edge. Every model trained on them therefore had to extrapolate at both ends and squeezed the temperature spread. Cross-validation could not see this, because it only checks the models at the station sites. A third of the low-cost network recovered nearly the full spread. With the full network, only the linear model left clustered errors, a sign that temperature responds non-linearly to urban form. The forested hills were still barely sampled, so the authors propose placing new stations to fill gaps in <em>feature space</em> rather than gaps on the map.</p>
+</section>
+
+<section class="card" aria-labelledby="demo-h">
+<h2 id="demo-h">Try it</h2>
+<p class="note" style="margin:0 0 14px">A toy city, 12 × 10 km on a 100 m grid, with a lake, a dense core, suburbs and two forested ridges, is built in your browser. Its “true” night-time temperature pattern is a made-up <strong>non-linear</strong> mix of the same kinds of predictors. Stations record it on 78 nights with noise. The demo then runs the paper’s pipeline: the anomaly from the station mean, standardisation, Spearman-ordered forward selection with VIF ≤ 5, MLR, GAM or RF, 3-fold cross-validation over station-days, Moran’s I of the residuals, and the P5–P95 range of the city-wide map. The city, the true pattern and every number from the toy are <strong>illustrative</strong>. They are not Zurich and not the paper’s results, which are in the table below.</p>
+
+<div class="controls">
+ <div><label for="nl"><span>Low-cost sensors added</span> <output id="nlo"></output></label><input id="nl" type="range" min="0" max="117" step="1" value="0"></div>
+ <fieldset><legend class="lbl">Where the sensors go</legend>
+  <div class="seg" role="radiogroup">
+   <label><input type="radio" name="mode" value="city" checked><span>Like the city network</span></label>
+   <label><input type="radio" name="mode" value="gap"><span>Fill feature-space gaps</span></label>
+  </div></fieldset>
+ <fieldset><legend class="lbl">Model</legend>
+  <div class="seg" role="radiogroup">
+   <label><input type="radio" name="kind" value="mlr" checked><span>MLR</span></label>
+   <label><input type="radio" name="kind" value="gam"><span>GAM</span></label>
+   <label><input type="radio" name="kind" value="rf"><span>RF</span></label>
+  </div></fieldset>
+ <div class="btns"><button id="redo" type="button">New random draw of sensors</button></div>
+</div>
+
+<div class="stats" style="grid-template-columns:repeat(auto-fit,minmax(240px,1fr))">
+ <div class="stat"><div class="v" id="sR2"></div><div class="l">Cross-validated R² (at the stations)</div></div>
+ <div class="stat"><div class="v" id="sRM"></div><div class="l">Cross-validated RMSE</div></div>
+ <div class="stat"><div class="v" id="sRg"></div><div class="l">Map’s temperature spread, P5–P95 (true: <span id="tRg"></span>)</div></div>
+ <div class="stat"><div class="v" id="sW"></div><div class="l">Warm end of the map, P95 (true: <span id="tW"></span>)</div></div>
+ <div class="stat"><div class="v" id="sI"></div><div class="l">Residual Moran’s I (p<sub>sim</sub>)</div></div>
+ <div class="stat"><div class="v" id="sC"></div><div class="l">Feature-space coverage of the stations</div></div>
+</div>
+<p class="note" id="status" aria-live="polite" style="margin:8px 0 0"></p>
+
+<div class="grid" style="margin-top:16px">
+ <div><div class="plot-title">True night-time pattern (toy)</div>
+  <canvas id="mapT" class="map" role="img" aria-label="Map of the toy city's true temperature anomaly with station locations"></canvas></div>
+ <div><div class="plot-title" id="mapTitle">Map drawn by the model</div>
+  <canvas id="mapP" class="map" role="img" aria-label="Map of the temperature anomaly predicted by the chosen model from the chosen stations"></canvas></div>
+</div>
+<div class="cbar"><span>−3 °C</span><b></b><span>+3 °C</span><span style="margin-left:12px">relative to the city-wide mean · ■ reference station · ○ low-cost sensor · lake in grey-blue</span></div>
+
+<div class="grid" style="margin-top:22px">
+ <div><div class="plot-title">Which surroundings do the stations cover? (like Fig. 1)</div>
+  <canvas id="pca" role="img" aria-label="Principal component scatter of all grid cells coloured by true temperature, with stations marked"></canvas>
+  <p class="note" id="pcaTxt" style="margin:6px 0 0"></p></div>
+ <div><div class="plot-title">Predictors chosen (MLR standardised coefficients, like Fig. 6a)</div>
+  <div class="tablewrap"><table><thead><tr><th>Predictor</th><th>Coefficient (°C per s.d.)</th></tr></thead><tbody id="selT"></tbody></table></div>
+  <p class="note" id="selTxt"></p></div>
+</div>
+
+<div class="grid" style="margin-top:22px">
+ <div><div class="plot-title">Map spread vs sensors added (like Fig. 2a)</div>
+  <canvas id="curve" role="img" aria-label="Predicted P5 to P95 temperature range against number of low-cost sensors for the three models, with the true range dashed"></canvas>
+  <div class="legend"><span style="--k:var(--c1)">MLR</span><span style="--k:var(--c2)">GAM</span><span style="--k:var(--c3)">RF</span><span style="--k:var(--cx)">True spread (dashed)</span></div></div>
+ <div><div class="plot-title">Cross-validated RMSE vs sensors added (like Fig. 4b)</div>
+  <canvas id="cvc" role="img" aria-label="Cross-validated RMSE against number of low-cost sensors for the three models"></canvas>
+  <div class="legend"><span style="--k:var(--c1)">MLR</span><span style="--k:var(--c2)">GAM</span><span style="--k:var(--c3)">RF</span></div></div>
+</div>
+<p class="note">Start at 0 sensors. Every model scores well in cross-validation, yet the map on the right is washed out: the hot core is too cool and the forested ridges are too mild. Slide to about 39 sensors and the hot core appears. GAM and RF now land near the dashed truth, but MLR overshoots at the cool end, on the forested ridges where no sensor stands, so its line extends too far. Then switch to “Fill feature-space gaps”. The same number of sensors, placed to cover unusual surroundings such as the ridges rather than more of the same streets, reaches almost full coverage. In this toy, that also stops the MLR overshoot.</p>
+</section>
+
+<section class="card" aria-labelledby="res-h">
+<h2 id="res-h">What the paper measured (Zurich)</h2>
+<div class="tablewrap"><table>
+<thead><tr><th>Result</th><th>Value</th></tr></thead>
+<tbody>
+<tr><td>Grid cells beyond the highest PC1 (forested/elevated) score of any reference station / any low-cost sensor</td><td>32.2 % / 15.2 %</td></tr>
+<tr><td>Observed station range of T − T<sub>mean</sub>: 4 reference stations → +39 sensors → +117 sensors</td><td>3.2 → 4.2 → 4.4 °C</td></tr>
+<tr><td>Cross-validated score, reference stations only (all three models)</td><td>R² ≈ 0.79, RMSE ≈ 0.70 °C</td></tr>
+<tr><td>Predicted P5–P95 range, reference stations only: MLR / GAM / RF</td><td>2.4 / 2.4 / 1.7 °C</td></tr>
+<tr><td>Warm end predicted below that of the reference stations (MLR to RF)</td><td>1.0 to 1.3 °C</td></tr>
+<tr><td>Predicted P5–P95 range, full network: MLR / GAM / RF</td><td>4.3 / 5.2 / 4.1 °C</td></tr>
+<tr><td>Cross-validated score, full network: MLR / GAM and RF</td><td>R² 0.57, RMSE 1.00 °C / R² 0.79, RMSE 0.69 °C</td></tr>
+<tr><td>Residual Moran’s I, full network: MLR / GAM / RF</td><td>+0.197 (p 0.003) / +0.019 (p 0.296) / −0.002 (p 0.431)</td></tr>
+<tr><td>Predictors selected: reference only → full network</td><td>3 → 9</td></tr>
+</tbody></table></div>
+<p class="note">Sources: Results and Materials and methods of arXiv:2610.29423. With four stations, the standardised predictor matrix has rank 3, so at most three predictors can enter. Those three, and their signs (tree cover even came out <em>warming</em>), were set by where the stations happened to be.</p>
+</section>
+
+<section class="card" aria-labelledby="math-h">
+<h2 id="math-h">The maths</h2>
+<p>The target is each station’s anomaly from the mean of all n stations at the same hour, which removes the day-to-day weather:</p>
+<div class="eq math">ΔT<sub>s,d</sub> = T<sub>s,d</sub> − (1/n) Σ<sub>s′</sub> T<sub>s′,d</sub></div>
+<p>Predictors are standardised, ranked by |Spearman ρ| with the target, and admitted one by one only if their variance inflation factor against those already chosen stays at or below 5. A backward pass then drops the worst until every VIF ≤ 5:</p>
+<div class="eq math">VIF<sub>j</sub> = 1 / (1 − R<sub>j</sub>²)   (R<sub>j</sub>² from regressing predictor j on the others)</div>
+<p>The three models on the selected predictors z<sub>j</sub>:</p>
+<div class="eq math">MLR: ΔT = β₀ + Σ<sub>j</sub> β<sub>j</sub> z<sub>j</sub>     GAM: ΔT = β₀ + Σ<sub>j</sub> f<sub>j</sub>(z<sub>j</sub>)     RF: ΔT = (1/B) Σ<sub>b</sub> tree<sub>b</sub>(z)</div>
+<p>Checks: out-of-fold R² and RMSE from 3-fold cross-validation over station-days; Moran’s I of the per-station mean residuals e with k = 4 nearest-neighbour, row-standardised weights w (999 permutations); and the spread of the map, the P95 − P5 of predictions over all land cells:</p>
+<div class="eq math">I = (n / S₀) · Σ<sub>i</sub>Σ<sub>j</sub> w<sub>ij</sub> e<sub>i</sub> e<sub>j</sub> / Σ<sub>i</sub> e<sub>i</sub>²     coverage = |occupied bins hit by stations| / |occupied bins|</div>
+<p class="note">Toy details, all illustrative. Predictors use square 3×3, 5×5 and 9×9 cell neighbourhoods for the 100/250/500 m buffers. They are building volume and tree canopy at three scales, elevation, TPI at 250 and 500 m, and lake distance (no slope or northness). The true pattern rises faster than linearly with building volume at 500 m, drops sharply once forest cover passes about 60 %, and falls with elevation. Each night scales it by a factor of 0.75–1.25, plus 0.3 °C noise per reading and a fixed bias per sensor (0.25 °C s.d. for low-cost sensors, 0.08 °C for reference stations). The GAM is an EBM-style model: 250 rounds of cyclic boosting of one-feature stumps (learning rate 0.05). The RF has 60 trees, with 60 % of the selected predictors tried at each split. Both are fitted on station-level aggregates, which is equivalent for squared error because all of a station’s days share its predictors. Spearman ranking is done on station means. Coverage bins each predictor into 8 equal-width bins over the land cells, following the score the paper proposes. “Fill feature-space gaps” greedily adds the site, among 900 random land cells, that fills the most empty bins, breaking ties by distance in standardised feature space. The PCA uses all ten standardised predictors over the land cells.</p>
+</section>
+
+<section class="card" aria-labelledby="how-h">
+<h2 id="how-h">How to use it</h2>
+<ul>
+<li><strong>Low-cost sensors added:</strong> 0 means only the four reference stations (squares). Watch the spread and warm-end stats move toward the “true” values as sensors are added, while the cross-validated scores barely change or even get worse.</li>
+<li><strong>Where the sensors go:</strong> “Like the city network” draws them from a fixed pool of 117 sites placed mostly in built-up streets, as real networks are. “Fill feature-space gaps” places them to cover unusual surroundings, the station-placement framework the paper proposes. Compare the coverage stat and the scatter of surroundings.</li>
+<li><strong>Model:</strong> MLR keeps clustered errors (positive Moran’s I) once the network is dense, because it is too straight for the curved truth. GAM and RF can bend. RF can never predict hotter or cooler than the stations it learned from.</li>
+<li><strong>New random draw:</strong> draws a different subset from the pool (or a different set of candidate sites for gap-filling), like the paper’s five repetitions. With few sensors, which ones you pick changes the predictors chosen and the map the most.</li>
+</ul>
+</section>
+
+<p class="note" style="margin-top:24px">Demo by Grok Bot for the Daily Research Explorer. Toy model in your browser; all Zurich values are quoted from arXiv:2610.29423.</p>
+</main>
+<script>
+"use strict";
+/* ===== Synthetic city (illustrative) ===== */
+const GX=120,GY=100,CELL=0.1; /* 100 m cells, 12 km × 10 km */
+function mkRng(s){s=s>>>0;return()=>{s=(s+0x6D2B79F5)>>>0;let t=s;t=Math.imul(t^(t>>>15),t|1);t^=t+Math.imul(t^(t>>>7),t|61);return((t^(t>>>14))>>>0)/4294967296;};}
+function gauss(r){let u=0;while(u===0)u=r();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*r());}
+function hash2(i,j,s){let h=(i*374761393+j*668265263+s*1442695041)>>>0;h=Math.imul(h^(h>>>13),1274126177)>>>0;return((h^(h>>>16))>>>0)/4294967296;}
+function vnoise(x,y,sc,s){const fx=x/sc,fy=y/sc,i=Math.floor(fx),j=Math.floor(fy),u=fx-i,v=fy-j,su=u*u*(3-2*u),sv=v*v*(3-2*v);
+ const a=hash2(i,j,s),b=hash2(i+1,j,s),c=hash2(i,j+1,s),d=hash2(i+1,j+1,s);return a+(b-a)*su+(c-a)*sv+(a-b-c+d)*su*sv;}
+const sigm=z=>1/(1+Math.exp(-z));
+function segInfo(px,py,ax,ay,bx,by){const dx=bx-ax,dy=by-ay,t=((px-ax)*dx+(py-ay)*dy)/(dx*dx+dy*dy),tc=Math.max(0,Math.min(1,t));return {t,d:Math.hypot(px-ax-tc*dx,py-ay-tc*dy)};}
+const NC=GX*GY,LAKE=new Uint8Array(NC),ELEV=new Float64Array(NC),BLD=new Float64Array(NC),TREE=new Float64Array(NC),LDIST=new Float64Array(NC);
+for(let j=0;j<GY;j++)for(let i=0;i<GX;i++){const k=j*GX+i,x=(i+.5)*CELL,y=(j+.5)*CELL;
+ const L=segInfo(x,y,6.1,5.5,12.6,-0.6),hw=0.32+0.5*Math.max(0,Math.min(1,L.t));LAKE[k]=(L.d<hw&&L.t>-0.02)?1:0;LDIST[k]=Math.max(0,L.d-hw);
+ const W=segInfo(x,y,1.7,-0.5,2.4,8.2),Ea=segInfo(x,y,7.4,10.6,9.6,4.6);
+ let e=408+390*Math.exp(-(W.d*W.d)/(0.8*0.8))*(W.t<1?1:Math.exp(-(((W.t-1)*8)**2)))+250*Math.exp(-(Ea.d*Ea.d)/(0.75*0.75))*sigm((Ea.t+0.05)*12)+45*(vnoise(x,y,1.3,3)-.5)+10*Math.max(0,LDIST[k]);
+ if(LAKE[k])e=406;ELEV[k]=e;
+ const core=Math.exp(-((x-5.6)**2+(y-6.3)**2)/(2*1.25*1.25)),oer=0.6*Math.exp(-((x-6.4)**2+(y-9.1)**2)/(2*0.75*0.75)),alt=0.5*Math.exp(-((x-3.5)**2+(y-7.4)**2)/(2*0.8*0.8)),lks=0.35*Math.exp(-((x-8.4)**2+(y-3.0)**2)/(2*0.9*0.9)),lkw=0.3*Math.exp(-((x-5.0)**2+(y-3.2)**2)/(2*0.9*0.9));
+ let b=(0.06+core+oer+alt+lks+lkw)*sigm(-(e-515)/22)*(0.5+0.7*vnoise(x,y,0.35,7)+0.5*hash2(i>>1,j>>1,21));
+ const park=vnoise(x,y,0.6,11);if(park>0.8)b*=0.25;
+ BLD[k]=LAKE[k]?0:Math.min(1.4,b);
+ let v=0.9*sigm((e-492)/18)+0.45*Math.max(0,park-0.55)*2+0.06+0.1*vnoise(x,y,0.25,13)+0.2*hash2(i>>1,j>>1,23);v*=(1-0.6*Math.min(1,BLD[k]));TREE[k]=LAKE[k]?0:Math.max(0,Math.min(1,v));}
+function boxMean(A,h){const o=new Float64Array(NC);for(let j=0;j<GY;j++)for(let i=0;i<GX;i++){let s=0,n=0;for(let b=Math.max(0,j-h);b<=Math.min(GY-1,j+h);b++)for(let a=Math.max(0,i-h);a<=Math.min(GX-1,i+h);a++){s+=A[b*GX+a];n++;}o[j*GX+i]=s/n;}return o;}
+/* predictors (square neighbourhoods approximating 100/250/500 m buffers) */
+const FEAT=[
+ ['Building volume (100 m)',boxMean(BLD,1)],['Building volume (250 m)',boxMean(BLD,2)],['Building volume (500 m)',boxMean(BLD,4)],
+ ['Tree canopy (100 m)',boxMean(TREE,1)],['Tree canopy (250 m)',boxMean(TREE,2)],['Tree canopy (500 m)',boxMean(TREE,4)],
+ ['Elevation',ELEV],['TPI (250 m)',null],['TPI (500 m)',null],['Lake distance',LDIST]];
+{const e2=boxMean(ELEV,2),e4=boxMean(ELEV,4);FEAT[7][1]=ELEV.map((v,k)=>v-e2[k]);FEAT[8][1]=ELEV.map((v,k)=>v-e4[k]);}
+const NF=FEAT.length,FX=k=>FEAT.map(f=>f[1][k]);
+/* true night-time anomaly (illustrative, non-linear) */
+const TRUE=new Float64Array(NC);const LAND=[];
+for(let k=0;k<NC;k++){if(LAKE[k])continue;LAND.push(k);const f=FX(k);
+ TRUE[k]=2.3*Math.pow(Math.min(f[2],1.2),1.7)+0.5*f[0]-0.7*f[3]-1.1*sigm((f[5]-0.6)/0.07)-0.0016*(f[6]-410)+0.005*f[8]+0.5*Math.exp(-f[9]/0.5);}
+{let m=0;LAND.forEach(k=>m+=TRUE[k]);m/=LAND.length;LAND.forEach(k=>TRUE[k]=1.15*(TRUE[k]-m));}
+function pct(a,q){const s=Float64Array.from(a).sort(),p=(s.length-1)*q,i=Math.floor(p);return s[i]+(s[Math.min(i+1,s.length-1)]-s[i])*(p-i);}
+const TRUE_LAND=LAND.map(k=>TRUE[k]),T_P5=pct(TRUE_LAND,.05),T_P95=pct(TRUE_LAND,.95);
+const cellAt=(x,y)=>Math.min(GY-1,Math.floor(y/CELL))*GX+Math.min(GX-1,Math.floor(x/CELL));
+/* four reference stations (mid-range sites) */
+const AWS=[cellAt(4.75,7.95),cellAt(3.25,2.05),cellAt(7.35,1.15),cellAt(4.15,9.45)];
+/* pool of 117 low-cost sensors, placed like a city network (mostly built-up, a few in the green belt) */
+const POOL=[];{const r=mkRng(117),used=new Set(AWS);let guard=0;while(POOL.length<117&&guard++<2e5){const k=LAND[Math.floor(r()*LAND.length)];if(used.has(k))continue;
+ const pr=(0.04+Math.pow(Math.min(1,FEAT[1][1][k]),1.3))*(ELEV[k]<540?1:0.12);if(r()<pr){POOL.push(k);used.add(k);}}}
+const DAYS=78;
+function stationObs(k,isAws){const r=mkRng(k*7+13),bias=gauss(r)*(isAws?0.08:0.25);return {bias,noise:Array.from({length:DAYS},()=>gauss(r)*0.3)};}
+const DAYF=(()=>{const r=mkRng(2022);return Array.from({length:DAYS},()=>0.75+0.5*r());})();
+/* ===== Pipeline: standardise -> Spearman-ordered forward selection with VIF <= 5 -> model ===== */
+function gsolve(A,b){const n=b.length,m=A.map((r,i)=>[...r,b[i]]);for(let i=0;i<n;i++){let p=i;for(let j=i+1;j<n;j++)if(Math.abs(m[j][i])>Math.abs(m[p][i]))p=j;[m[i],m[p]]=[m[p],m[i]];
+ if(Math.abs(m[i][i])<1e-14)m[i][i]=1e-14;for(let j=i+1;j<n;j++){const f=m[j][i]/m[i][i];for(let k=i;k<=n;k++)m[j][k]-=f*m[i][k];}}
+ const x=new Float64Array(n);for(let i=n-1;i>=0;i--){let s=m[i][n];for(let k=i+1;k<n;k++)s-=m[i][k]*x[k];x[i]=s/m[i][i];}return x;}
+function wls(cols,y,w,ridge){const n=y.length,p=cols.length+1,A=Array.from({length:p},()=>new Float64Array(p)),b=new Float64Array(p);
+ for(let i=0;i<n;i++){const r=[1];cols.forEach(c=>r.push(c[i]));for(let a=0;a<p;a++){b[a]+=w[i]*r[a]*y[i];for(let q=0;q<p;q++)A[a][q]+=w[i]*r[a]*r[q];}}
+ for(let a=1;a<p;a++)A[a][a]+=ridge||0;return gsolve(A,b);}
+function rsq(cols,y,w){const c=wls(cols,y,w,1e-12);let W=0,m=0;for(let i=0;i<y.length;i++){W+=w[i];m+=w[i]*y[i];}m/=W;let st=0,sr=0;
+ for(let i=0;i<y.length;i++){let f=c[0];cols.forEach((cc,j)=>f+=c[j+1]*cc[i]);sr+=w[i]*(y[i]-f)**2;st+=w[i]*(y[i]-m)**2;}return st<=0?1:1-sr/st;}
+function vif(cols,c,w){if(!cols.length)return 1;if(cols.length+1>=c.length)return Infinity;const r=rsq(cols,c,w);return r>1-1e-9?Infinity:1/(1-r);}
+function ranks(a){const idx=a.map((v,i)=>i).sort((p,q)=>a[p]-a[q]),r=new Float64Array(a.length);let i=0;while(i<idx.length){let j=i;while(j+1<idx.length&&a[idx[j+1]]===a[idx[i]])j++;for(let k=i;k<=j;k++)r[idx[k]]=(i+j)/2;i=j+1;}return r;}
+function pearson(a,b){const n=a.length;let ma=0,mb=0;for(let i=0;i<n;i++){ma+=a[i];mb+=b[i];}ma/=n;mb/=n;let s=0,sa=0,sb=0;for(let i=0;i<n;i++){s+=(a[i]-ma)*(b[i]-mb);sa+=(a[i]-ma)**2;sb+=(b[i]-mb)**2;}return sa*sb>0?s/Math.sqrt(sa*sb):0;}
+function select(Z,y,w){const n=y.length,ry=ranks(Array.from(y));const order=[...Array(NF).keys()].map(j=>({j,r:Math.abs(pearson(ranks(Array.from(Z[j])),ry)),q:Math.abs(pearson(Array.from(Z[j]),Array.from(y)))})).sort((a,b)=>(b.r-a.r)||(b.q-a.q));
+ let sel=[];order.forEach(o=>{if(!(o.r>0))return;const v=vif(sel.map(j=>Z[j]),Z[o.j],w);if(v<=5)sel.push(o.j);});
+ for(;;){if(sel.length<2)break;const vs=sel.map(j=>vif(sel.filter(q=>q!==j).map(q=>Z[q]),Z[j],w));let mx=0;vs.forEach((v,i)=>{if(v>vs[mx])mx=i;});if(vs[mx]<=5)break;sel.splice(mx,1);}
+ return sel;}
+/* station-level training data: X (n×NF raw), y = mean anomaly over training obs, w = number of training obs */
+function fitModel(kind,X,y,w,seed){const n=y.length,mu=new Float64Array(NF),sd=new Float64Array(NF);let W=0;w.forEach(v=>W+=v);
+ for(let j=0;j<NF;j++){let m=0;for(let i=0;i<n;i++)m+=w[i]*X[i][j];m/=W;let v=0;for(let i=0;i<n;i++)v+=w[i]*(X[i][j]-m)**2;mu[j]=m;sd[j]=Math.sqrt(v/W)||1;}
+ const Z=[...Array(NF).keys()].map(j=>Float64Array.from(X,r=>(r[j]-mu[j])/sd[j]));const sel=select(Z,y,w),z=x=>sel.map(j=>(x[j]-mu[j])/sd[j]);
+ let pred;const cm=wls(sel.map(j=>Z[j]),y,w,1e-9),coef=sel.map((j,i)=>[j,cm[i+1]]);
+ if(kind==='mlr'){const c=cm;pred=x=>{const q=z(x);let f=c[0];q.forEach((v,i)=>f+=c[i+1]*v);return f;};}
+ else if(kind==='gam'){/* EBM-style: cyclic boosting of one-feature stumps, no interactions */
+  let f0=0;for(let i=0;i<n;i++)f0+=w[i]*y[i];f0/=W;const res=Float64Array.from(y,v=>v-f0);
+  const shp=sel.map(j=>{const u=[...new Set(Array.from(Z[j]))].sort((a,b)=>a-b);const cut=u.slice(0,-1).map((v,i)=>(v+u[i+1])/2);const bin=Float64Array.from(Z[j],v=>{let k=0;while(k<cut.length&&v>cut[k])k++;return k;});return {j,cut,val:new Float64Array(u.length),bin,m:u.length};});
+  const LR=0.05;for(let it=0;it<250;it++)shp.forEach(s=>{if(s.m<2)return;const SR=new Float64Array(s.m),SW=new Float64Array(s.m);for(let i=0;i<n;i++){SR[s.bin[i]]+=w[i]*res[i];SW[s.bin[i]]+=w[i];}
+   let tr=0,tw=0;SR.forEach(v=>tr+=v);SW.forEach(v=>tw+=v);let best=-1,bg=-Infinity,lr=0,lw=0,bl=0,bw=0;for(let k=0;k<s.m-1;k++){lr+=SR[k];lw+=SW[k];const rw=tw-lw;if(lw<=0||rw<=0)continue;const g=lr*lr/lw+(tr-lr)**2/rw;if(g>bg){bg=g;best=k;bl=lr;bw=lw;}}
+   if(best<0)return;const dl=LR*bl/bw,dr=LR*(tr-bl)/(tw-bw);for(let k=0;k<s.m;k++)s.val[k]+=k<=best?dl:dr;for(let i=0;i<n;i++)res[i]-=s.bin[i]<=best?dl:dr;});
+  pred=x=>{const q=z(x);let f=f0;shp.forEach((s,i)=>{let k=0;while(k<s.cut.length&&q[i]>s.cut[k])k++;f+=s.val[k];});return f;};}
+ else{/* random forest on the selected predictors */
+  const r=mkRng(seed||7),p=sel.length,mtry=Math.max(1,Math.ceil(p*0.6)),trees=[];
+  const build=(idx,wt,d)=>{let sw=0,sy=0;idx.forEach(i=>{sw+=wt[i];sy+=wt[i]*y[i];});const leaf={v:sy/sw};if(idx.length<2||d>14)return leaf;
+   const fs=[...Array(p).keys()];for(let a=p-1;a>0;a--){const b=Math.floor(r()*(a+1));[fs[a],fs[b]]=[fs[b],fs[a]];}
+   let bg=0,bf=-1,bt=0;const tot=sy*sy/sw;
+   fs.slice(0,mtry).forEach(fi=>{const col=Z[sel[fi]],o=idx.slice().sort((a,b)=>col[a]-col[b]);let lw=0,ly=0;for(let k=0;k<o.length-1;k++){lw+=wt[o[k]];ly+=wt[o[k]]*y[o[k]];if(col[o[k]]===col[o[k+1]])continue;const rw=sw-lw;const g=ly*ly/lw+(sy-ly)**2/rw-tot;if(g>bg+1e-12){bg=g;bf=fi;bt=(col[o[k]]+col[o[k+1]])/2;}}});
+   if(bf<0)return leaf;const L=idx.filter(i=>Z[sel[bf]][i]<=bt),R=idx.filter(i=>Z[sel[bf]][i]>bt);return {f:bf,t:bt,l:build(L,wt,d+1),r:build(R,wt,d+1)};};
+  const pois=m=>{if(m>30)return Math.max(0,Math.round(m+Math.sqrt(m)*gauss(r)));const L=Math.exp(-m);let k=0,q=1;do{k++;q*=r();}while(q>L);return k-1;};
+  if(p===0){pred=()=>{let s=0;for(let i=0;i<n;i++)s+=w[i]*y[i];return s/W;};}
+  else{for(let t=0;t<60;t++){const wt=Float64Array.from(w,v=>pois(v)),idx=[];for(let i=0;i<n;i++)if(wt[i]>0)idx.push(i);if(idx.length)trees.push(build(idx,wt,0));}
+  pred=x=>{const q=z(x);let s=0;trees.forEach(t=>{let nd=t;while(nd.f!==undefined)nd=q[nd.f]<=nd.t?nd.l:nd.r;s+=nd.v;});return s/trees.length;};}}
+ return {sel,coef,pred};}
+/* ===== Experiment for one station set ===== */
+function experiment(st,kind,seed,doGrid){/* st: array of {k,aws} */
+ const n=st.length,obs=st.map(s=>stationObs(s.k,s.aws)),X=st.map(s=>FX(s.k));
+ const Y=st.map(()=>new Float64Array(DAYS));for(let d=0;d<DAYS;d++){let m=0;for(let i=0;i<n;i++){const v=DAYF[d]*TRUE[st[i].k]+obs[i].bias+obs[i].noise[d];Y[i][d]=v;m+=v;}m/=n;for(let i=0;i<n;i++)Y[i][d]-=m;}
+ /* 3-fold CV over station-days */
+ const rf=mkRng(seed*31+5),fold=st.map(()=>Uint8Array.from({length:DAYS},()=>Math.floor(rf()*3)));const oof=st.map(()=>new Float64Array(DAYS));
+ for(let F=0;F<3;F++){const y=new Float64Array(n),w=new Float64Array(n);for(let i=0;i<n;i++){for(let d=0;d<DAYS;d++)if(fold[i][d]!==F){y[i]+=Y[i][d];w[i]++;}y[i]/=w[i]||1;}
+  const keep=[...Array(n).keys()].filter(i=>w[i]>0),M=fitModel(kind,keep.map(i=>X[i]),Float64Array.from(keep,i=>y[i]),Float64Array.from(keep,i=>w[i]),seed+F);
+  for(let i=0;i<n;i++){const p=M.pred(X[i]);for(let d=0;d<DAYS;d++)if(fold[i][d]===F)oof[i][d]=p;}}
+ let my=0,N=n*DAYS;Y.forEach(a=>a.forEach(v=>my+=v));my/=N;let ss=0,sr=0;const rs=new Float64Array(n);
+ for(let i=0;i<n;i++)for(let d=0;d<DAYS;d++){const e=Y[i][d]-oof[i][d];sr+=e*e;ss+=(Y[i][d]-my)**2;rs[i]+=e/DAYS;}
+ const r2=1-sr/ss,rmse=Math.sqrt(sr/N);
+ /* Moran's I of per-station mean residuals, k-nearest-neighbour weights */
+ const kk=Math.min(4,n-1),nb=st.map((s,i)=>{const xi=s.k%GX,yi=Math.floor(s.k/GX);return st.map((t,j)=>({j,d:j===i?Infinity:Math.hypot(t.k%GX-xi,Math.floor(t.k/GX)-yi)})).sort((a,b)=>a.d-b.d).slice(0,kk).map(o=>o.j);});
+ const moran=z=>{let m=0;z.forEach(v=>m+=v);m/=n;let num=0,den=0;for(let i=0;i<n;i++){den+=(z[i]-m)**2;let s=0;nb[i].forEach(j=>s+=z[j]-m);num+=(z[i]-m)*s/kk;}return den>0?num/den:0;};
+ const I=moran(rs);let ge=0;const rp=mkRng(seed+99),perm=Array.from(rs);for(let t=0;t<999;t++){for(let a=n-1;a>0;a--){const b=Math.floor(rp()*(a+1));[perm[a],perm[b]]=[perm[b],perm[a]];}if(moran(perm)>=I)ge++;}
+ /* final fit on all station-days; city-wide map */
+ const yA=Float64Array.from(Y,a=>a.reduce((s,v)=>s+v,0)/DAYS),M=fitModel(kind,X,yA,new Float64Array(n).fill(DAYS),seed+11);
+ const out={r2,rmse,I,p:(ge+1)/1000,sel:M.sel,coef:M.coef,stRange:Math.max(...yA)-Math.min(...yA),yA};
+ if(doGrid!==false){const G=new Float64Array(NC).fill(NaN);let gm=0;LAND.forEach(k=>{const v=M.pred(FX(k));G[k]=v;gm+=v;});gm/=LAND.length;LAND.forEach(k=>G[k]-=gm);
+  const g=LAND.map(k=>G[k]);out.grid=G;out.p5=pct(g,.05);out.p95=pct(g,.95);}
+ return out;}
+/* feature-space coverage (marginal bins per predictor over the grid) */
+const NB=8,FMIN=[],FMAX=[];for(let j=0;j<NF;j++){let a=Infinity,b=-Infinity;LAND.forEach(k=>{const v=FEAT[j][1][k];if(v<a)a=v;if(v>b)b=v;});FMIN.push(a);FMAX.push(b);}
+const binOf=(j,v)=>Math.min(NB-1,Math.max(0,Math.floor((v-FMIN[j])/(FMAX[j]-FMIN[j])*NB)));
+const OCC=[];for(let j=0;j<NF;j++){const s=new Set();LAND.forEach(k=>s.add(binOf(j,FEAT[j][1][k])));OCC.push(s);}const NOCC=OCC.reduce((a,s)=>a+s.size,0);
+function coverage(ks){let c=0;for(let j=0;j<NF;j++){const s=new Set(ks.map(k=>binOf(j,FEAT[j][1][k])));s.forEach(b=>{if(OCC[j].has(b))c++;});}return c/NOCC;}
+/* targeted placement: greedily add the site that fills most empty bins (ties: farthest in standardised feature space) */
+const FSD=[...Array(NF).keys()].map(j=>{let m=0;LAND.forEach(k=>m+=FEAT[j][1][k]);m/=LAND.length;let v=0;LAND.forEach(k=>v+=(FEAT[j][1][k]-m)**2);return [m,Math.sqrt(v/LAND.length)];});
+const ZF=k=>FEAT.map((f,j)=>(f[1][k]-FSD[j][0])/FSD[j][1]);
+function targeted(nAdd,seed){const r=mkRng(seed*13+1),cand=[];for(let t=0;t<900;t++)cand.push(LAND[Math.floor(r()*LAND.length)]);
+ const chosen=AWS.slice(),cov=[...Array(NF)].map((_,j)=>new Set(chosen.map(k=>binOf(j,FEAT[j][1][k])))),zc=cand.map(ZF),zs=chosen.map(ZF);const out=[];
+ const dmin=cand.map((k,c)=>Math.min(...zs.map(z=>z.reduce((a,v,i)=>a+(v-zc[c][i])**2,0))));
+ for(let a=0;a<nAdd;a++){let best=-1,bs=-1;cand.forEach((k,c)=>{if(chosen.includes(k))return;let g=0;for(let j=0;j<NF;j++)if(!cov[j].has(binOf(j,FEAT[j][1][k])))g++;const s=g*1000+dmin[c];if(s>bs){bs=s;best=c;}});
+  const k=cand[best];chosen.push(k);out.push(k);for(let j=0;j<NF;j++)cov[j].add(binOf(j,FEAT[j][1][k]));cand.forEach((_,c)=>{const d=zc[c].reduce((s,v,i)=>s+(v-zc[best][i])**2,0);if(d<dmin[c])dmin[c]=d;});}
+ return out;}
+function citySample(nAdd,seed){if(nAdd>=POOL.length)return POOL.slice();const r=mkRng(seed*101+3),a=POOL.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a.slice(0,nAdd);}
+/* ===== UI ===== */
+const $=id=>document.getElementById(id);
+const css=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const FONT='12px -apple-system,BlinkMacSystemFont,"SF Pro Text",Helvetica,Arial,sans-serif';
+const sm=u=>'<small>'+u+'</small>';
+const fmt=(v,d)=>(v<0?'−':'')+Math.abs(v).toFixed(d);
+const sgn=(v,d)=>(v>=0?'+':'−')+Math.abs(v).toFixed(d);
+let seed=1,job=0,cjob=0,CUR=null,CURVE=null;
+const val=n=>document.querySelector('input[name='+n+']:checked').value;
+function stations(n,mode,sd){const add=mode==='city'?citySample(n,sd):targeted(n,sd);return [...AWS.map(k=>({k,aws:1})),...add.map(k=>({k,aws:0}))];}
+/* PCA of standardised predictors over land cells (power iteration) */
+const PCA=(()=>{const Zs=LAND.map(ZF),C=[...Array(NF)].map(()=>new Float64Array(NF));Zs.forEach(z=>{for(let a=0;a<NF;a++)for(let b=0;b<NF;b++)C[a][b]+=z[a]*z[b]/Zs.length;});
+ let tr=0;for(let a=0;a<NF;a++)tr+=C[a][a];const vecs=[],vals=[];
+ for(let c=0;c<2;c++){let v=new Float64Array(NF).fill(1).map((_,i)=>1+i*0.1);for(let it=0;it<300;it++){const u=new Float64Array(NF);for(let a=0;a<NF;a++)for(let b=0;b<NF;b++)u[a]+=C[a][b]*v[b];
+   vecs.forEach(q=>{let d=0;for(let a=0;a<NF;a++)d+=u[a]*q[a];for(let a=0;a<NF;a++)u[a]-=d*q[a];});const nr=Math.hypot(...u);v=u.map(x=>x/nr);}
+  let lam=0;for(let a=0;a<NF;a++){let s=0;for(let b=0;b<NF;b++)s+=C[a][b]*v[b];lam+=v[a]*s;}
+  /* orient PC1 toward forested/elevated (tree canopy 500 m positive) */
+  if(c===0&&v[5]<0)v=v.map(x=>-x);if(c===1&&v[2]<0)v=v.map(x=>-x);vecs.push(v);vals.push(lam/tr);}
+ const proj=k=>{const z=ZF(k);return [z.reduce((s,x,i)=>s+x*vecs[0][i],0),z.reduce((s,x,i)=>s+x*vecs[1][i],0)];};
+ const P=new Map();LAND.forEach(k=>P.set(k,proj(k)));return {P,vals,proj};})();
+/* ---------- drawing helpers ---------- */
+function setup(c){const dpr=window.devicePixelRatio||1,Wd=c.clientWidth,H=c.clientHeight;c.width=Math.round(Wd*dpr);c.height=Math.round(H*dpr);const x=c.getContext('2d');x.setTransform(dpr,0,0,dpr,0,0);x.clearRect(0,0,Wd,H);return [x,Wd,H];}
+function rgb(c){const d=document.createElement('canvas').getContext('2d');d.fillStyle=c;const h=d.fillStyle;if(h[0]==='#')return [1,3,5].map(i=>parseInt(h.slice(i,i+2),16));return h.match(/[\d.]+/g).slice(0,3).map(Number);}
+function palette(){const a=rgb(css('--cold')),m=rgb(css('--mid')),b=rgb(css('--hot'));return v=>{const t=Math.max(-1,Math.min(1,v/3));const e=t<0?a:b,u=Math.abs(t);return [0,1,2].map(i=>Math.round(m[i]+(e[i]-m[i])*u));};}
+function drawMap(cv,G,st){const [x,Wd,H]=setup(cv),col=palette(),lake=rgb(css('--lake'));const im=document.createElement('canvas');im.width=GX;im.height=GY;const ix=im.getContext('2d'),id=ix.createImageData(GX,GY);
+ for(let j=0;j<GY;j++)for(let i=0;i<GX;i++){const k=j*GX+i,p=((GY-1-j)*GX+i)*4,c=LAKE[k]?lake:col(G[k]);id.data[p]=c[0];id.data[p+1]=c[1];id.data[p+2]=c[2];id.data[p+3]=255;}
+ ix.putImageData(id,0,0);x.imageSmoothingEnabled=false;x.drawImage(im,0,0,Wd,H);
+ const sx=Wd/GX,sy=H/GY,fg=css('--text'),bg=css('--card-solid');
+ st.forEach(s=>{const cx=(s.k%GX+.5)*sx,cy=(GY-Math.floor(s.k/GX)-.5)*sy;x.lineWidth=1.6;if(s.aws){x.fillStyle=bg;x.strokeStyle=fg;x.fillRect(cx-5,cy-5,10,10);x.strokeRect(cx-5,cy-5,10,10);}else{x.strokeStyle=fg;x.beginPath();x.arc(cx,cy,3.2,0,6.3);x.stroke();}});
+ x.fillStyle=fg;x.font=FONT;x.textAlign='left';x.fillText('1 km',10,H-10);x.fillRect(10,H-24,sx*10,3);}
+function axes(x,Wd,H,m,x0,x1,y0,y1,xt,yt,xl,yl,fx,fy){const Xf=v=>m.l+(v-x0)/(x1-x0)*(Wd-m.l-m.r),Yf=v=>H-m.b-(v-y0)/(y1-y0)*(H-m.t-m.b);
+ x.font=FONT;x.lineWidth=1;x.strokeStyle=css('--grid');x.fillStyle=css('--muted');
+ x.textAlign='center';xt.forEach(v=>{x.beginPath();x.moveTo(Xf(v),m.t);x.lineTo(Xf(v),H-m.b);x.stroke();x.fillText(fx?fx(v):v,Xf(v),H-m.b+16);});
+ x.textAlign='right';yt.forEach(v=>{x.beginPath();x.moveTo(m.l,Yf(v));x.lineTo(Wd-m.r,Yf(v));x.stroke();x.fillText(fy?fy(v):v,m.l-6,Yf(v)+4);});
+ x.textAlign='center';x.fillText(xl,(m.l+Wd-m.r)/2,H-6);x.save();x.translate(12,(m.t+H-m.b)/2);x.rotate(-Math.PI/2);x.fillText(yl,0,0);x.restore();return [Xf,Yf];}
+function line(x,pts,Xf,Yf,col,w,dash){x.strokeStyle=col;x.lineWidth=w;x.setLineDash(dash||[]);x.beginPath();pts.forEach((p,i)=>i?x.lineTo(Xf(p[0]),Yf(p[1])):x.moveTo(Xf(p[0]),Yf(p[1])));x.stroke();x.setLineDash([]);}
+function drawPCA(st){const [x,Wd,H]=setup($('pca')),m={l:46,r:14,t:14,b:38};
+ let a0=Infinity,a1=-Infinity,b0=Infinity,b1=-Infinity;PCA.P.forEach(p=>{a0=Math.min(a0,p[0]);a1=Math.max(a1,p[0]);b0=Math.min(b0,p[1]);b1=Math.max(b1,p[1]);});
+ a0=Math.floor(a0);a1=Math.ceil(a1);b0=Math.floor(b0);b1=Math.ceil(b1);const tk=(lo,hi)=>{const o=[],s=(hi-lo)>8?2:1;for(let v=Math.ceil(lo/s)*s;v<=hi;v+=s)o.push(v);return o;};
+ const [Xf,Yf]=axes(x,Wd,H,m,a0,a1,b0,b1,tk(a0,a1),tk(b0,b1),'PC1 ('+(PCA.vals[0]*100).toFixed(0)+' %): built core ← → forested, elevated','PC2 ('+(PCA.vals[1]*100).toFixed(0)+' %)');
+ const col=palette();x.globalAlpha=.55;let c=0;LAND.forEach(k=>{if((c++)%3)return;const p=PCA.P.get(k),q=col(TRUE[k]);x.fillStyle='rgb('+q.join(',')+')';x.fillRect(Xf(p[0])-1.2,Yf(p[1])-1.2,2.4,2.4);});x.globalAlpha=1;
+ const fg=css('--text'),bg=css('--card-solid');st.forEach(s=>{const p=PCA.P.get(s.k);x.lineWidth=1.6;x.strokeStyle=fg;if(s.aws){x.fillStyle=bg;x.fillRect(Xf(p[0])-5,Yf(p[1])-5,10,10);x.strokeRect(Xf(p[0])-5,Yf(p[1])-5,10,10);}else{x.beginPath();x.arc(Xf(p[0]),Yf(p[1]),3.2,0,6.3);x.stroke();}});
+ const mx=Math.max(...st.map(s=>PCA.P.get(s.k)[0]));let beyond=0;PCA.P.forEach(p=>{if(p[0]>mx)beyond++;});
+ $('pcaTxt').textContent='Dots: every 3rd land cell, coloured by its true anomaly. '+(beyond/LAND.length*100).toFixed(1)+' % of land cells lie beyond the most forested/elevated station on PC1 (paper, Zurich: 32.2 % for the reference stations, 15.2 % for the low-cost sensors).';}
+const KIND=['mlr','gam','rf'],KC=['--c1','--c2','--c3'],NS=[0,10,20,39,58,77,97,117];
+function drawCurves(){const n=+$('nl').value;
+ [['curve',r=>r.p95-r.p5,0,8,[0,2,4,6,8],'predicted P95 − P5 (°C)'],['cvc',r=>r.rmse,0,0.8,[0,0.2,0.4,0.6,0.8],'cross-validated RMSE (°C)']].forEach(([id,f,y0,y1,yt,yl])=>{
+  const [x,Wd,H]=setup($(id)),m={l:50,r:14,t:14,b:38};const [Xf,Yf]=axes(x,Wd,H,m,0,117,y0,y1,[0,20,39,58,77,97,117],yt,'low-cost sensors added',yl,null,v=>v.toFixed(id==='cvc'?1:0));
+  if(id==='curve')line(x,[[0,T_P95-T_P5],[117,T_P95-T_P5]],Xf,Yf,css('--cx'),1.5,[6,5]);
+  x.strokeStyle=css('--muted');x.setLineDash([2,4]);x.beginPath();x.moveTo(Xf(n),Yf(y0));x.lineTo(Xf(n),Yf(y1));x.stroke();x.setLineDash([]);
+  if(!CURVE)return;KIND.forEach((k,i)=>{const pts=CURVE[k].map((r,j)=>r?[NS[j],Math.min(y1,f(r))]:null).filter(Boolean);if(!pts.length)return;line(x,pts,Xf,Yf,css(KC[i]),2.4);x.fillStyle=css(KC[i]);pts.forEach(p=>{x.beginPath();x.arc(Xf(p[0]),Yf(p[1]),3,0,6.3);x.fill();});});});}
+function drawAll(){if(!CUR)return;const T=new Float64Array(NC).fill(NaN);LAND.forEach(k=>T[k]=TRUE[k]);drawMap($('mapT'),T,CUR.st);drawMap($('mapP'),CUR.o.grid,CUR.st);drawPCA(CUR.st);drawCurves();}
+function show(){const o=CUR.o,tr=T_P95-T_P5,rg=o.p95-o.p5;
+ $('sR2').textContent=o.r2.toFixed(2);$('sRM').innerHTML=o.rmse.toFixed(2)+sm('°C');
+ $('sRg').innerHTML=rg.toFixed(1)+sm('°C');$('sRg').classList.toggle('bad',Math.abs(rg-tr)>0.6);
+ $('sW').innerHTML=sgn(o.p95,1)+sm('°C');$('sW').classList.toggle('bad',Math.abs(o.p95-T_P95)>0.5);
+ $('sI').innerHTML=(CUR.st.length<5?'—':sgn(o.I,2)+sm('p '+o.p.toFixed(3)));
+ $('sC').innerHTML=(coverage(CUR.st.map(s=>s.k))*100).toFixed(0)+sm('%');
+ $('tRg').textContent=tr.toFixed(1)+' °C';$('tW').textContent=sgn(T_P95,1)+' °C';
+ $('mapTitle').textContent='Map drawn by '+({mlr:'MLR',gam:'GAM',rf:'RF'})[CUR.kind]+' from '+CUR.st.length+' stations';
+ $('selT').innerHTML=o.coef.map(([j,c])=>'<tr><td>'+FEAT[j][0]+'</td><td>'+sgn(c,2)+'</td></tr>').join('');
+ $('selTxt').textContent=o.sel.length+' of '+NF+' predictors passed the Spearman + VIF ≤ 5 selection (shared by all three models).'+(CUR.st.length===4?' With 4 stations no more than 3 can enter, because the standardised predictor matrix has rank 3.':'');}
+function run(){const my=++job;$('status').textContent='Fitting…';setTimeout(()=>{if(my!==job)return;const n=+$('nl').value,mode=val('mode'),kind=val('kind'),st=stations(n,mode,seed),o=experiment(st,kind,seed);
+ CUR={st,o,kind};show();drawAll();$('status').textContent=st.length+' stations × '+DAYS+' nights = '+(st.length*DAYS)+' readings; '+NC+' map cells ('+LAND.length+' on land).';document.body.dataset.ready='1';},0);}
+function runCurve(){const my=++cjob,mode=val('mode'),sd=seed;CURVE={mlr:[],gam:[],rf:[]};const todo=[];NS.forEach((n,j)=>KIND.forEach(k=>todo.push([n,j,k])));
+ const step=()=>{if(my!==cjob)return;const t=todo.shift();if(!t){document.body.dataset.curve='1';return;}const [n,j,k]=t;CURVE[k][j]=experiment(stations(n,mode,sd),k,sd);drawCurves();setTimeout(step,0);};setTimeout(step,30);}
+let deb=null;
+$('nl').addEventListener('input',()=>{$('nlo').textContent=$('nl').value;drawCurves();clearTimeout(deb);deb=setTimeout(run,120);});
+document.querySelectorAll('input[name=kind]').forEach(r=>r.addEventListener('change',run));
+document.querySelectorAll('input[name=mode]').forEach(r=>r.addEventListener('change',()=>{run();runCurve();}));
+$('redo').addEventListener('click',()=>{seed++;run();runCurve();});
+addEventListener('resize',drawAll);
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',drawAll);
+$('nlo').textContent=$('nl').value;run();runCurve();
+</script>
+</body></html>
