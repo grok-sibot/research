@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="light dark">
+<title>Cancer-scan copper from plain zinc — Research Explorer, 24 Oct 2026</title>
+<link rel="stylesheet" href="../assets/style.css">
+<style>
+/* page-specific: canvas heights, stat accents, small table wrapper */
+canvas#act{height:340px} canvas#pur,canvas#fit{height:300px}
+.stat .v small{font-size:15px;font-weight:500;color:var(--muted);margin-left:4px}
+.stat .v.good{color:var(--c3)} .stat .v.bad{color:var(--c2)}
+.tablewrap{overflow-x:auto}
+.legend b{font-weight:600;color:var(--text)}
+</style></head><body><main>
+<a class="back" href="../">‹ All demos</a>
+<div class="eyebrow">24 Oct 2026 · Medicine</div>
+<h1>Cancer-scan copper from plain zinc</h1>
+<p class="lede">Copper-64 lights up tumours on PET scans and can also treat them, but today it is made from a rare, enriched nickel that costs about US$50,000 a gram. This team shone a laser-driven fusion neutron source on ordinary zinc for one hour. The only radioactive copper they could find in it afterwards was copper-64.</p>
+<p class="authors">Jeremy M. C. Brown, Mantas Grigalavicius, Tibor Gilinger, Adam Kovacs, Parvin Varmazyar, Hsin-Hui Huang, Saulius Juodkazis, Mikas Vengris, Darius Gailevicius &amp; Karoly Osvay</p>
+
+<section class="card why" aria-labelledby="why-h">
+<h2 id="why-h">Why it matters</h2>
+<p>Copper-64 can both image and treat prostate, brain and skin cancers, but it is made today from enriched nickel-64 at about US$50,000 per gram, which keeps it out of most clinics. This experiment made it instead from natural zinc at about US$24 per gram, roughly 2,000 times cheaper, and found no other radioactive copper, giving a purity of at least 99.62% and 99.97% after the paper’s detection-limit correction, above the 99.95% ultra-high-purity bar.</p>
+</section>
+
+<section class="card" aria-labelledby="paper-h">
+<h2 id="paper-h">The paper</h2>
+<p style="margin:0 0 6px"><strong>Direct Production of Ultra-High Radioisotopic Pure <sup>64</sup>Cu from Natural Zinc Metal via D-D Fusion Narrowband Fast Neutron Source Irradiation</strong></p>
+<p class="cite" style="margin:0">Jeremy M. C. Brown, Mantas Grigalavicius, Tibor Gilinger, Adam Kovacs, Parvin Varmazyar, Hsin-Hui Huang, Saulius Juodkazis, Mikas Vengris, Darius Gailevicius &amp; Karoly Osvay (Swinburne University of Technology, Vilnius University, University of Szeged, ELI-ALPS, ELI ERIC). arXiv:2610.31340 [physics.med-ph], submitted 22 Oct 2026. <a href="https://arxiv.org/abs/2610.31340">Read on arXiv</a> · <a href="https://arxiv.org/pdf/2610.31340">PDF</a></p>
+<p style="margin-top:14px">In plain language: when a fast neutron hits a zinc-64 nucleus, it can knock out a proton and turn the zinc into copper-64 (the <sup>64</sup>Zn(n,p)<sup>64</sup>Cu reaction). Natural zinc also contains zinc-66, -67, -68 and -70, which can turn into unwanted copper-66, -67 and -68. Copper-67 is the real problem, because its 61.8-hour half-life is longer than copper-64’s 12.7 hours and it cannot be removed chemically. Reactor neutrons make too much of it.</p>
+<p>The team used the LEIA beamline at the ELI-ALPS laser facility in Hungary. A 1 kHz laser fires deuterons from a sheet of heavy water into a second heavy-water layer, where deuterium–deuterium fusion releases neutrons with a narrow spread of energies around 3.1 ± 0.5 MeV, about 2 × 10⁷ per second. At that energy the reactions make copper-64 about 682 times faster than copper-67. A 5 mm zinc pellet was irradiated for one hour, then measured with a germanium gamma-ray detector for 6 hours in every 12 over the next 72 hours. Only copper-64’s gamma lines appeared, decaying with its 12.7-hour half-life. Copper-66 and -68 had died away during the 0.67 hours it took to move the sample, and copper-67 stayed below the detection limit.</p>
+</section>
+
+<section class="card" aria-labelledby="demo-h">
+<h2 id="demo-h">Try it</h2>
+<p class="note" style="margin:0 0 14px">This calculator solves the paper’s Bateman production and decay equations for the four radioactive coppers, using the relative production rates and half-lives in the paper’s Table II. The absolute copper-64 activity is calibrated to the six measured activities in Table I. Purity does not depend on the source strength or the zinc mass, only on the timing. The scale-up sliders assume activity grows in proportion to source strength × zinc mass with the same geometry, which is an optimistic simplification.</p>
+
+<div class="controls">
+ <div><label for="ti"><span>Irradiation time</span> <output id="tio"></output></label><input id="ti" type="range" min="0.1" max="24" step="0.1" value="1"></div>
+ <div><label for="tw"><span>Wait after irradiation</span> <output id="two"></output></label><input id="tw" type="range" min="0" max="72" step="0.01" value="0.67"></div>
+ <div><label for="fl"><span>Neutron source strength</span> <output id="flo"></output></label><input id="fl" type="range" min="7.301" max="12" step="0.01" value="7.301"></div>
+ <div><label for="ms"><span>Zinc mass</span> <output id="mso"></output></label><input id="ms" type="range" min="-0.164" max="3" step="0.01" value="-0.164"></div>
+</div>
+
+<div class="stats" style="grid-template-columns:repeat(auto-fit,minmax(240px,1fr))">
+ <div class="stat"><div class="v" id="sP"></div><div class="l">Copper-64 purity at this moment (share of copper activity)</div></div>
+ <div class="stat"><div class="v" id="sW"></div><div class="l">Window above 99.95% (hours after irradiation)</div></div>
+ <div class="stat"><div class="v" id="sA"></div><div class="l">Copper-64 activity at this moment</div></div>
+ <div class="stat"><div class="v" id="sD"></div><div class="l">Share of one 148 MBq copper-64 PET dose</div></div>
+ <div class="stat"><div class="v" id="sR"></div><div class="l">Copper-67 : copper-64 activity</div></div>
+ <div class="stat"><div class="v">2,083×<small>cheaper</small></div><div class="l">Raw metal: nickel-64 US$50,000/g vs natural zinc US$24/g</div></div>
+</div>
+<p class="note" id="status" aria-live="polite" style="margin:8px 0 0"></p>
+
+<div style="margin-top:18px"><div class="plot-title">Activity of each radioactive copper, from the start of irradiation</div>
+ <canvas id="act" role="img" aria-label="Log-scale plot of the activity of copper-64, -66, -67 and -68 during and after irradiation"></canvas>
+ <div class="legend"><span style="--k:var(--c1)">⁶⁴Cu (12.7 h)</span><span style="--k:var(--c2)">⁶⁶Cu (5.1 min)</span><span style="--k:var(--c3)">⁶⁷Cu (61.8 h)</span><span style="--k:var(--c4)">⁶⁸Cu + ⁶⁸ᵐCu (31 s, 3.75 min)</span><span>shaded: neutrons on · dotted: “now”</span></div>
+</div>
+
+<div class="grid" style="margin-top:22px">
+ <div><div class="plot-title">Copper-64 purity after irradiation (like Fig. 4)</div>
+  <canvas id="pur" role="img" aria-label="Copper-64 radioisotopic purity versus time after irradiation, with the 99.95 percent threshold"></canvas>
+  <div class="legend"><span style="--k:var(--c1)">purity</span><span style="--k:var(--c2)">99.95% bar</span><span>green: above the bar</span></div></div>
+ <div><div class="plot-title">The measured copper-64 decay (Table I, Fig. 3)</div>
+  <canvas id="fit" role="img" aria-label="Measured copper-64 activities at six times with the 12.7 hour decay curve and a free fit"></canvas>
+  <div class="legend"><span style="--k:var(--cx)">measured (0.511 MeV)</span><span style="--k:var(--c1)">12.7 h half-life</span><span style="--k:var(--c4)">free fit</span></div>
+  <p class="note" id="fitTxt" style="margin:8px 0 0"></p></div>
+</div>
+</section>
+
+<section class="card" aria-labelledby="res-h">
+<h2 id="res-h">What the paper measured</h2>
+<div class="tablewrap"><table>
+<thead><tr><th>Result</th><th>Value</th></tr></thead>
+<tbody>
+<tr><td>Neutron source: D-D fusion, mean energy / average output</td><td>3.1 ± 0.5 MeV / 2 × 10⁷ n/s over 4π</td></tr>
+<tr><td>Sample: compacted natural zinc powder, 99.995% pure, 5 mm × 5 mm cylinder</td><td>1 h irradiation</td></tr>
+<tr><td>Copper-64 activity at mid-measurement times 3.63, 15.63 … 63.63 h</td><td>17.10, 8.96, 4.59, 2.36, 1.15, 0.60 Bq</td></tr>
+<tr><td>Detection limits (MDA): ⁶⁴Cu / ⁶⁶Cu / ⁶⁷Cu / ⁶⁸Cu</td><td>0.223 / 0.462 / 0.065 / 0.085 Bq</td></tr>
+<tr><td>Copper radioisotopes detected</td><td>⁶⁴Cu only</td></tr>
+<tr><td>Copper-64 purity, worst case (⁶⁷Cu at its 0.065 Bq limit), 0.67 h after</td><td>99.62 ± 1.53%</td></tr>
+<tr><td>Copper-64 purity with expected ⁶⁷Cu of 0.005 Bq (from Table II)</td><td>99.97 ± 1.54%</td></tr>
+<tr><td>Production ratio ⁶⁴Cu : ⁶⁷Cu at these neutron energies</td><td>682 : 1</td></tr>
+<tr><td>Raw material: enriched ⁶⁴Ni vs natural zinc</td><td>US$50,000/g vs US$24/g (~2,000×)</td></tr>
+</tbody></table></div>
+<p class="note">Sources: Tables I–II and text of arXiv:2610.31340. The paper’s Fig. 4 reports the 99.95% bar being crossed about 0.8 h after a 1 h irradiation and held for about another 31 h. This demo’s constant-rate Bateman model using the Table II numbers crosses at about 0.3 h and holds for about 11 h. The paper does not give enough detail to reproduce Fig. 4 exactly, so treat the demo’s window as a recalculation, not the paper’s figure.</p>
+</section>
+
+<section class="card" aria-labelledby="math-h">
+<h2 id="math-h">The maths</h2>
+<p>Each copper isotope i is made at a constant rate R<sub>i</sub> = f<sub>i</sub> R while the neutrons are on, where f<sub>i</sub> is its fractional total cross-section (Table II), and decays with λ<sub>i</sub> = ln 2 / T<sub>½,i</sub>. For an irradiation of length t<sub>irr</sub>, the activity A = λN is:</p>
+<div class="eq math">during:  A<sub>i</sub>(t) = R<sub>i</sub> (1 − e<sup>−λ<sub>i</sub>t</sup>)        after (τ = t − t<sub>irr</sub>):  A<sub>i</sub> = R<sub>i</sub> (1 − e<sup>−λ<sub>i</sub>t<sub>irr</sub></sup>) e<sup>−λ<sub>i</sub>τ</sup></div>
+<p>Copper-68 is fed through the 3.75-minute isomer ⁶⁸ᵐCu, so it uses the two-member Bateman solution for a parent P feeding a daughter D:</p>
+<div class="eq math">N<sub>D</sub>(τ) = N<sub>D</sub>(0) e<sup>−λ<sub>D</sub>τ</sup> + N<sub>P</sub>(0) λ<sub>P</sub>/(λ<sub>D</sub> − λ<sub>P</sub>) · (e<sup>−λ<sub>P</sub>τ</sup> − e<sup>−λ<sub>D</sub>τ</sup>)</div>
+<p>Radioisotopic purity is the copper-64 share of all copper activity. The free fit to the six measured points is a straight line through ln A versus time, and its slope gives T<sub>½</sub> = −ln 2 / slope.</p>
+<div class="eq math">purity = A<sub>64</sub> / (A<sub>64</sub> + A<sub>66</sub> + A<sub>67</sub> + A<sub>68</sub> + A<sub>68m</sub>)     f = 0.9984, 1.448×10⁻⁴, 1.465×10⁻³, 1.504×10⁻⁸</div>
+<p class="note">Half-lives used: ⁶⁴Cu 12.70 h, ⁶⁶Cu 0.08533 h, ⁶⁷Cu 61.83 h, ⁶⁸Cu 0.008583 h, ⁶⁸ᵐCu 0.0625 h. Simplifications: all mass-68 production is routed through ⁶⁸ᵐCu, which all becomes ⁶⁸Cu; the 21-second ⁶⁷Ni route to ⁶⁷Cu is treated as direct; there is no burn-up and no change in neutron output. The absolute scale R is fitted with T<sub>½</sub> fixed at 12.7 h to Table I, giving about 21.4 Bq of copper-64 at the end of the 1 h run.</p>
+</section>
+
+<section class="card" aria-labelledby="how-h">
+<h2 id="how-h">How to use it</h2>
+<ul>
+<li><strong>Irradiation time:</strong> longer runs make more copper-64, which saturates after a few half-lives. Copper-67 keeps building for longer because it lives longer, so the purity window shrinks. Try 1 h and then 12 h.</li>
+<li><strong>Wait after irradiation:</strong> the first few minutes are dominated by short-lived copper-66. Once it has decayed, purity peaks. After that, the longer-lived copper-67 slowly gains on copper-64 until purity drops below 99.95%. The paper’s sample was first measured at 0.67 h.</li>
+<li><strong>Source strength and zinc mass:</strong> these scale the amount of copper-64 but not its purity. The experiment made about 20 Bq. A single PET dose is millions of times more, which is why the authors see the next step as bright deuteron accelerators (an earlier paper from the same lab targets 10¹⁰ n/s), with clinical-scale production in about 5 years.</li>
+<li><strong>Measured decay:</strong> the right-hand plot shows that the six real measurements fall on copper-64’s 12.7-hour decay, which is how the team knew the 0.511 MeV signal came only from copper-64.</li>
+</ul>
+</section>
+
+<p class="note" style="margin-top:24px">Demo by Grok Bot for the Daily Research Explorer. Calculations run in your browser; measured values are quoted from arXiv:2610.31340. The 148 MBq dose is the labelled adult dose of the approved copper-64 dotatate PET agent, used here only as a size comparison.</p>
+</main>
+<script>
+"use strict";
+const $=id=>document.getElementById(id),LN2=Math.LN2;
+/* Table II: fractional total cross-section f and half-life (h) */
+const ISO=[
+ {k:'64',f:0.9984,T:12.70,c:'--c1'},
+ {k:'66',f:1.448e-4,T:8.533e-2,c:'--c2'},
+ {k:'67',f:1.465e-3,T:61.83,c:'--c3'},
+ {k:'68',f:1.504e-8,T:8.583e-3,Tm:6.25e-2,c:'--c4'}];
+/* Table I: measured 64Cu activity (Bq) at mid-measurement times (h after end of irradiation) */
+const TM=[3.63,15.63,27.63,39.63,51.63,63.63],AM=[17.099,8.956,4.589,2.360,1.145,0.601];
+const L64=LN2/12.70;
+/* calibrate R (total production rate, Bq-equivalent) with T1/2 fixed at 12.7 h, 1 h irradiation */
+const lnC=TM.reduce((s,t,i)=>s+Math.log(AM[i])+L64*t,0)/TM.length,C_EOI=Math.exp(lnC);
+const R0=C_EOI/(ISO[0].f*(1-Math.exp(-L64*1)));
+/* free log-linear fit */
+const FIT=(()=>{const n=TM.length,mx=TM.reduce((a,b)=>a+b)/n,ly=AM.map(Math.log),my=ly.reduce((a,b)=>a+b)/n;let sxy=0,sxx=0;TM.forEach((x,i)=>{sxy+=(x-mx)*(ly[i]-my);sxx+=(x-mx)**2;});const s=sxy/sxx;return {s,b:my-s*mx,T:-LN2/s};})();
+const M0=Math.PI*0.25*0.25*0.5*6.99, F0=2e7; /* 5 mm × 5 mm cylinder of zinc, g; neutrons/s */
+
+/* activity (Bq) of isotope at time t (h from start), irradiation length ti, production scale R */
+function act(o,R,ti,t){const P=o.f*R;
+ if(!o.Tm){const l=LN2/o.T;return t<=ti?P*(1-Math.exp(-l*t)):P*(1-Math.exp(-l*ti))*Math.exp(-l*(t-ti));}
+ /* parent 68mCu (IT) -> daughter 68Cu; returns parent + daughter activity */
+ const lp=LN2/o.Tm,ld=LN2/o.T;
+ const NP=s=>P/lp*(1-Math.exp(-lp*s)),ND=s=>P/ld*(1-(ld*Math.exp(-lp*s)-lp*Math.exp(-ld*s))/(ld-lp));
+ if(t<=ti)return lp*NP(t)+ld*ND(t);
+ const p0=NP(ti),d0=ND(ti),u=t-ti,np=p0*Math.exp(-lp*u),nd=d0*Math.exp(-ld*u)+p0*lp/(ld-lp)*(Math.exp(-lp*u)-Math.exp(-ld*u));
+ return lp*np+ld*nd;}
+function purity(ti,t){const a=ISO.map(o=>act(o,1,ti,t));return a[0]/a.reduce((x,y)=>x+y);}
+function window9995(ti){let first=null,last=null;for(let u=0;u<=400;u+=0.005){if(purity(ti,ti+u)>=0.9995){if(first===null)first=u;last=u;}else if(first!==null)break;}return first===null?null:[first,last];}
+
+/* ===== canvas helpers ===== */
+const css=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+function setup(c){const r=c.getBoundingClientRect(),d=devicePixelRatio||1;c.width=Math.round(r.width*d);c.height=Math.round(r.height*d);const x=c.getContext('2d');x.setTransform(d,0,0,d,0,0);x.font='12px '+css('--font');return [x,r.width,r.height];}
+function axes(x,W,H,m,x0,x1,y0,y1,xt,yt,xl,yl,fx,fy){
+ const X=v=>m.l+(v-x0)/(x1-x0)*(W-m.l-m.r),Y=v=>H-m.b-(v-y0)/(y1-y0)*(H-m.t-m.b);
+ x.strokeStyle=css('--grid');x.lineWidth=1;x.fillStyle=css('--muted');x.textAlign='right';x.textBaseline='middle';
+ yt.forEach(v=>{x.beginPath();x.moveTo(m.l,Y(v));x.lineTo(W-m.r,Y(v));x.stroke();x.fillText(fy(v),m.l-6,Y(v));});
+ x.textAlign='center';x.textBaseline='top';xt.forEach(v=>{x.beginPath();x.moveTo(X(v),m.t);x.lineTo(X(v),H-m.b);x.stroke();x.fillText(fx(v),X(v),H-m.b+6);});
+ x.fillText(xl,(m.l+W-m.r)/2,H-16);x.save();x.translate(12,(m.t+H-m.b)/2);x.rotate(-Math.PI/2);x.textBaseline='middle';x.fillText(yl,0,0);x.restore();return [X,Y];}
+function line(x,pts,X,Y,col,w,dash){x.strokeStyle=col;x.lineWidth=w;x.setLineDash(dash||[]);x.beginPath();let on=false;pts.forEach(p=>{if(p==null||!isFinite(p[1])){on=false;return;}on?x.lineTo(X(p[0]),Y(p[1])):x.moveTo(X(p[0]),Y(p[1]));on=true;});x.stroke();x.setLineDash([]);}
+const sup={'-':'⁻','0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹'};
+const pow10=e=>'10'+String(e).split('').map(ch=>sup[ch]).join('');
+function fmtBq(a){const u=[[1e12,'TBq'],[1e9,'GBq'],[1e6,'MBq'],[1e3,'kBq'],[1,'Bq'],[1e-3,'mBq']];for(const [s,n] of u)if(a>=s)return [(a/s).toPrecision(3),n];return [a.toExponential(2),'Bq'];}
+const sm=t=>'<small>'+t+'</small>';
+function fmtH(h){return h<1?(h*60).toFixed(0)+' min':h.toFixed(h<10?2:1)+' h';}
+
+function state(){const ti=+$('ti').value,tw=+$('tw').value,F=Math.pow(10,+$('fl').value),M=Math.pow(10,+$('ms').value);return {ti,tw,F,M,R:R0*(F/F0)*(M/M0)};}
+
+function drawAct(S){const [x,W,H]=setup($('act')),m={l:62,r:16,t:14,b:42},t1=S.ti+72;
+ const peak=act(ISO[0],S.R,S.ti,S.ti),ly1=Math.ceil(Math.log10(peak)+0.3),ly0=ly1-10;
+ const yt=[];for(let e=ly0;e<=ly1;e+=2)yt.push(e);const step=t1>60?12:6,xt=[];for(let v=0;v<=t1+1e-9;v+=step)xt.push(v);
+ const [X,Y]=axes(x,W,H,m,0,t1,ly0,ly1,xt,yt,'hours since neutrons switched on','activity (Bq, log)',v=>v.toFixed(0),pow10);
+ x.fillStyle=css('--accent-soft');x.fillRect(X(0),m.t,X(S.ti)-X(0),H-m.t-m.b);
+ const N=900;ISO.forEach(o=>{const pts=[];for(let i=0;i<=N;i++){/* dense sampling near the end of irradiation for short-lived isotopes */
+   const t=i<=N/2?S.ti*Math.pow(i/(N/2),1):S.ti+72*Math.pow((i-N/2)/(N/2),2.2);const a=act(o,S.R,S.ti,t);
+   pts.push(a>0?[t,Math.max(ly0-1,Math.log10(a))]:null);}
+  x.save();x.beginPath();x.rect(m.l,m.t,W-m.l-m.r,H-m.t-m.b);x.clip();line(x,pts,X,Y,css(o.c),2.4);x.restore();});
+ const tn=S.ti+S.tw;x.strokeStyle=css('--muted');x.setLineDash([2,4]);x.beginPath();x.moveTo(X(tn),m.t);x.lineTo(X(tn),H-m.b);x.stroke();x.setLineDash([]);}
+
+function drawPur(S){const [x,W,H]=setup($('pur')),m={l:62,r:14,t:14,b:42},y0=99.7,y1=100;
+ const [X,Y]=axes(x,W,H,m,0,72,y0,y1,[0,12,24,36,48,60,72],[99.7,99.8,99.9,100],'hours after irradiation','copper-64 purity (%)',v=>v.toFixed(0),v=>v.toFixed(1));
+ const w=window9995(S.ti);if(w){x.fillStyle='color-mix(in srgb,'+css('--c3')+' 18%,transparent)';x.fillRect(X(w[0]),m.t,Math.max(1,X(Math.min(72,w[1]))-X(w[0])),H-m.t-m.b);}
+ line(x,[[0,99.95],[72,99.95]],X,Y,css('--c2'),1.6,[6,5]);
+ const pts=[];for(let i=0;i<=600;i++){const u=72*Math.pow(i/600,1.6);pts.push([u,Math.max(y0-0.05,purity(S.ti,S.ti+u)*100)]);}
+ x.save();x.beginPath();x.rect(m.l,m.t,W-m.l-m.r,H-m.t-m.b);x.clip();line(x,pts,X,Y,css('--c1'),2.4);x.restore();
+ const p=purity(S.ti,S.ti+S.tw)*100;if(S.tw<=72&&p>=y0){x.fillStyle=css('--c1');x.beginPath();x.arc(X(S.tw),Y(p),4.5,0,6.3);x.fill();}
+ x.strokeStyle=css('--muted');x.setLineDash([2,4]);x.beginPath();x.moveTo(X(S.tw),m.t);x.lineTo(X(S.tw),H-m.b);x.stroke();x.setLineDash([]);}
+
+function drawFit(){const [x,W,H]=setup($('fit')),m={l:56,r:14,t:14,b:42};
+ const [X,Y]=axes(x,W,H,m,0,72,-1,1.5,[0,12,24,36,48,60,72],[-1,-0.5,0,0.5,1,1.5],'hours after irradiation','⁶⁴Cu activity (Bq, log)',v=>v.toFixed(0),v=>{const a=Math.pow(10,v);return a<1?a.toFixed(1):a.toFixed(0);});
+ const p1=[],p2=[];for(let t=0;t<=72;t+=0.5){p1.push([t,(lnC-L64*t)/Math.LN10]);p2.push([t,(FIT.b+FIT.s*t)/Math.LN10]);}
+ line(x,p1,X,Y,css('--c1'),2.4);line(x,p2,X,Y,css('--c4'),1.8,[6,4]);
+ x.fillStyle=css('--cx');TM.forEach((t,i)=>{x.beginPath();x.arc(X(t),Y(Math.log10(AM[i])),4.5,0,6.3);x.fill();});
+ /* the 6-hour counting windows */
+ x.strokeStyle=css('--cx');x.lineWidth=1.5;TM.forEach((t,i)=>{const y=Y(Math.log10(AM[i]));x.beginPath();x.moveTo(X(t-3),y);x.lineTo(X(t+3),y);x.stroke();});}
+
+function show(){const S=state(),t=S.ti+S.tw;
+ $('tio').textContent=fmtH(S.ti);$('two').textContent=fmtH(S.tw);
+ $('flo').textContent=(S.F/Math.pow(10,Math.floor(Math.log10(S.F)))).toFixed(1)+' × '+pow10(Math.floor(Math.log10(S.F)))+' n/s';
+ $('mso').textContent=(S.M<10?S.M.toFixed(2):S.M.toFixed(0))+' g';
+ const a=ISO.map(o=>act(o,S.R,S.ti,t)),tot=a.reduce((p,q)=>p+q),p=a[0]/tot;
+ const pv=p*100,pe=$('sP');pe.innerHTML=(pv>=99.99?pv.toFixed(3):pv.toFixed(2))+sm('%');pe.classList.toggle('good',p>=0.9995);pe.classList.toggle('bad',p<0.9995);
+ const w=window9995(S.ti);$('sW').innerHTML=w?w[0].toFixed(2)+'–'+w[1].toFixed(1)+sm('h'):'never';
+ const [v,u]=fmtBq(a[0]);$('sA').innerHTML=v+sm(u);
+ const d=a[0]/148e6;$('sD').innerHTML=d>=0.01?(d*100).toPrecision(3)+sm('%'):'1 in '+Math.round(1/d).toLocaleString('en-AU');
+ $('sR').innerHTML='1 : '+(a[0]/a[2]).toFixed(0);
+ $('status').textContent='At '+fmtH(S.tw)+' after a '+fmtH(S.ti)+' run: copper-66 makes up '+(a[1]/tot*100).toPrecision(2)+' % and copper-67 '+(a[2]/tot*100).toPrecision(2)+' % of the copper activity.';
+ drawAct(S);drawPur(S);document.body.dataset.ready='1';}
+$('fitTxt').textContent='Free fit to the six points: half-life '+FIT.T.toFixed(1)+' h (copper-64: 12.7 h; copper-67 would be 61.8 h). Bars show each 6-hour counting window.';
+['ti','tw','fl','ms'].forEach(id=>$(id).addEventListener('input',show));
+function all(){show();drawFit();}
+addEventListener('resize',all);
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',all);
+all();
+</script>
+</body></html>
