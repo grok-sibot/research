@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="light dark">
+<title>Which metal mixes can hydrogen turn straight into alloy? — Research Explorer, 25 Oct 2026</title>
+<link rel="stylesheet" href="../assets/style.css">
+<style>
+/* page-specific: two extra chart colours, canvas heights, segmented control, stat accents */
+:root{--c5:#007d8a;--c6:#c4007a}
+@media (prefers-color-scheme:dark){:root{--c5:#5ac8fa;--c6:#ff6bb5}}
+canvas#ell{height:380px} canvas#rmin{height:300px} canvas#rec{height:360px}
+.stat .v small{font-size:15px;font-weight:500;color:var(--muted);margin-left:4px}
+.stat .v.good{color:var(--c3)} .stat .v.bad{color:var(--c2)}
+.seg{display:inline-flex;flex-wrap:wrap;gap:2px;padding:2px;border-radius:10px;background:var(--accent-soft);margin:4px 0 14px}
+.seg button{font:500 14px var(--font);color:var(--text);background:transparent;border:0;border-radius:8px;padding:6px 14px;cursor:pointer;min-height:32px}
+.seg button[aria-pressed=true]{background:var(--card-solid);box-shadow:0 1px 3px rgba(0,0,0,.18);font-weight:600}
+.tablewrap{overflow-x:auto}
+td.ok{color:var(--c3);font-weight:600} td.no{color:var(--c2);font-weight:600}
+</style></head><body><main>
+<a class="back" href="../">‹ All demos</a>
+<div class="eyebrow">25 Oct 2026 · Materials &amp; Climate</div>
+<h1>Which metal mixes can hydrogen turn straight into alloy?</h1>
+<p class="lede">Instead of mining, smelting and melting each metal separately, you could blend their oxides and let hydrogen pull the oxygen out, leaving a finished alloy and only water as exhaust. This study works out, for thousands of cobalt–chromium–iron–manganese–nickel blends, how dry the hydrogen has to be for the last scrap of oxide to disappear.</p>
+<p class="authors">Albert Linda, Shiv Shankar &amp; Dierk Raabe</p>
+
+<section class="card why" aria-labelledby="why-h">
+<h2 id="why-h">Why it matters</h2>
+<p id="whyP">Metal production causes about 40% of global industrial greenhouse gas emissions, and hydrogen can turn a blend of oxides straight into an alloy in one step while giving off water instead of CO₂. This study maps how dry that hydrogen must be across 3,526 cobalt–chromium–iron–manganese–nickel blends: cobalt–iron–nickel mixes reduce easily (a median H₂/H₂O ratio of about 0.16 at 1100 °C), while manganese- and chromium-bearing mixes need gas hundreds to thousands of times drier, so recipes can be screened before anyone fires up a furnace.</p>
+</section>
+
+<section class="card" aria-labelledby="paper-h">
+<h2 id="paper-h">The paper</h2>
+<p style="margin:0 0 6px"><strong>Designing sustainable high-entropy alloys directly from mixed oxides: A thermodynamic perspective</strong></p>
+<p class="cite" style="margin:0">Albert Linda, Shiv Shankar &amp; Dierk Raabe (Max Planck Institute for Sustainable Materials, Düsseldorf). arXiv:2610.30870 [cond-mat.mtrl-sci], submitted 22 Oct 2026. <a href="https://arxiv.org/abs/2610.30870">Read on arXiv</a> · <a href="https://arxiv.org/pdf/2610.30870">PDF</a> · <a href="https://github.com/albert-hzbn/CoCrFeMnNi-hydrogen-reduction">Data &amp; code</a></p>
+<p style="margin-top:14px">In plain language: every metal oxide holds on to its oxygen with a certain strength. Hydrogen can take that oxygen away (making water) only if the gas “pulls” harder than the oxide “holds”. How hard the gas pulls depends on the temperature and on the ratio of hydrogen to water vapour, r = H₂/H₂O. Drier gas (bigger r) pulls harder. The catch is that water builds up right where the reaction happens, so very large ratios are hard to keep.</p>
+<p>In a blend, the metals dissolve in each other and the oxides mix, so each one holds its oxygen differently than it would on its own. The authors used CALPHAD thermodynamic databases (Thermo-Calc with TCOX10) to find, for each blend and temperature from 500 to 1500 °C, the last oxide that has to be removed, and the minimum gas ratio r<sub>min</sub> that removes it. Manganese and chromium make that last oxide much harder to remove. Cobalt, iron and nickel make it easier. These effects can change size, or even reverse, depending on what else is in the mix. They also show that a blend with fewer in-between steps is not always easier to finish.</p>
+</section>
+
+<section class="card" aria-labelledby="demo-h">
+<h2 id="demo-h">Try it: the hydrogen operating window</h2>
+<p class="note" style="margin:0 0 14px">The gas line and the iron-oxide (FeO) line use the paper’s Equations 3, 4 and 6 exactly. Each coloured line is the <em>median</em> last-oxide stability for one family of three-metal blends. It comes from the paper’s median driving forces at 700 °C and 1300 °C and is drawn straight between them, which is an approximation. The open circles are a check, back-calculated from the paper’s median r<sub>min</sub> at 1100 °C. A blend is reducible when its line sits <strong>above</strong> the gas line, inside the shaded zone.</p>
+
+<div class="controls">
+ <div><label for="tt"><span>Furnace temperature</span> <output id="tto"></output></label><input id="tt" type="range" min="700" max="1300" step="10" value="1100"></div>
+ <div><label for="rr"><span>Gas dryness, H₂/H₂O ratio r</span> <output id="rro"></output></label><input id="rr" type="range" min="-1" max="5.5" step="any" value="0.47712"></div>
+</div>
+
+<div class="stats" style="grid-template-columns:repeat(auto-fit,minmax(200px,1fr))">
+ <div class="stat"><div class="v" id="sG"></div><div class="l">Gas oxygen-pull line ΔG<sub>HyDR</sub> (kJ per mol O₂)</div></div>
+ <div class="stat"><div class="v" id="sH"></div><div class="l">Water vapour in the H₂/H₂O gas</div></div>
+ <div class="stat"><div class="v" id="sF"></div><div class="l">Margin for plain iron oxide (FeO → Fe)</div></div>
+ <div class="stat"><div class="v" id="sN"></div><div class="l">Blend families whose median blend is fully reduced</div></div>
+</div>
+<p class="note" id="status" aria-live="polite" style="margin:8px 0 0"></p>
+
+<div style="margin-top:18px"><div class="plot-title">Ellingham-style diagram: who holds oxygen harder, the oxide or the gas?</div>
+ <canvas id="ell" role="img" aria-label="Oxygen potential versus temperature showing the hydrogen gas line, the FeO reference line and median last-oxide lines for five blend families"></canvas>
+ <div class="legend"><span style="--k:var(--c1)">H₂/H₂O gas at your r</span><span style="--k:var(--cx)">FeO → Fe (dashed)</span><span style="--k:var(--c2)">Fe–Mn–Ni</span><span style="--k:var(--c4)">Cr–Fe–Mn</span><span style="--k:var(--c5)">Cr–Fe–Ni</span><span style="--k:var(--c6)">Co–Fe–Mn</span><span style="--k:var(--c3)">Co–Fe–Ni (1100 °C point)</span><span>shaded: reducible zone</span></div>
+</div>
+
+<div style="margin-top:22px">
+ <div><div class="plot-title">Driest gas needed, r<sub>min</sub> (Equation 7)</div>
+  <canvas id="rmin" role="img" aria-label="Log-scale minimum hydrogen to water ratio versus temperature for each blend family, with your chosen ratio as a horizontal line"></canvas>
+  <div class="legend"><span style="--k:var(--c1)">your r</span><span>colours as above · circles: paper’s 1100 °C medians</span></div></div>
+ <div style="margin-top:22px"><div class="plot-title">Median r<sub>min</sub> at your temperature</div>
+  <div class="tablewrap"><table>
+   <thead><tr><th>Blend family</th><th>r<sub>min</sub> (this demo)</th><th>Paper, 1100 °C</th><th>Max H₂O in a 5% H₂ feed</th><th>At your r</th></tr></thead>
+   <tbody id="tb"></tbody></table></div>
+  <p class="note">The H₂O column is 5% ÷ r<sub>min</sub>, as in the paper (for example, 121 ppm for Fe–Mn–Ni at 1100 °C). These are equilibrium targets at the reacting surface, not inlet specifications.</p></div>
+</div>
+</section>
+
+<section class="card" aria-labelledby="rec-h">
+<h2 id="rec-h">Try it: specific recipes at 900 °C</h2>
+<p class="note" style="margin:0 0 10px">The paper lists the last-oxide energy (boundary 1) of six example blends at 900 °C (Figure 6). The last three rows are derived from the Conclusions: an equal iron–nickel blend needs r ≈ 0.3, and adding 10 at.% chromium or manganese lowers its last-oxide energy by about 168 or 161 kJ/mol O₂. Each bar is the driving force ΔG<sub>rf</sub> at your gas ratio. Green bars to the right reduce completely, red bars to the left leave oxide behind.</p>
+<div class="seg" role="group" aria-label="Preset gas ratio">
+ <button type="button" data-r="1">r = 1</button><button type="button" data-r="3">r = 3 (paper’s reference)</button><button type="button" data-r="10">r = 10</button><button type="button" data-r="1000">r = 1,000</button><button type="button" data-r="100000">r = 100,000</button>
+</div>
+<canvas id="rec" role="img" aria-label="Horizontal bars of reduction driving force at 900 degrees Celsius for nine example blends"></canvas>
+<div class="legend"><span style="--k:var(--c3)">fully reduced</span><span style="--k:var(--c2)">oxide remains</span><span>numbers at the right: r<sub>min</sub> for that blend</span></div>
+<p class="note" id="recTxt" aria-live="polite" style="margin:8px 0 0"></p>
+</section>
+
+<section class="card" aria-labelledby="res-h">
+<h2 id="res-h">What the paper found</h2>
+<div class="tablewrap"><table>
+<thead><tr><th>Result</th><th>Value</th></tr></thead>
+<tbody>
+<tr><td>Blends computed (Co–Cr–Fe–Mn–Ni, at 21 temperatures from 500–1500 °C)</td><td>3,526 compositions</td></tr>
+<tr><td>Reference gas: r = 3 is the smallest ratio that reduces FeO across 700–1300 °C</td><td>r<sub>min,FeO</sub> ≈ 2.6 at 700 °C</td></tr>
+<tr><td>Median r<sub>min</sub> at 1100 °C: Co–Fe–Ni / Cr–Fe–Ni / Fe–Mn–Ni / Co–Fe–Mn / Cr–Fe–Mn</td><td>0.155 / 356 / 413 / 1,405 / 2,529</td></tr>
+<tr><td>Fe–Mn–Ni median r<sub>min</sub>, 700 °C → 1300 °C</td><td>7.16 × 10⁴ → 71.2</td></tr>
+<tr><td>Median driving force at r = 3, 700 → 1300 °C: Fe–Mn–Ni / Cr–Fe–Mn / Cr–Fe–Ni / Co–Fe–Mn</td><td>−163→−82 / −190→−134 / −157→−87 / −181→−115 kJ/mol O₂</td></tr>
+<tr><td>Most common last oxide in Fe-bearing blends: rock-salt (HALITE) / CORUNDUM / SPINEL</td><td>42.4% / 28.6% / 27.6%</td></tr>
+<tr><td>Adding 10 at.% Cr or Mn to equal Fe–Ni at 900 °C</td><td>−168 / −161 kJ/mol O₂; r<sub>min</sub> 0.3 → above 10³</td></tr>
+<tr><td>Adding 10 at.% Co to equal Fe–Ni at 900 °C</td><td>&lt; 1 kJ/mol O₂ change</td></tr>
+</tbody></table></div>
+<p class="note">Sources: Section 3.1, Table 1, Section 3.4 and Conclusions of arXiv:2610.30870. Everything is equilibrium thermodynamics. It says nothing about speed: pores that trap water, gas flow and diffusion decide how fast, and whether, reduction finishes in practice. The metal is assumed to form a single FCC solid solution, which is a modelling assumption.</p>
+</section>
+
+<section class="card" aria-labelledby="math-h">
+<h2 id="math-h">The maths</h2>
+<p>Hydrogen burning to water sets the oxygen potential of the furnace gas (T in kelvin, J per mol O₂). At a gas ratio r = p<sub>H₂</sub>/p<sub>H₂O</sub>:</p>
+<div class="eq math">2H₂ + O₂ → 2H₂O:   ΔG°<sub>H₂O</sub>(T) ≈ −483,600 + 88T        ΔG<sub>HyDR</sub>(T, r) = ΔG°<sub>H₂O</sub> − 2RT ln r</div>
+<p>The last oxide in a blend has an onset energy ΔG<sub>onset</sub> (kJ per mol O₂). The reduction driving force and the minimum gas ratio follow from Equations 5 and 7:</p>
+<div class="eq math">ΔG<sub>rf</sub> = ΔG<sub>onset</sub> − ΔG<sub>HyDR</sub>/1000        r<sub>min</sub> = exp[(ΔG°<sub>H₂O</sub>(T) − 1000 ΔG<sub>onset</sub>) / (2RT)]</div>
+<p>Reduction is complete at equilibrium when ΔG<sub>rf</sub> &gt; 0, that is, when r &gt; r<sub>min</sub>. The iron-oxide reference is ΔG<sub>FeO</sub> ≈ (−544,000 + 134T)/1000 kJ/mol O₂. Because r<sub>min</sub> is exponential, small energy differences matter a lot. At 1100 °C, ±10 kJ/mol O₂ changes r<sub>min</sub> by a factor of about 1.55, as the paper notes.</p>
+<p class="note">Check: at 700 °C and r = 3 the demo gives a gas line of −415.7 and an FeO line of −413.6 kJ/mol O₂, a margin of +2.1, matching Table 1. Family lines: ΔG<sub>onset</sub>(T) = ΔG<sub>HyDR</sub>(T, 3)/1000 + median ΔG<sub>rf</sub>, taken at 700 and 1300 °C and joined with a straight line. At 1100 °C this lands within a few kJ/mol O₂ of the paper’s own median r<sub>min</sub> values (the open circles). The gap is small but noticeable on a log scale. The Co–Fe–Ni family is shown only at 1100 °C, because the paper gives its median as a number only at that temperature.</p>
+</section>
+
+<section class="card" aria-labelledby="how-h">
+<h2 id="how-h">How to use it</h2>
+<ul>
+<li><strong>Furnace temperature:</strong> heating lifts every oxide line toward the gas line, so hotter usually helps. Watch Fe–Mn–Ni: its median r<sub>min</sub> falls from about 72,000 at 700 °C to about 71 at 1300 °C. Even so, it still needs much drier gas than plain iron oxide.</li>
+<li><strong>Gas dryness r:</strong> dragging it right lowers the blue gas line. Going from r = 3 to r = 10 gains only about 20–30 kJ/mol O₂. That helps blends near the edge, but it cannot close a gap of 100 kJ or more in manganese- or chromium-rich blends.</li>
+<li><strong>Recipes at 900 °C:</strong> tap the presets and compare. Co5Fe60Ni35 and Co10Fe10Ni80 turn fully to metal even in wet gas (r = 1). Co10Fe80Mn10 has only one oxide step, but it still needs r ≈ 4.75 × 10³. Fewer steps does not mean easier.</li>
+<li><strong>Design rule:</strong> to make an alloy straight from oxides with realistic hydrogen, keep manganese and chromium low or accept very dry gas and higher temperatures. Adding nickel or cobalt generally makes the last oxide easier to remove, though how much depends on the rest of the blend.</li>
+</ul>
+</section>
+
+<p class="note" style="margin-top:24px">Demo by Grok Bot for the Daily Research Explorer. Calculations run in your browser. Every input number is quoted from arXiv:2610.30870. The straight-line family curves and the three derived Fe–Ni recipes are this demo’s approximations, as labelled above.</p>
+</main>
+<script>
+"use strict";
+const $=id=>document.getElementById(id),R=8.314,K=c=>c+273.15;
+/* Paper Eq. 3, 4, 6 */
+const g0=T=>-483600+88*T;                         /* J/mol O2 */
+const gas=(T,r)=>(g0(T)-2*R*T*Math.log(r))/1000;   /* kJ/mol O2 */
+const feo=T=>(-544000+134*T)/1000;
+const rmin=(T,on)=>Math.exp((g0(T)-1000*on)/(2*R*T)); /* Eq. 7 */
+/* Median driving force at r=3 (kJ/mol O2) at 700 and 1300 C, Section 3.1; median rmin at 1100 C */
+const FAM=[
+ {k:'Fe–Mn–Ni',c:'--c2',d700:-163,d1300:-82,r1100:413},
+ {k:'Cr–Fe–Mn',c:'--c4',d700:-190,d1300:-134,r1100:2529},
+ {k:'Cr–Fe–Ni',c:'--c5',d700:-157,d1300:-87,r1100:356},
+ {k:'Co–Fe–Mn',c:'--c6',d700:-181,d1300:-115,r1100:1405}];
+const COFENI={k:'Co–Fe–Ni',c:'--c3',r1100:0.155};
+const T7=K(700),T13=K(1300),T11=K(1100);
+FAM.forEach(f=>{f.o7=gas(T7,3)+f.d700;f.o13=gas(T13,3)+f.d1300;});
+const onset=(f,T)=>f.o7+(T-T7)/(T13-T7)*(f.o13-f.o7);
+const onFromR=(T,r)=>gas(T,r); /* onset energy that gives rmin=r */
+/* Section 3.4 boundary-1 energies at 900 C; last three derived from Conclusions */
+const T9=K(900),feni=gas(T9,0.3);
+const REC=[
+ {k:'Co5Fe60Ni35',on:-360.2},{k:'Co10Fe10Ni80',on:-315.4},{k:'Fe20Mn20Ni60',on:-528.5},
+ {k:'Co10Fe80Mn10',on:-545.5},{k:'Co10Fe50Mn40',on:-572.2},{k:'Co20Fe20Mn60',on:-580.7},
+ {k:'≈ Fe50Ni50',on:feni,d:1},{k:'≈ Fe–Ni + 10% Mn',on:feni-161,d:1},{k:'≈ Fe–Ni + 10% Cr',on:feni-168,d:1}];
+
+const css=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+function setup(c){const r=c.getBoundingClientRect(),d=devicePixelRatio||1;c.width=Math.round(r.width*d);c.height=Math.round(r.height*d);const x=c.getContext('2d');x.setTransform(d,0,0,d,0,0);x.font='12px '+css('--font');return [x,r.width,r.height];}
+function axes(x,W,H,m,x0,x1,y0,y1,xt,yt,xl,yl,fx,fy){
+ const X=v=>m.l+(v-x0)/(x1-x0)*(W-m.l-m.r),Y=v=>H-m.b-(v-y0)/(y1-y0)*(H-m.t-m.b);
+ x.strokeStyle=css('--grid');x.lineWidth=1;x.fillStyle=css('--muted');x.textAlign='right';x.textBaseline='middle';
+ yt.forEach(v=>{x.beginPath();x.moveTo(m.l,Y(v));x.lineTo(W-m.r,Y(v));x.stroke();x.fillText(fy(v),m.l-6,Y(v));});
+ x.textAlign='center';x.textBaseline='top';xt.forEach(v=>{x.beginPath();x.moveTo(X(v),m.t);x.lineTo(X(v),H-m.b);x.stroke();x.fillText(fx(v),X(v),H-m.b+6);});
+ x.fillText(xl,(m.l+W-m.r)/2,H-16);x.save();x.translate(12,(m.t+H-m.b)/2);x.rotate(-Math.PI/2);x.textBaseline='middle';x.fillText(yl,0,0);x.restore();return [X,Y];}
+function line(x,pts,X,Y,col,w,dash){x.strokeStyle=col;x.lineWidth=w;x.setLineDash(dash||[]);x.beginPath();pts.forEach((p,i)=>i?x.lineTo(X(p[0]),Y(p[1])):x.moveTo(X(p[0]),Y(p[1])));x.stroke();x.setLineDash([]);}
+function ring(x,px,py,col,fill){x.lineWidth=2;x.strokeStyle=col;x.fillStyle=fill?col:css('--card-solid');x.beginPath();x.arc(px,py,5,0,6.3);x.fill();x.stroke();}
+const sup={'-':'⁻','0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹'};
+const pow10=e=>'10'+String(e).split('').map(ch=>sup[ch]).join('');
+function fmtR(r){if(r<10)return r.toPrecision(r<1?3:2);if(r<1e4)return Math.round(r).toLocaleString('en-AU');const e=Math.floor(Math.log10(r));return (r/Math.pow(10,e)).toFixed(2)+' × '+pow10(e);}
+function fmtPPM(f){return f>=0.01?(f*100).toPrecision(2)+'%':f>=1e-6?Math.round(f*1e6).toLocaleString('en-AU')+' ppm':(f*1e9).toPrecision(2)+' ppb';}
+const sm=t=>'<small>'+t+'</small>';
+const sign=v=>(v>=0?'+':'−')+Math.abs(v).toFixed(1);
+
+function state(){return {tc:+$('tt').value,r:Math.pow(10,+$('rr').value)};}
+
+function drawEll(S){const [x,W,H]=setup($('ell')),m={l:62,r:16,t:14,b:42},y0=-620,y1=-300;
+ const [X,Y]=axes(x,W,H,m,700,1300,y0,y1,[700,800,900,1000,1100,1200,1300],[-600,-550,-500,-450,-400,-350,-300],'temperature (°C)','ΔG (kJ per mol O₂)',v=>v,v=>v);
+ const Ts=[];for(let t=700;t<=1300;t+=5)Ts.push(t);
+ /* reducible zone: above the gas line */
+ x.save();x.beginPath();x.rect(m.l,m.t,W-m.l-m.r,H-m.t-m.b);x.clip();
+ x.fillStyle='color-mix(in srgb,'+css('--c3')+' 12%,transparent)';x.beginPath();x.moveTo(X(700),Y(y1));
+ Ts.forEach(t=>x.lineTo(X(t),Y(gas(K(t),S.r))));x.lineTo(X(1300),Y(y1));x.closePath();x.fill();
+ FAM.forEach(f=>line(x,Ts.map(t=>[t,onset(f,K(t))]),X,Y,css(f.c),2.2));
+ line(x,Ts.map(t=>[t,feo(K(t))]),X,Y,css('--cx'),1.8,[6,5]);
+ [1,3,10].forEach(rr=>line(x,Ts.map(t=>[t,gas(K(t),rr)]),X,Y,css('--muted'),1,[2,4]));
+ line(x,Ts.map(t=>[t,gas(K(t),S.r)]),X,Y,css('--c1'),3);
+ x.restore();
+ FAM.forEach(f=>ring(x,X(1100),Y(onFromR(T11,f.r1100)),css(f.c),false));
+ ring(x,X(1100),Y(onFromR(T11,COFENI.r1100)),css(COFENI.c),true);
+ x.fillStyle=css('--muted');x.textAlign='left';x.textBaseline='bottom';x.font='11px '+css('--font');
+ [1,3,10].forEach(rr=>x.fillText('r = '+rr,X(705),Y(gas(K(705),rr))-2));
+ x.strokeStyle=css('--muted');x.setLineDash([2,4]);x.beginPath();x.moveTo(X(S.tc),m.t);x.lineTo(X(S.tc),H-m.b);x.stroke();x.setLineDash([]);}
+
+function drawRmin(S){const [x,W,H]=setup($('rmin')),m={l:56,r:14,t:14,b:42},y0=-1,y1=7;
+ const [X,Y]=axes(x,W,H,m,700,1300,y0,y1,[700,900,1100,1300],[-1,0,1,2,3,4,5,6,7],'temperature (°C)','minimum H₂/H₂O (log)',v=>v,pow10);
+ const Ts=[];for(let t=700;t<=1300;t+=5)Ts.push(t);
+ x.save();x.beginPath();x.rect(m.l,m.t,W-m.l-m.r,H-m.t-m.b);x.clip();
+ FAM.forEach(f=>line(x,Ts.map(t=>[t,Math.log10(rmin(K(t),onset(f,K(t))))]),X,Y,css(f.c),2.2));
+ line(x,Ts.map(t=>[t,Math.log10(rmin(K(t),feo(K(t))))]),X,Y,css('--cx'),1.8,[6,5]);
+ line(x,[[700,Math.log10(S.r)],[1300,Math.log10(S.r)]],X,Y,css('--c1'),2.6);x.restore();
+ FAM.forEach(f=>ring(x,X(1100),Y(Math.log10(f.r1100)),css(f.c),false));
+ ring(x,X(1100),Y(Math.log10(COFENI.r1100)),css(COFENI.c),true);
+ x.strokeStyle=css('--muted');x.setLineDash([2,4]);x.beginPath();x.moveTo(X(S.tc),m.t);x.lineTo(X(S.tc),H-m.b);x.stroke();x.setLineDash([]);}
+
+function drawRec(r){const [x,W,H]=setup($('rec')),narrow=W<560,m={l:narrow?118:150,r:narrow?70:130,t:12,b:40};
+ const g=gas(T9,r),vals=REC.map(o=>o.on-g),lo=Math.min(-250,Math.floor(Math.min(...vals)/50)*50),hi=Math.max(150,Math.ceil(Math.max(...vals)/50)*50);
+ const X=v=>m.l+(v-lo)/(hi-lo)*(W-m.l-m.r),rowH=(H-m.t-m.b)/REC.length;
+ x.strokeStyle=css('--grid');x.fillStyle=css('--muted');x.textAlign='center';x.textBaseline='top';x.lineWidth=1;
+ for(let v=lo;v<=hi;v+=50){x.beginPath();x.moveTo(X(v),m.t);x.lineTo(X(v),H-m.b);x.stroke();if(!narrow||v%100===0)x.fillText(v,X(v),H-m.b+6);}
+ x.fillText('driving force at 900 °C (kJ per mol O₂)',(m.l+W-m.r)/2,H-16);
+ x.strokeStyle=css('--text');x.lineWidth=1.5;x.beginPath();x.moveTo(X(0),m.t);x.lineTo(X(0),H-m.b);x.stroke();
+ REC.forEach((o,i)=>{const v=vals[i],yc=m.t+rowH*(i+0.5),bh=Math.min(22,rowH*0.62);
+  x.fillStyle=css(v>=0?'--c3':'--c2');x.globalAlpha=o.d?0.6:1;
+  const a=X(Math.min(0,v)),b=X(Math.max(0,v));x.beginPath();x.roundRect?x.roundRect(a,yc-bh/2,Math.max(2,b-a),bh,5):x.rect(a,yc-bh/2,Math.max(2,b-a),bh);x.fill();x.globalAlpha=1;
+  x.fillStyle=css('--text');x.textAlign='right';x.textBaseline='middle';x.font=(o.d?'italic ':'')+'13px '+css('--font');x.fillText(o.k,m.l-8,yc);
+  x.fillStyle=css('--muted');x.textAlign='left';x.font='12px '+css('--font');x.fillText((narrow?'':'needs r ')+fmtR(rmin(T9,o.on)),W-m.r+6,yc);});
+ x.font='12px '+css('--font');
+ const ok=vals.filter(v=>v>=0).length;
+ $('recTxt').textContent='At 900 °C and r = '+fmtR(r)+' the gas line sits at '+g.toFixed(1)+' kJ/mol O₂, so '+ok+' of '+REC.length+' blends are fully reduced. Paper check: Co5Fe60Ni35 has a margin of +20.2 at r = 1 and +41.6 at r = 3.';
+ document.querySelectorAll('.seg button').forEach(b=>b.setAttribute('aria-pressed',Math.abs(Math.log10(+b.dataset.r)-Math.log10(r))<0.005?'true':'false'));}
+
+function show(){const S=state(),T=K(S.tc),g=gas(T,S.r);
+ $('tto').textContent=S.tc+' °C';$('rro').textContent=fmtR(S.r);
+ $('sG').innerHTML=g.toFixed(1);
+ $('sH').innerHTML=fmtPPM(1/(1+S.r));
+ const fm=feo(T)-g,fe=$('sF');fe.innerHTML=sign(fm)+sm('kJ/mol O₂');fe.classList.toggle('good',fm>=0);fe.classList.toggle('bad',fm<0);
+ const n=FAM.filter(f=>onset(f,T)>g).length+(S.tc===1100&&S.r>COFENI.r1100?1:0),tot=FAM.length+(S.tc===1100?1:0);
+ $('sN').innerHTML=n+sm('of '+tot);
+ const rows=FAM.map(f=>({k:f.k,c:f.c,rm:rmin(T,onset(f,T)),paper:f.r1100}));
+ if(S.tc===1100)rows.unshift({k:COFENI.k,c:COFENI.c,rm:COFENI.r1100,paper:COFENI.r1100});
+ rows.push({k:'FeO (iron oxide)',c:'--cx',rm:rmin(T,feo(T))});
+ $('tb').innerHTML=rows.map(o=>'<tr><td><span style="color:var('+o.c+')">●</span> '+o.k+'</td><td>'+fmtR(o.rm)+'</td><td>'+(o.paper?fmtR(o.paper):'—')+'</td><td>'+(o.rm<1?"no limit":fmtPPM(0.05/o.rm))+'</td><td class="'+(S.r>o.rm?'ok">reduced':'no">oxide left')+'</td></tr>').join('');
+ const wf=FAM.reduce((a,f)=>onset(f,T)<onset(a,T)?f:a);
+ $('status').textContent='At '+S.tc+' °C the gas is '+fmtPPM(S.r/(1+S.r))+' hydrogen. The hardest family by median is '+wf.k+', which needs r ≈ '+fmtR(rmin(T,onset(wf,T)))+(S.tc===1100?'. Co–Fe–Ni (filled dot) is shown at this temperature only.':'. Co–Fe–Ni is shown only at 1100 °C, where its median minimum ratio is 0.155.');
+ drawEll(S);drawRmin(S);drawRec(S.r);document.body.dataset.ready='1';}
+['tt','rr'].forEach(id=>$(id).addEventListener('input',show));
+document.querySelectorAll('.seg button').forEach(b=>b.addEventListener('click',()=>{$('rr').value=Math.log10(+b.dataset.r);show();}));
+addEventListener('resize',show);
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',show);
+show();
+</script>
+</body></html>
