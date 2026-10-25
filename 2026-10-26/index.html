@@ -1,0 +1,298 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="light dark">
+<title>Can a power meter tell when an AI is being trained? — Research Explorer, 26 Oct 2026</title>
+<link rel="stylesheet" href="../assets/style.css">
+<style>
+/* page-specific: canvas heights, segmented control, button, stat accents */
+canvas#trace{height:240px} canvas#map{height:340px} canvas#hist{height:280px} canvas#cost{height:280px}
+.stat .v small{font-size:15px;font-weight:500;color:var(--muted);margin-left:4px}
+.stat .v.good{color:var(--c3)} .stat .v.bad{color:var(--c2)}
+.seg{display:inline-flex;flex-wrap:wrap;gap:2px;padding:2px;border-radius:10px;background:var(--accent-soft);margin:4px 0 10px}
+.seg button{font:500 14px var(--font);color:var(--text);background:transparent;border:0;border-radius:8px;padding:6px 14px;cursor:pointer;min-height:32px}
+.seg button[aria-pressed=true]{background:var(--card-solid);box-shadow:0 1px 3px rgba(0,0,0,.18);font-weight:600}
+.seglabel{font-size:15px;font-weight:500;margin:6px 0 2px}
+.btn{font:600 15px var(--font);color:#fff;background:var(--accent);border:0;border-radius:10px;padding:9px 18px;min-height:40px;cursor:pointer}
+.btn:disabled{opacity:.5;cursor:default}
+.btn.plain{background:var(--accent-soft);color:var(--accent)}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:8px 0 4px}
+.tablewrap{overflow-x:auto}
+</style></head><body><main>
+<a class="back" href="../">‹ All demos</a>
+<div class="eyebrow">26 Oct 2026 · AI</div>
+<h1>Can a power meter tell when an AI is being trained?</h1>
+<p class="lede">Training a big AI model makes thousands of chips work hard, then pause to share results, then work again, roughly once a second. This study shows that a sealed electricity meter outside a data centre can pick up that beat in five minutes of readings, even when the beat drifts or the operator tries to blur it.</p>
+<p class="authors">Tom Kimpson, Mauricio Baker &amp; Emlyn Graham</p>
+
+<section class="card why" aria-labelledby="why-h">
+<h2 id="why-h">Why it matters</h2>
+<p>Any agreement to limit the largest AI training runs needs a way to check compliance without taking the operator’s word for it, and this study shows that a tamper-evident power meter on a data centre’s supply, sampling just twice a second, could do that job. On simulated facility power, the tracker caught at least 96% of training runs in five-minute windows at a 1% false-alarm rate, and the only disguise that often slipped past made training need 93–267% more compute to reach the same quality.</p>
+</section>
+
+<section class="card" aria-labelledby="paper-h">
+<h2 id="paper-h">The paper</h2>
+<p style="margin:0 0 6px"><strong>Detecting AI Training in Datacentre Power</strong></p>
+<p class="cite" style="margin:0">Tom Kimpson (University of Melbourne; MATS), Mauricio Baker (University of Oxford) &amp; Emlyn Graham (MATS). arXiv:2610.30182 [cs.CR], submitted 19 Oct 2026. <a href="https://arxiv.org/abs/2610.30182">Read on arXiv</a> · <a href="https://arxiv.org/pdf/2610.30182">PDF</a></p>
+<p style="margin-top:14px">In plain language: when many chips train one model together, each step has a busy, high-power compute phase followed by a quieter phase where the chips swap results. That rhythm, about once a second, adds a narrow “line” to the power spectrum. Answering a chatbot’s requests (inference) looks different: requests come and go at random, so their power is spread across many frequencies with no single line.</p>
+<p>The catch is that a real training rhythm wanders. Slow chips, hot hardware and network hiccups speed it up and slow it down, and an operator who wants to hide can make it wander on purpose. A test that looks for one sharp peak then fails. The authors borrowed a trick from sonar and gravitational-wave astronomy: cut the trace into 16-second slices, see which frequencies stand out in each slice, and use the Viterbi algorithm to find the best smooth path through them. A drifting training rhythm leaves a bright path. Random inference noise does not. They tested this on synthetic data centre power traces built from a published model of training power, plus their own model of inference, and also checked eight ways an operator might try to hide.</p>
+</section>
+
+<section class="card" aria-labelledby="demo-h">
+<h2 id="demo-h">Try it: five minutes through the meter</h2>
+<p class="note" style="margin:0 0 12px">Every trace is simulated in your browser with the paper’s workload model (Equations 1–8, Table 1): one main job taking 90% of peak power, plus four small training runs and four fine-tuning runs in the background. It then passes through the meter model (Equations 10–11) and the Viterbi tracker (Equations 12–14). The detection threshold is set live from 200 simulated inference-only traces at your meter settings, so that only 1% of them would be flagged.</p>
+<div class="seglabel" id="wl-l">The facility is actually running</div>
+<div class="seg" role="group" aria-labelledby="wl-l" id="segW"><button type="button" data-w="1" aria-pressed="true">A training run</button><button type="button" data-w="0" aria-pressed="false">Declared inference only</button></div>
+<div class="controls">
+ <div><label for="f0"><span>Training rhythm f₀</span> <output id="f0o"></output></label><input id="f0" type="range" min="0.5" max="1.5" step="0.01" value="0.9"></div>
+ <div><label for="sf"><span>Rhythm wander σ<sub>f</sub></span> <output id="sfo"></output></label><input id="sf" type="range" min="0" max="1.5" step="0.05" value="0.4"></div>
+ <div><label for="sg"><span>Disguise: vary work per step σ<sub>G</sub></span> <output id="sgo"></output></label><input id="sg" type="range" min="0" max="0.7" step="0.05" value="0"></div>
+ <div><label for="tau"><span>Meter averaging window τ</span> <output id="tauo"></output></label><input id="tau" type="range" min="0" max="2" step="0.05" value="0"></div>
+</div>
+<div class="seglabel" id="fs-l">Meter sample rate</div>
+<div class="seg" role="group" aria-labelledby="fs-l" id="segF"><button type="button" data-f="20" aria-pressed="true">20 Hz</button><button type="button" data-f="10">10 Hz</button><button type="button" data-f="5">5 Hz</button><button type="button" data-f="2">2 Hz</button><button type="button" data-f="1">1 Hz</button><button type="button" data-f="0.5">0.5 Hz</button></div>
+<div class="row"><button type="button" class="btn plain" id="newT">New five-minute trace</button></div>
+
+<div class="stats" style="grid-template-columns:repeat(auto-fit,minmax(190px,1fr));margin-top:12px">
+ <div class="stat"><div class="v" id="sV"></div><div class="l">Tracker score V (best path, per slice)</div></div>
+ <div class="stat"><div class="v" id="sT"></div><div class="l">Threshold v<sub>α</sub> at 1% false alarms</div></div>
+ <div class="stat"><div class="v" id="sD"></div><div class="l">Viterbi tracker says</div></div>
+ <div class="stat"><div class="v" id="sM"></div><div class="l">Fixed-peak test (matched filter) says</div></div>
+</div>
+<p class="note" id="status" aria-live="polite" style="margin:8px 0 0"></p>
+
+<div style="margin-top:18px"><div class="plot-title">What the meter records: first 20 seconds</div>
+ <canvas id="trace" role="img" aria-label="Facility power and meter readings over the first 20 seconds"></canvas>
+ <div class="legend"><span style="--k:var(--muted)">facility power before the meter</span><span style="--k:var(--c1)">meter readings</span></div></div>
+<div style="margin-top:22px"><div class="plot-title">What the tracker sees: how much each frequency stands out, slice by slice (Equation 13)</div>
+ <canvas id="map" role="img" aria-label="Contrast map of frequency against time with the Viterbi best path and the true training rhythm"></canvas>
+ <div class="legend"><span style="--k:#fff;outline:1px solid var(--muted)">Viterbi best path (Equation 14)</span><span style="--k:var(--c2)">true training rhythm (dashed)</span><span>brighter = stands out more above the slice’s median</span></div></div>
+</section>
+
+<section class="card" aria-labelledby="trial-h">
+<h2 id="trial-h">Try it: how often is it caught?</h2>
+<p class="note" style="margin:0 0 10px">One trace is luck of the draw. This runs 100 five-minute training traces at your settings, each with a random rhythm f₀ between 0.5 and 1.5 Hz (your wander, disguise and meter settings are kept), and scores them against the same 200 inference-only traces used for the threshold. The paper uses 200 per class.</p>
+<div class="row"><button type="button" class="btn" id="run">Run 100 windows</button><span class="note" id="runS" aria-live="polite" style="margin:0"></span></div>
+<div class="stats" style="grid-template-columns:repeat(auto-fit,minmax(190px,1fr));margin-top:12px">
+ <div class="stat"><div class="v" id="rV">—</div><div class="l">Caught by the Viterbi tracker</div></div>
+ <div class="stat"><div class="v" id="rM">—</div><div class="l">Caught by the fixed-peak test</div></div>
+ <div class="stat"><div class="v" id="rP">—</div><div class="l">Paper, same setting (n = 200)</div></div>
+</div>
+<div style="margin-top:16px"><div class="plot-title">Tracker scores V: training vs inference-only</div>
+ <canvas id="hist" role="img" aria-label="Histogram of tracker scores for inference-only and training traces with the threshold marked"></canvas>
+ <div class="legend"><span style="--k:var(--muted)">inference only (200)</span><span style="--k:var(--c1)">training (100)</span><span style="--k:var(--c2)">threshold v<sub>α</sub></span></div></div>
+</section>
+
+<section class="card" aria-labelledby="cost-h">
+<h2 id="cost-h">Try it: what the disguise costs</h2>
+<p class="note" style="margin:0 0 10px">The one disguise that beats the tracker is varying how much work goes into each step (Equation 23). Steps normally bundle G₀ = 8 micro-batches, and the disguise redraws that number every step. It wastes no time, but a few huge steps make learning less efficient. Equation 20, using McCandlish et al.’s gradient-noise model, gives the extra data needed to reach the same loss. The disguise slider above controls σ<sub>G</sub> here too.</p>
+<div class="controls"><div><label for="bn"><span>Gradient noise scale B<sub>noise</sub> (micro-batches)</span> <output id="bno"></output></label><input id="bn" type="range" min="3" max="7" step="0.01" value="3.807"></div></div>
+<div class="stats" style="grid-template-columns:repeat(auto-fit,minmax(190px,1fr));margin-top:12px">
+ <div class="stat"><div class="v" id="cD"></div><div class="l">Extra samples to reach the same loss, Δ</div></div>
+ <div class="stat"><div class="v" id="cG"></div><div class="l">Average micro-batches per step (honest: 8)</div></div>
+ <div class="stat"><div class="v">≈ 0%</div><div class="l">Throughput lost (measured on an A100)</div></div>
+</div>
+<div style="margin-top:16px"><div class="plot-title">Extra data needed vs disguise strength (Equation 20)</div>
+ <canvas id="cost" role="img" aria-label="Extra samples needed versus work variation for three gradient noise scales"></canvas>
+ <div class="legend"><span style="--k:var(--c4)">B<sub>noise</sub> = 8</span><span style="--k:var(--c2)">14 (measured in the paper)</span><span style="--k:var(--c3)">128</span><span style="--k:var(--c1)">your B<sub>noise</sub></span></div></div>
+<p class="note">Check: at σ<sub>G</sub> = 0.7 this gives about 186%, 163% and 53% for B<sub>noise</sub> = 8, 14 and 128. The paper reports 53–184% for 8 to 128 and 163% at the measured scale. When they actually trained a 30M-parameter model this way, it needed 267 ± 33% more tokens.</p>
+</section>
+
+<section class="card" aria-labelledby="res-h">
+<h2 id="res-h">What the paper found</h2>
+<div class="tablewrap"><table>
+<thead><tr><th>Result (300 s windows, 1% false-alarm rate)</th><th>Value</th></tr></thead>
+<tbody>
+<tr><td>Viterbi tracker vs rhythm wander σ<sub>f</sub> = 0–0.4 / 0.8 / 1.5 Hz</td><td>1.00 / 0.99 / 0.96</td></tr>
+<tr><td>Gap to the Neyman–Pearson optimal ceiling</td><td>≤ 0.04</td></tr>
+<tr><td>Fixed-peak matched filter at σ<sub>f</sub> = 0 / 0.1 / 0.4 Hz</td><td>0.98 / 0.59 / 0.23</td></tr>
+<tr><td>Multitaper F-test, any wander</td><td>≤ 0.03</td></tr>
+<tr><td>Minimum meter: sample rate / averaging window</td><td>≥ 2 Hz / ≤ 0.5 s</td></tr>
+<tr><td>1 Hz sampling, or 1 s averaging at 20 Hz</td><td>0.33 / 0.32</td></tr>
+<tr><td>Strategies that beat the tracker (of 8)</td><td>only large work variation</td></tr>
+<tr><td>Work variation σ<sub>G</sub> = 0.7: windows hidden, throughput cost</td><td>55%, ≈ 0%</td></tr>
+<tr><td>Lognormal work variation: windows hidden, learning cost</td><td>up to 73%, 93 ± 6%</td></tr>
+<tr><td>Same, runs caught over 24 h (run-level false alarms 0.1%)</td><td>87%</td></tr>
+<tr><td>Idle-time jitter σ<sub>ξ</sub> = 0.35: windows hidden, throughput cost</td><td>24%, 159%</td></tr>
+</tbody></table></div>
+<p class="note">Sources: Sections 5–7 and Appendix C of arXiv:2610.30182. All results are on synthetic traces. The training model follows Ko &amp; Zhu (2025), and the inference model is the authors’ own. Neither has been checked against a real multi-GPU facility meter yet. The tracker detects any steady, slowly wandering rhythm, so non-training loads with a training-like cycle, or a chip’s own power-management loop, can also trip it.</p>
+</section>
+
+<section class="card" aria-labelledby="math-h">
+<h2 id="math-h">The maths</h2>
+<p>Each training step i has a period set by the base rhythm f₀, a slow drift g<sub>i</sub> and per-step jitter ξ<sub>i</sub> (Equations 3–5, θ = 0.02):</p>
+<div class="eq math">T<sub>i</sub> = 1 / [f₀ g<sub>i</sub> (1 + ξ<sub>i</sub>)],   g<sub>i</sub> − 1 = (1 − θ)(g<sub>i−1</sub> − 1) + ε<sub>i</sub>,   σ<sub>g</sub> = (σ<sub>f</sub>/f₀)·√(2θ − θ²)</div>
+<p>A fraction ρ<sub>i</sub> of each period is at about full power and the rest is about 30% lower (Equation 2). The meter averages over τ, samples at f<sub>s</sub>, and adds 4 W of noise. The tracker cuts the mean-removed readings into 16 s Tukey-windowed slices (half overlap), takes each slice’s spectrum, and measures how far each bin in 0.3–1.7 Hz stands above the slice median:</p>
+<div class="eq math">S<sub>kj</sub> = |Σ<sub>m</sub> w[m] x[jH+m] e<sup>−2πikm/M</sup>|²     L<sub>kj</sub> = ln S<sub>kj</sub> − ln median<sub>k</sub> S<sub>kj</sub></div>
+<p>The score is the best path through that map, charged λ = 1 per bin of jump between slices, averaged over slices. Dynamic programming finds it exactly:</p>
+<div class="eq math">V = (1/N<sub>t</sub>) max<sub>k₀…k<sub>N<sub>t</sub>−1</sub></sub> [ Σ<sub>j</sub> L<sub>k<sub>j</sub> j</sub> − λ Σ<sub>j</sub> |k<sub>j</sub> − k<sub>j−1</sub>| ]     flag training if V &gt; v<sub>α</sub></div>
+<p>The disguise draws G̃<sub>i</sub> = G₀ / max(1 + ζ<sub>i</sub>, 0.05), ζ<sub>i</sub> ~ N(0, σ<sub>G</sub>²), rounded at random to an integer. With h(B) = B/(B + B<sub>noise</sub>), the extra data needed is</p>
+<div class="eq math">Δ = [h(G₀)/G₀] / [E h(G) / E G] − 1</div>
+<p class="note">Check against the paper: at the nominal meter this demo’s threshold comes out around 0.85–0.9 (the paper quotes v<sub>α</sub> ≈ 0.91), and inference-only traces score around 0.67 (paper example: 0.73). In offline runs of this exact code with 200 nulls and 100 training traces per setting, detection was 1.00 at σ<sub>f</sub> = 0–0.4 Hz and 0.98 at 1.5 Hz. The matched filter scored 0.99, 0.60 and 0.32 at σ<sub>f</sub> = 0, 0.1 and 0.4 Hz. Detection was 0.98 at τ = 0.5 s, 0.34 at τ = 1 s, and 0.49 under σ<sub>G</sub> = 0.7, all close to the paper.</p>
+</section>
+
+<section class="card" aria-labelledby="how-h">
+<h2 id="how-h">How to use it</h2>
+<ul>
+<li><strong>Start honest:</strong> with a training run selected, the white path sits on the dashed true rhythm, and V lands far above the threshold. Switch to “Declared inference only”: the path still exists, because Viterbi always returns one, but it just strings together noise, and V falls below the line.</li>
+<li><strong>Make the rhythm wander:</strong> raise σ<sub>f</sub>, then run 100 windows. The tracker keeps catching nearly everything, while the fixed-peak test, which expects one sharp spike, drops sharply.</li>
+<li><strong>Choose the meter:</strong> try 2 Hz (still works, partly because faster rhythms fold back into the band), then 1 Hz or 0.5 Hz (the rhythm falls above the Nyquist limit and detection collapses). An averaging window of 1 s puts a blind spot right at 1 Hz. The paper’s spec is at least 2 Hz with no more than 0.5 s of averaging.</li>
+<li><strong>Play the cheater:</strong> push σ<sub>G</sub> to 0.7 and run 100 windows. About half the windows slip through, but the cost card shows the model then needs roughly 1.5–3 times the data. Over a full day of windows, the paper still flags most such runs.</li>
+</ul>
+</section>
+
+<p class="note" style="margin-top:24px">Demo by Grok Bot for the Daily Research Explorer. Everything is simulated in your browser with the paper’s published equations and Table 1 parameters, and every quoted result comes from arXiv:2610.30182. Simulations use random draws, so individual numbers vary from run to run.</p>
+</main>
+<script>
+"use strict";
+/* ===== engine: paper Eqs 1–14, 16, 20, 23 ===== */
+const FS0=20,TT=300,N0=FS0*TT,PPEAK=850,P0=250;
+const PTR={sxi:0.1,rlo:0.55,rhi:0.8,sD:0.05,muD:0.3,su:[0.02,0.05],sd:[0.01,0.03],kap:0.15};
+const PFT={sxi:0.1,rlo:0.7,rhi:0.9,sD:0.03,muD:0.8,su:[0.01,0.03],sd:[0.005,0.02],kap:0.15};
+function mkRng(seed){let a=seed>>>0;const r=()=>{a=(a+0x6D2B79F5)>>>0;let t=a;t=Math.imul(t^(t>>>15),t|1);t^=t+Math.imul(t^(t>>>7),t|61);return ((t^(t>>>14))>>>0)/4294967296;};
+ let sp=null;r.g=()=>{if(sp!==null){const v=sp;sp=null;return v;}let u=0,v=0;while(u===0)u=r();v=r();const m=Math.sqrt(-2*Math.log(u));sp=m*Math.sin(2*Math.PI*v);return m*Math.cos(2*Math.PI*v);};
+ r.u=(a,b)=>a+(b-a)*r();return r;}
+/* Eq 1–4 (+ Eq 23 work variation): one synchronous run on the 20 Hz grid, in units of P_peak */
+function genRun(P,f0,sf,sG,rng,rec){const out=new Float64Array(N0),dt=1/FS0,th=0.02,sg=sf>0?sf/f0*Math.sqrt(2*th-th*th):0;
+ let g=1,t=-rng()/f0;
+ while(t<TT){if(sf>0){g=1+(1-th)*(g-1)+sg*rng.g();if(g<0.1)g=0.1;}
+  const T=1/(f0*g*Math.max(1+P.sxi*rng.g(),0.05)),rho=rng.u(P.rlo,P.rhi);let up=rho*T;const dn=(1-rho)*T;
+  if(sG>0){const Gt=8/Math.max(1+sG*rng.g(),0.05);let G=Math.floor(Gt);if(rng()<Gt-G)G++;up=Math.max(1,G)*up/8;}
+  const lu=1+P.sD*rng.g(),ld=1-(P.muD+P.sD*rng.g()),su=P.kap*rng.u(P.su[0],P.su[1]),sd=P.kap*rng.u(P.sd[0],P.sd[1]);
+  const i0=Math.max(0,Math.ceil(t/dt)),i1=Math.min(N0,Math.ceil((t+up)/dt)),i2=Math.min(N0,Math.ceil((t+up+dn)/dt));
+  for(let i=i0;i<i1;i++)out[i]=Math.max(0,lu+su*rng.g());for(let i=Math.max(i0,i1);i<i2;i++)out[i]=Math.max(0,ld+sd*rng.g());
+  if(rec)rec.push([t,up+dn]);t+=up+dn;}
+ return out;}
+function fftIP(re,im){const n=re.length;for(let i=1,j=0;i<n;i++){let b=n>>1;for(;j&b;b>>=1)j^=b;j^=b;if(i<j){let x=re[i];re[i]=re[j];re[j]=x;x=im[i];im[i]=im[j];im[j]=x;}}
+ for(let len=2;len<=n;len<<=1){const a=-2*Math.PI/len,wr=Math.cos(a),wi=Math.sin(a);for(let i=0;i<n;i+=len){let cr=1,ci=0;for(let k=0;k<len/2;k++){const p=i+k,q=p+len/2,xr=re[q]*cr-im[q]*ci,xi=re[q]*ci+im[q]*cr;re[q]=re[p]-xr;im[q]=im[p]-xi;re[p]+=xr;im[p]+=xi;const nr=cr*wr-ci*wi;ci=cr*wi+ci*wr;cr=nr;}}}}
+/* Eq 6: inference null (B + A[1+m u]b + prefill pulses) */
+function genInf(rng){const L=8192,re=new Float64Array(L),im=new Float64Array(L);for(let i=0;i<L;i++)re[i]=rng.g();fftIP(re,im);
+ for(let k=0;k<L;k++){const f=Math.min(k,L-k)*FS0/L;if(f<0.1||f>4){re[k]=0;im[k]=0;}}for(let i=0;i<L;i++)im[i]=-im[i];fftIP(re,im);
+ let s2=0;for(let i=0;i<N0;i++)s2+=re[i]*re[i];const bn=Math.sqrt(s2/N0);
+ const u=new Float64Array(N0),c=Math.exp(-1/FS0/5);let v=rng.g(),mu=0,s=0;for(let i=0;i<N0;i++){v=c*v+Math.sqrt(1-c*c)*rng.g();u[i]=v;mu+=v;}mu/=N0;for(let i=0;i<N0;i++)s+=(u[i]-mu)**2;s=Math.sqrt(s/N0)||1;
+ const out=new Float64Array(N0);for(let i=0;i<N0;i++)out[i]=0.5+0.4*(1+0.4*(u[i]-mu)/s)*re[i]/bn+0.035*0.15*rng.g();
+ let t=-Math.log(1-rng())/0.08;while(t<TT){const i0=Math.ceil(t*FS0),i1=Math.min(N0,Math.ceil((t+0.1)*FS0));for(let i=i0;i<i1;i++)out[i]+=0.15;t+=-Math.log(1-rng())/0.08;}
+ for(let i=0;i<N0;i++)if(out[i]<0)out[i]=0;return out;}
+/* Eq 7/8 aggregate + Eq 9/10 meter */
+function genTrace(o,rng){const rec=[],P=new Float64Array(N0),wm=0.9,wb=0.05/4;
+ const main=o.train?genRun(PTR,o.f0,o.sf,o.sG,rng,rec):genInf(rng);for(let i=0;i<N0;i++)P[i]=wm*main[i];
+ for(let j=0;j<4;j++){const a=genRun(PTR,rng.u(0.5,1.5),0,0,rng),b=genRun(PFT,rng.u(0.3,0.7),0,0,rng);for(let i=0;i<N0;i++)P[i]+=wb*(a[i]+b[i]);}
+ const fac=new Float64Array(N0);for(let i=0;i<N0;i++)fac[i]=P0+PPEAK*P[i];
+ let sm=fac;const w=Math.round(o.tau*FS0);if(w>=2){sm=new Float64Array(N0);let acc=0;for(let i=0;i<N0;i++){acc+=fac[i];if(i>=w)acc-=fac[i-w];sm[i]=acc/Math.min(i+1,w);}}
+ const n=Math.floor(TT*o.fs),x=new Float64Array(n);for(let k=0;k<n;k++)x[k]=sm[Math.min(N0-1,Math.floor(k*FS0/o.fs+1e-9))]+o.sn*rng.g();
+ return {x,rec,fac};}
+/* Eq 12–14: spectrogram, contrast map, Viterbi path */
+function viterbi(x,fs){const N=x.length,M=Math.max(64,Math.round(16*fs)),H=M/2,Nt=Math.floor((N-M)/H)+1;let mean=0;for(const v of x)mean+=v;mean/=N;
+ const ks=[];for(let k=0;k<=M/2;k++){const f=k*fs/M;if(f>=0.3&&f<=1.7&&f<=fs/2)ks.push(k);}
+ if(!ks.length||Nt<1)return {V:0,ks,Nt:0,L:[],path:[],M,H};
+ const a=0.25*(M-1),w=new Float64Array(M);for(let m=0;m<M;m++){const d=Math.min(m,M-1-m);w[m]=d<a/2?0.5*(1-Math.cos(2*Math.PI*d/a)):1;}
+ const cs=ks.map(k=>{const c=new Float64Array(M),s=new Float64Array(M);for(let m=0;m<M;m++){c[m]=Math.cos(2*Math.PI*k*m/M);s[m]=Math.sin(2*Math.PI*k*m/M);}return [c,s];});
+ const L=[];for(let j=0;j<Nt;j++){const S=cs.map(([c,s])=>{let r=0,i=0;for(let m=0;m<M;m++){const v=w[m]*(x[j*H+m]-mean);r+=v*c[m];i+=v*s[m];}return r*r+i*i+1e-30;});
+  const so=[...S].sort((p,q)=>p-q),K=so.length,med=K%2?so[(K-1)/2]:0.5*(so[K/2-1]+so[K/2]);L.push(S.map(v=>Math.log(v)-Math.log(med)));}
+ const K=ks.length;let D=L[0].slice();const bp=[];
+ for(let j=1;j<Nt;j++){const nd=new Array(K),b=new Array(K);for(let k=0;k<K;k++){let best=-1e99,bi=0;for(let q=0;q<K;q++){const v=D[q]-Math.abs(k-q);if(v>best){best=v;bi=q;}}nd[k]=best+L[j][k];b[k]=bi;}bp.push(b);D=nd;}
+ let k=0;for(let q=1;q<K;q++)if(D[q]>D[k])k=q;const V=D[k]/Nt,path=[k];for(let j=Nt-2;j>=0;j--){k=bp[j][k];path.unshift(k);}
+ return {V,ks,Nt,L,path,M,H};}
+/* Eq 16: spectral matched filter (Welch, Hann, half-overlap) */
+function dftPow(seg){const n=seg.length,out=new Float64Array(Math.floor(n/2)+1);if((n&(n-1))===0){const re=Float64Array.from(seg),im=new Float64Array(n);fftIP(re,im);for(let k=0;k<out.length;k++)out[k]=re[k]*re[k]+im[k]*im[k];return out;}
+ for(let k=0;k<out.length;k++){let r=0,i=0;for(let m=0;m<n;m++){r+=seg[m]*Math.cos(2*Math.PI*k*m/n);i-=seg[m]*Math.sin(2*Math.PI*k*m/n);}out[k]=r*r+i*i;}return out;}
+function matched(x,fs){const N=x.length,Ls=Math.min(N,1024),hop=Math.floor(Ls/2);let mean=0;for(const v of x)mean+=v;mean/=N;let acc=null,c=0;
+ for(let s=0;s+Ls<=N;s+=hop){const seg=new Float64Array(Ls);for(let m=0;m<Ls;m++)seg[m]=(x[s+m]-mean)*(0.5-0.5*Math.cos(2*Math.PI*m/(Ls-1)));const p=dftPow(seg);if(!acc)acc=p;else for(let k=0;k<p.length;k++)acc[k]+=p[k];c++;if(Ls===N)break;}
+ let mx=0;const all=[];for(let k=0;k<acc.length;k++){const f=k*fs/Ls;all.push(acc[k]);if(f>=0.3&&f<=1.7)mx=Math.max(mx,acc[k]);}all.sort((p,q)=>p-q);const med=all[Math.floor(all.length/2)]||1;return mx/med;}
+/* Eq 20 + Eq 23: extra samples needed under work variation */
+function learnCost(sG,Bn,rng,n){let eh=0,eg=0;for(let i=0;i<n;i++){const Gt=8/Math.max(1+sG*rng.g(),0.05);let G=Math.floor(Gt);if(rng()<Gt-G)G++;G=Math.max(1,G);eh+=G/(G+Bn);eg+=G;}
+ return {d:(8/(8+Bn)/8)/(eh/eg)-1,eg:eg/n};}
+const $=id=>document.getElementById(id);
+const css=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const S={w:1,fs:20,seed:20261026};
+const cal={};let calJob=0;
+function key(){return S.fs+'|'+(+$('tau').value).toFixed(2);}
+function opts(){return {train:S.w,f0:+$('f0').value,sf:+$('sf').value,sG:+$('sg').value,fs:S.fs,tau:+$('tau').value,sn:4};}
+function thr(a,n){return [...a].sort((p,q)=>q-p)[n];} /* lets at most n of the nulls through */
+function calibrate(){const k=key();if(cal[k]&&cal[k].done)return;if(cal[k])return;
+ const c=cal[k]={V:[],M:[],done:false},job=++calJob,o={train:0,fs:S.fs,tau:+$('tau').value,sn:4},rng=mkRng(777+Math.round(S.fs*100)+Math.round(o.tau*1000));
+ (function step(){if(job!==calJob){delete cal[k];return;}const t=performance.now();
+  while(c.V.length<200&&performance.now()-t<30){const x=genTrace(o,rng).x;c.V.push(viterbi(x,o.fs).V);c.M.push(matched(x,o.fs));}
+  if(c.V.length<200){$('sT').innerHTML='…<small>'+Math.round(c.V.length/2)+'%</small>';setTimeout(step,0);}
+  else{c.done=true;c.tV=thr(c.V,2);c.tM=thr(c.M,2);if(key()===k)show();}})();}
+let last=null;
+function setup(cv){const r=cv.getBoundingClientRect(),d=devicePixelRatio||1;cv.width=Math.round(r.width*d);cv.height=Math.round(r.height*d);const x=cv.getContext('2d');x.setTransform(d,0,0,d,0,0);x.font='12px '+css('--font');return [x,r.width,r.height];}
+function axes(x,W,H,m,x0,x1,y0,y1,xt,yt,xl,yl,fy){const X=v=>m.l+(v-x0)/(x1-x0)*(W-m.l-m.r),Y=v=>H-m.b-(v-y0)/(y1-y0)*(H-m.t-m.b);
+ x.strokeStyle=css('--grid');x.lineWidth=1;x.fillStyle=css('--muted');x.textAlign='right';x.textBaseline='middle';
+ yt.forEach(v=>{x.beginPath();x.moveTo(m.l,Y(v));x.lineTo(W-m.r,Y(v));x.stroke();x.fillText(fy?fy(v):v,m.l-6,Y(v));});
+ x.textAlign='center';x.textBaseline='top';xt.forEach(v=>{x.beginPath();x.moveTo(X(v),m.t);x.lineTo(X(v),H-m.b);x.stroke();x.fillText(v,X(v),H-m.b+6);});
+ x.fillText(xl,(m.l+W-m.r)/2,H-16);x.save();x.translate(12,(m.t+H-m.b)/2);x.rotate(-Math.PI/2);x.textBaseline='middle';x.fillText(yl,0,0);x.restore();return [X,Y];}
+const VIR=[[68,1,84],[72,40,120],[62,74,137],[49,104,142],[38,130,142],[31,158,137],[53,183,121],[109,205,89],[180,222,44],[253,231,37]];
+function cmap(t){t=Math.max(0,Math.min(1,t))*(VIR.length-1);const i=Math.min(VIR.length-2,Math.floor(t)),f=t-i,a=VIR[i],b=VIR[i+1];return 'rgb('+a.map((v,j)=>Math.round(v+(b[j]-v)*f)).join(',')+')';}
+function drawTrace(tr){const [x,W,H]=setup($('trace')),m={l:58,r:12,t:12,b:40},n20=400,nm=Math.floor(20*S.fs);
+ let lo=1e9,hi=-1e9;for(let i=0;i<n20;i++){lo=Math.min(lo,tr.fac[i]);hi=Math.max(hi,tr.fac[i]);}for(let i=0;i<nm;i++){lo=Math.min(lo,tr.x[i]);hi=Math.max(hi,tr.x[i]);}
+ const st=hi-lo>300?100:50;lo=Math.floor(lo/st)*st;hi=Math.ceil(hi/st)*st;const yt=[];for(let v=lo;v<=hi;v+=st)yt.push(v);
+ const [X,Y]=axes(x,W,H,m,0,20,lo,hi,[0,5,10,15,20],yt,'time (s)','power (W)');
+ x.strokeStyle=css('--muted');x.lineWidth=1.2;x.beginPath();for(let i=0;i<n20;i++){const px=X(i/20),py=Y(tr.fac[i]);i?x.lineTo(px,py):x.moveTo(px,py);}x.stroke();
+ x.strokeStyle=css('--c1');x.fillStyle=css('--c1');x.lineWidth=2.2;x.beginPath();for(let i=0;i<nm;i++){const px=X(i/S.fs),py=Y(tr.x[i]);i?x.lineTo(px,py):x.moveTo(px,py);}x.stroke();
+ if(S.fs<=5)for(let i=0;i<nm;i++){x.beginPath();x.arc(X(i/S.fs),Y(tr.x[i]),3,0,6.3);x.fill();}}
+function drawMap(tr,vr){const [x,W,H]=setup($('map')),m={l:58,r:12,t:12,b:40};
+ const [X,Y]=axes(x,W,H,m,0,300,0.3,1.7,[0,60,120,180,240,300],[0.3,0.5,0.7,0.9,1.1,1.3,1.5,1.7],'time (s)','frequency (Hz)',v=>v.toFixed(1));
+ if(!vr.Nt){x.fillStyle=css('--muted');x.textAlign='center';x.textBaseline='middle';x.font='15px '+css('--font');x.fillText('No frequency in 0.3–1.7 Hz is below this meter’s Nyquist limit ('+(S.fs/2)+' Hz): the tracker is blind.',(m.l+W-m.r)/2,(m.t+H-m.b)/2);return;}
+ const df=S.fs/vr.M,dt=vr.H/S.fs,fl=S.fs/vr.M*vr.ks[0]-df/2;
+ for(let j=0;j<vr.Nt;j++)vr.ks.forEach((k,q)=>{const f=k*df,t0=j*dt+dt/2;x.fillStyle=cmap((vr.L[j][q]+1)/5);
+  const xa=X(Math.max(0,t0)),xb=X(Math.min(300,t0+dt)),ya=Y(Math.min(1.7,f+df/2)),yb=Y(Math.max(0.3,f-df/2));x.fillRect(xa,ya,xb-xa+0.6,yb-ya+0.6);});
+ if(S.fs/2<1.7){x.fillStyle=css('--grid');x.fillRect(m.l,m.t,W-m.l-m.r,Y(S.fs/2)-m.t);x.fillStyle=css('--muted');x.textAlign='left';x.textBaseline='top';x.fillText('above Nyquist ('+S.fs/2+' Hz)',m.l+8,m.t+6);}
+ if(S.w&&tr.rec.length){x.save();x.beginPath();x.rect(m.l,m.t,W-m.l-m.r,H-m.t-m.b);x.clip();x.strokeStyle=css('--c2');x.lineWidth=2.4;x.setLineDash([7,5]);x.beginPath();let first=true;
+  for(let t=0;t<=300;t+=4){const ps=tr.rec.filter(r=>r[0]+r[1]>t-8&&r[0]<t+8).map(r=>r[1]).sort((a,b)=>a-b);if(!ps.length)continue;const f=1/ps[Math.floor(ps.length/2)];first?x.moveTo(X(t),Y(f)):x.lineTo(X(t),Y(f));first=false;}x.stroke();x.setLineDash([]);x.restore();}
+ const pts=vr.path.map((q,j)=>[X(Math.min(300,j*dt+dt)),Y(vr.ks[q]*df)]);
+ x.lineJoin='round';[[5,'rgba(0,0,0,.55)'],[2.6,'#fff']].forEach(([lw,c])=>{x.strokeStyle=c;x.lineWidth=lw;x.beginPath();pts.forEach((p,i)=>i?x.lineTo(p[0],p[1]):x.moveTo(p[0],p[1]));x.stroke();});
+ x.fillStyle='rgba(0,0,0,.6)';x.fillRect(W-m.r-92,m.t+6,84,24);x.fillStyle='#fff';x.textAlign='center';x.textBaseline='middle';x.font='600 13px '+css('--font');x.fillText('V = '+vr.V.toFixed(2),W-m.r-50,m.t+18);}
+function verdict(el,hit){const ok=(!!hit)===(S.w===1);el.textContent=hit?'Training':'Not flagged';el.classList.toggle('good',ok);el.classList.toggle('bad',!ok);}
+function paperRef(o){const fsn=o.fs===20,t0=o.tau===0;
+ if(o.sG===0&&fsn&&t0){const m={0:'1.00 · MF 0.98',0.1:'1.00 · MF 0.59',0.2:'1.00',0.4:'1.00 · MF 0.23',0.8:'0.99',1.5:'0.96'}[o.sf];if(m)return m;}
+ if(o.sf===0&&o.sG===0){if(fsn&&o.tau===0.5)return '0.94';if(fsn&&o.tau===1)return '0.32';if(t0&&o.fs===1)return '0.33';if(t0&&o.fs===0.5)return 'chance';if(t0&&[10,5,2].includes(o.fs))return '≈ 1.0';}
+ if(o.sf===0&&fsn&&t0&&o.sG===0.7)return '0.45';return '—';}
+function show(){const o=opts();$('f0o').textContent=o.f0.toFixed(2)+' Hz';$('sfo').textContent=o.sf.toFixed(2)+' Hz';$('sgo').textContent=o.sG===0?'off (honest)':o.sG.toFixed(2);$('tauo').textContent=o.tau===0?'none':o.tau.toFixed(2)+' s';
+ ['f0','sf','sg'].forEach(id=>$(id).disabled=!S.w);
+ const rng=mkRng(S.seed),tr=genTrace(o,rng),vr=viterbi(tr.x,o.fs),mf=matched(tr.x,o.fs);last={tr,vr};
+ $('sV').textContent=vr.V.toFixed(2);const c=cal[key()];
+ if(c&&c.done){$('sT').textContent=c.tV.toFixed(2);verdict($('sD'),vr.V>c.tV);verdict($('sM'),mf>c.tM);}
+ else{$('sD').textContent='…';$('sM').textContent='…';['sD','sM'].forEach(i=>$(i).classList.remove('good','bad'));calibrate();}
+ let msg=S.w?'Training run at f₀ = '+o.f0.toFixed(2)+' Hz. ':'Inference only: no training rhythm is present, only the background’s weak lines. ';
+ if(o.fs/2<0.3)msg+='At '+o.fs+' Hz the whole search band is above the Nyquist limit, so V = 0.';
+ else if(S.w&&o.f0>o.fs/2)msg+='This rhythm is above the '+o.fs/2+' Hz Nyquist limit, so it shows up folded back to '+Math.abs(o.f0-o.fs*Math.round(o.f0/o.fs)).toFixed(2)+' Hz'+(Math.abs(o.f0-o.fs*Math.round(o.f0/o.fs))<0.3?', below the search band.':'.');
+ else if(o.tau>0)msg+='The averaging window removes signal at 1/τ = '+(1/o.tau).toFixed(2)+' Hz and its multiples.';
+ $('status').textContent=msg;$('rP').textContent=S.w?paperRef(o):'—';
+ drawTrace(tr);drawMap(tr,vr);drawCost();document.body.dataset.ready='1';}
+/* trials */
+let H=null;
+function runTrials(){const c=cal[key()];if(!c||!c.done){$('runS').textContent='Still setting the threshold…';calibrate();setTimeout(runTrials,400);return;}
+ const o=opts();o.train=1;const rng=mkRng(S.seed*7+11),V=[],M=[],b=$('run');b.disabled=true;
+ (function step(){const t=performance.now();while(V.length<100&&performance.now()-t<30){o.f0=rng.u(0.5,1.5);const x=genTrace(o,rng).x;V.push(viterbi(x,o.fs).V);M.push(matched(x,o.fs));}
+  $('runS').textContent='Simulating… '+V.length+'/100';
+  if(V.length<100)return setTimeout(step,0);
+  const dv=V.filter(v=>v>c.tV).length,dm=M.filter(v=>v>c.tM).length;$('rV').textContent=dv+'%';$('rM').textContent=dm+'%';
+  const oo=opts();oo.train=1;$('rP').textContent=paperRef(oo);
+  $('runS').textContent='Done: σf = '+o.sf.toFixed(2)+' Hz, σG = '+o.sG.toFixed(2)+', '+o.fs+' Hz meter, τ = '+o.tau.toFixed(2)+' s.';b.disabled=false;H={V,N:c.V,t:c.tV};drawHist();})();}
+function drawHist(){const [x,W,H2]=setup($('hist')),m={l:48,r:12,t:12,b:40};
+ if(!H){x.fillStyle=css('--muted');x.textAlign='center';x.textBaseline='middle';x.font='15px '+css('--font');x.fillText('Press “Run 100 windows” to fill this chart.',W/2,H2/2);return;}
+ const hi=Math.max(2,Math.ceil(Math.max(...H.V,...H.N)*2)/2),nb=Math.round(hi/0.05),bw=hi/nb,cn=new Array(nb).fill(0),ct=new Array(nb).fill(0);
+ H.N.forEach(v=>cn[Math.min(nb-1,Math.floor(v/bw))]+=0.5);H.V.forEach(v=>ct[Math.min(nb-1,Math.floor(v/bw))]++);
+ const ym=Math.max(5,Math.ceil(Math.max(...cn,...ct)/5)*5),xt=[];for(let v=0;v<=hi+1e-9;v+=hi>4?1:0.5)xt.push(+v.toFixed(1));const yt=[];for(let v=0;v<=ym;v+=ym>20?10:5)yt.push(v);
+ const [X,Y]=axes(x,W,H2,m,0,hi,0,ym,xt,yt,'tracker score V','traces per bin (nulls ÷ 2)');
+ [[cn,css('--muted')],[ct,css('--c1')]].forEach(([a,col])=>{x.fillStyle=col;x.globalAlpha=0.55;a.forEach((v,i)=>{if(v)x.fillRect(X(i*bw)+1,Y(v),X(bw)-X(0)-2,Y(0)-Y(v));});});x.globalAlpha=1;
+ x.strokeStyle=css('--c2');x.lineWidth=2.4;x.beginPath();x.moveTo(X(H.t),m.t);x.lineTo(X(H.t),H2-m.b);x.stroke();}
+/* cost */
+const CC={};function lc(sG,Bn){const k=sG.toFixed(3)+'|'+Bn.toFixed(2);return CC[k]||(CC[k]=learnCost(sG,Bn,mkRng(99),sG===0?1000:60000));}
+function drawCost(){const sG=+$('sg').value,Bn=Math.pow(2,+$('bn').value);$('bno').textContent=Bn.toFixed(Bn<20?1:0);
+ const r=lc(sG,Bn);$('cD').textContent=(Math.round(r.d*100)||0)+'%';$('cG').textContent=r.eg.toFixed(1);
+ const [x,W,H2]=setup($('cost')),m={l:66,r:12,t:12,b:40},[X,Y]=axes(x,W,H2,m,0,0.7,0,250,[0,0.1,0.2,0.3,0.4,0.5,0.6,0.7],[0,50,100,150,200,250],'disguise strength σG','extra samples Δ (%)',v=>v+'%');
+ const s=[];for(let g=0;g<=0.7001;g+=0.05)s.push(+g.toFixed(2));
+ [[8,'--c4'],[14,'--c2'],[128,'--c3'],[Bn,'--c1']].forEach(([b,c],i)=>{x.strokeStyle=css(c);x.lineWidth=i===3?3:1.8;x.setLineDash(i===3?[]:[5,4]);x.beginPath();s.forEach((g,j)=>{const v=lc(g,b).d*100;j?x.lineTo(X(g),Y(v)):x.moveTo(X(g),Y(v));});x.stroke();});x.setLineDash([]);
+ x.fillStyle=css('--c1');x.beginPath();x.arc(X(sG),Y(Math.min(250,r.d*100)),5.5,0,6.3);x.fill();}
+/* wiring */
+['f0','sf','sg'].forEach(id=>$(id).addEventListener('input',show));
+$('tau').addEventListener('input',show);$('bn').addEventListener('input',drawCost);
+document.querySelectorAll('#segW button').forEach(b=>b.addEventListener('click',()=>{S.w=+b.dataset.w;document.querySelectorAll('#segW button').forEach(q=>q.setAttribute('aria-pressed',q===b));show();}));
+document.querySelectorAll('#segF button').forEach(b=>b.addEventListener('click',()=>{S.fs=+b.dataset.f;document.querySelectorAll('#segF button').forEach(q=>q.setAttribute('aria-pressed',q===b));show();}));
+$('newT').addEventListener('click',()=>{S.seed=(S.seed*1103515245+12345)>>>0;show();});
+$('run').addEventListener('click',runTrials);
+addEventListener('resize',()=>{show();drawHist();});
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>{show();drawHist();});
+show();drawHist();
+</script>
+</body></html>
