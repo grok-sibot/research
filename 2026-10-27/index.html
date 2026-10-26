@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="light dark">
+<title>A pinch of silver so lithium can keep up — Research Explorer, 27 Oct 2026</title>
+<link rel="stylesheet" href="../assets/style.css">
+<style>
+/* page-specific: canvas heights, segmented control, stat accents */
+canvas#ccd{height:320px} canvas#trade{height:300px} canvas#trap{height:280px}
+.stat .v small{font-size:15px;font-weight:500;color:var(--muted);margin-left:4px}
+.stat .v.good{color:var(--c3)} .stat .v.bad{color:var(--c2)}
+.seg{display:inline-flex;flex-wrap:wrap;gap:2px;padding:2px;border-radius:10px;background:var(--accent-soft);margin:4px 0 10px}
+.seg button{font:500 14px var(--font);color:var(--text);background:transparent;border:0;border-radius:8px;padding:6px 14px;cursor:pointer;min-height:32px}
+.seg button[aria-pressed=true]{background:var(--card-solid);box-shadow:0 1px 3px rgba(0,0,0,.18);font-weight:600}
+.seglabel{font-size:15px;font-weight:500;margin:6px 0 2px}
+.tablewrap{overflow-x:auto}
+</style></head><body><main>
+<a class="back" href="../">‹ All demos</a>
+<div class="eyebrow">27 Oct 2026 · Materials</div>
+<h1>A pinch of silver so lithium can keep up</h1>
+<p class="lede">Solid-state batteries with a lithium-metal anode fail when current is drawn faster than lithium can flow back to the interface: empty atomic sites (vacancies) pile up there and grow into voids. This study screens 50 elements with quantum-mechanical calculations to find which ones, dissolved in lithium, raise the number of vacancies enough to carry more current.</p>
+<p class="authors">Arseniy S. Burov, Nadezhda A. Ashikhmina, Nurlan Zhanabayev, Anton O. Boev, Aleksandra D. Radina, Ilya V. Chepkasov, Alexander G. Kvashnin &amp; Dmitry A. Aksyonov</p>
+
+<section class="card why" aria-labelledby="why-h">
+<h2 id="why-h">Why it matters</h2>
+<p>Lithium-metal solid-state batteries promise more energy and safer cells, but at room temperature without applied pressure a lithium anode on the garnet electrolyte LLZO fails at only about 0.28 mA cm⁻², because lithium cannot refill the interface fast enough and voids open up. Screening 50 elements, this study predicts that only silver, germanium and cadmium dissolved in lithium can lift that limit above 1 mA cm⁻², with about 9 at.% silver reaching an estimated 4 mA cm⁻², the industrial target, while keeping 1522 mAh g⁻¹ of capacity.</p>
+</section>
+
+<section class="card" aria-labelledby="paper-h">
+<h2 id="paper-h">The paper</h2>
+<p style="margin:0 0 6px"><strong>Vacancy-enhanced Li solid-solution anodes for solid-state batteries: computational screening enabling high critical current density</strong></p>
+<p class="cite" style="margin:0">Arseniy S. Burov, Nadezhda A. Ashikhmina, Nurlan Zhanabayev, Anton O. Boev, Aleksandra D. Radina, Ilya V. Chepkasov, Alexander G. Kvashnin &amp; Dmitry A. Aksyonov (Skolkovo Institute of Science and Technology; Ashikhmina: Moscow Institute of Physics and Technology). arXiv:2610.32938 [cond-mat.mtrl-sci], submitted 23 Oct 2026. <a href="https://arxiv.org/abs/2610.32938">Read on arXiv</a> · <a href="https://arxiv.org/pdf/2610.32938">PDF</a></p>
+<p style="margin-top:14px">In plain language: lithium atoms in the metal move by hopping into empty sites, and at room temperature only about 2 in 10 million sites are empty. When a battery pulls lithium out of the anode, the empty sites it leaves at the interface have to spread back into the metal. If they can’t spread fast enough, they merge into voids, the anode loses contact with the electrolyte, and the cell fails. The current where this starts is the <em>critical current density</em> (CCD).</p>
+<p>A foreign atom that attracts vacancies (positive binding energy E<sub>b</sub>) raises the total number of vacancies around it by a Boltzmann factor exp(E<sub>b</sub>/k<sub>B</sub>T). The authors computed solution and binding energies for 50 elements with density functional theory, kept those that dissolve in lithium and attract vacancies, and then asked how much each could raise the CCD within its real solubility limit. Only silver, germanium and cadmium clear 1 mA cm⁻². They then checked the catch: vacancies trapped next to silver also find it harder to leave, which eats into the gain.</p>
+</section>
+
+<section class="card" aria-labelledby="demo-h">
+<h2 id="demo-h">Try it: pick a solute, set how much you add</h2>
+<p class="note" style="margin:0 0 12px">This uses the paper’s dilute-limit Lomer model with z = 1 (Equation S7), the CCD scaling J = η × 0.28 mA cm⁻² capped where the LLZO electrolyte becomes the bottleneck (Equation S11), and the capacity formula (Equation S13). Binding energies and solubility limits are the paper’s Table S6 values. Past the solubility limit the curve turns dashed: the extra solute would no longer stay dissolved.</p>
+<div class="seglabel" id="el-l">Solute dissolved in lithium</div>
+<div class="seg" role="group" aria-labelledby="el-l" id="segE"></div>
+<div class="controls">
+ <div><label for="cc"><span>Solute concentration c</span> <output id="cco"></output></label><input id="cc" type="range" min="-2" max="2" step="any" value="0.9542425"></div>
+ <div><label for="tt"><span>Temperature T</span> <output id="tto"></output></label><input id="tt" type="range" min="260" max="360" step="1" value="300"></div>
+</div>
+<div class="stats" style="grid-template-columns:repeat(auto-fit,minmax(170px,1fr));margin-top:12px">
+ <div class="stat"><div class="v" id="sEta"></div><div class="l">Boost per solute atom, exp(E<sub>b</sub>/k<sub>B</sub>T)</div></div>
+ <div class="stat"><div class="v" id="sN"></div><div class="l">Vacancy boost η = 1 + c·exp(E<sub>b</sub>/k<sub>B</sub>T)</div></div>
+ <div class="stat"><div class="v" id="sJ"></div><div class="l">Estimated critical current density</div></div>
+ <div class="stat"><div class="v" id="sQ"></div><div class="l">Theoretical capacity (pure Li: 3862)</div></div>
+</div>
+<p class="note" id="status" aria-live="polite" style="margin:8px 0 0"></p>
+<div style="margin-top:18px"><div class="plot-title">Estimated CCD vs how much solute you add (log scale)</div>
+ <canvas id="ccd" role="img" aria-label="Critical current density against solute concentration for nine solutes"></canvas>
+ <div class="legend" id="lg1"></div></div>
+<div style="margin-top:22px"><div class="plot-title">The trade-off: current you can draw vs energy you can store</div>
+ <canvas id="trade" role="img" aria-label="Critical current density against theoretical capacity for the selected solute"></canvas>
+ <div class="legend"><span style="--k:var(--c1)">selected solute, from 0 up to its solubility limit</span><span style="--k:var(--muted)">other solutes</span><span style="--k:var(--c3)">1 mA cm⁻² target</span><span style="--k:var(--c2)">4 mA cm⁻² industrial target</span></div></div>
+</section>
+
+<section class="card" aria-labelledby="trap-h">
+<h2 id="trap-h">Try it: the silver trap</h2>
+<p class="note" style="margin:0 0 10px">More vacancies only help if they can move. Each silver atom holds a vacancy with 0.13 eV of binding, and the authors’ nudged-elastic-band calculations show that escaping a silver neighbour costs 0.12 eV, against 0.04 eV for a normal lithium hop. Equation S18 combines the extra vacancies on the 8 sites around each silver atom with that escape penalty to estimate how much faster lithium diffuses overall. Concentration and temperature come from the sliders above when silver is selected; with any other solute, this card shows silver at its 9 at.% limit.</p>
+<div class="controls"><div><label for="esc"><span>Escape barrier E<sub>esc</sub></span> <output id="esco"></output></label><input id="esc" type="range" min="0.04" max="0.2" step="0.005" value="0.12"></div></div>
+<div class="stats" style="grid-template-columns:repeat(auto-fit,minmax(170px,1fr));margin-top:12px">
+ <div class="stat"><div class="v" id="tF"></div><div class="l">Sites next to a silver atom, f<sub>nn</sub> = 8c</div></div>
+ <div class="stat"><div class="v" id="tA"></div><div class="l">Average vacancy boost, η<sub>avg</sub> (Eq. S17)</div></div>
+ <div class="stat"><div class="v" id="tR"></div><div class="l">Net diffusion speed-up, r<sub>D</sub> (Eq. S18)</div></div>
+</div>
+<div style="margin-top:16px"><div class="plot-title">Silver: vacancy boost vs net diffusion speed-up (log scale)</div>
+ <canvas id="trap" role="img" aria-label="Vacancy enhancement and diffusivity ratio against silver concentration"></canvas>
+ <div class="legend"><span style="--k:var(--c4)">η (Eq. S7, z = 1, used for CCD)</span><span style="--k:var(--muted)">η<sub>avg</sub> (Eq. S17, z = 8)</span><span style="--k:var(--c1)">r<sub>D</sub> with your escape barrier</span><span style="--k:var(--c2)">your concentration</span></div></div>
+<p class="note">Check: at 300 K and E<sub>esc</sub> = 0.12 eV this gives r<sub>D</sub> ≈ 1.45 at 1 at.% and ≈ 5.5 at 10 at.%. The paper’s Table S9 lists 1.46 and 5.60 (it rounds the escape factor to 0.045). So the thermodynamic gain of about 147 per silver atom shrinks to a net 1.5-fold speed-up at 1 at.% silver.</p>
+</section>
+
+<section class="card" aria-labelledby="res-h">
+<h2 id="res-h">What the paper found</h2>
+<div class="tablewrap"><table>
+<thead><tr><th>Solute</th><th>E<sub>b</sub> (meV)</th><th>Boost per atom</th><th>Solubility limit (at.%)</th><th>η at limit</th><th>CCD (mA cm⁻²)</th><th>Capacity at limit (mAh g⁻¹)</th></tr></thead>
+<tbody id="tbl"></tbody></table></div>
+<p class="note">Values from Tables S6 and S7 of arXiv:2610.32938 (T = 300 K, z = 1, natural CCD 0.28 mA cm⁻² for Li|LLZO without applied pressure). The demo recomputes every row live from E<sub>b</sub>, c<sub>max</sub> and the molar mass, and matches the paper to rounding. Other findings: only 19 of 50 solutes pass the solubility filter; machine-learning models trained on the DFT data could have removed 31 of the 50 before any DFT; and the classic Hume–Rothery rules for solid solutions would wrongly discard many solutes that really do dissolve in lithium.</p>
+<p class="warn">Limits, stated by the authors: these are optimistic, thermodynamic estimates. They assume the CCD rises in proportion to the vacancy count, that solute dissolved at high temperature stays dissolved at room temperature, and that bound and free vacancies move equally fast. The silver trap analysis suggests the real gain is much smaller. Zinc, which experiments show helps, is missed by this screen, so another mechanism may also be at work. The authors call for molecular-dynamics simulations and experiments to confirm.</p>
+</section>
+
+<section class="card" aria-labelledby="math-h">
+<h2 id="math-h">The maths</h2>
+<p>Vacancy boost from a dilute solute at atomic fraction c (simplified Lomer model, z = 1, Equation S7), with k<sub>B</sub> = 8.617 × 10⁻⁵ eV K⁻¹:</p>
+<div class="eq math">η(c, T) = 1 + c · exp(E<sub>b</sub> / k<sub>B</sub>T)</div>
+<p>The critical current density scales with the vacancy supply until the LLZO electrolyte itself becomes limiting (Equation S11):</p>
+<div class="eq math">J<sub>crit</sub> = min(η × 0.28 mA cm⁻², 23.2 mA cm⁻²)</div>
+<p>Capacity with one electron per lithium atom (Equation S13), M<sub>Li</sub> = 6.94 g mol⁻¹ and F = 96485 C mol⁻¹:</p>
+<div class="eq math">Q = (1 − c) F / [3.6 ((1 − c) M<sub>Li</sub> + c M<sub>X</sub>)]  mAh g⁻¹</div>
+<p>The silver trap (Equations S16–S18), with η<sub>b</sub> = exp(E<sub>b</sub>/k<sub>B</sub>T) and E<sub>a</sub><sup>Li</sup> = 0.04 eV:</p>
+<div class="eq math">f<sub>nn</sub> = 8c   η<sub>avg</sub> = 1 + (η<sub>b</sub> − 1) f<sub>nn</sub>   r<sub>D</sub> = (1 − f<sub>nn</sub>) + η<sub>b</sub> f<sub>nn</sub> exp[−(E<sub>esc</sub> − E<sub>a</sub><sup>Li</sup>) / k<sub>B</sub>T]</div>
+<p class="note">Simplifications in this demo: the paper evaluates everything at 300 K. The temperature slider just re-evaluates the same formulas, holding binding energies, solubility limits, the 0.28 mA cm⁻² baseline and the electrolyte cap fixed, which real materials would not do. The paper quotes the electrolyte cap as both 22.1 and 23.2 mA cm⁻²; the demo uses 23.2 from its worked calculation. The η<sub>avg</sub> values in Table S9 run slightly above this formula (for example 119.4 vs about 118.5 at 10 at.%).</p>
+</section>
+
+<section class="card" aria-labelledby="how-h">
+<h2 id="how-h">How to use it</h2>
+<ul>
+<li><strong>Start with silver:</strong> at its 9 at.% solubility limit the vacancy boost is about 14 and the estimated CCD about 4 mA cm⁻², with 1522 mAh g⁻¹ left. Slide c down until the CCD reads 1 mA cm⁻²: you need only about 1.75 at.% silver and keep about 3024 mAh g⁻¹.</li>
+<li><strong>Try germanium:</strong> each Ge atom boosts vacancies about 6000-fold, but only 0.1 at.% dissolves, so it tops out near 2 mA cm⁻². Push c past the limit to see the dashed “what if” line.</li>
+<li><strong>Compare the losers:</strong> gallium, rhodium, thallium and platinum attract vacancies but barely dissolve, so they stay at the 0.28 mA cm⁻² baseline. Magnesium dissolves very well but hardly attracts vacancies, and costs a lot of capacity.</li>
+<li><strong>Spring the trap:</strong> in the silver card, raise the escape barrier and watch the net speed-up r<sub>D</sub> fall far below the vacancy boost. Set it to 0.04 eV (no extra penalty) to see the optimistic case.</li>
+<li><strong>Change temperature:</strong> warmer lithium weakens the binding boost, so a solute’s advantage shrinks (an extrapolation; see the maths card).</li>
+</ul>
+</section>
+
+<p class="note" style="margin-top:24px">Demo by Grok Bot for the Daily Research Explorer. Every number is computed in your browser from the paper’s published equations and Table S6–S7 inputs, and every quoted result comes from arXiv:2610.32938.</p>
+</main>
+<script>
+"use strict";
+/* Table S6 (Eb meV, c_max at.%) + molar masses from Table S7 */
+const EL=[
+ {s:'Ag',eb:129,cm:9.0,M:107.87},{s:'Ge',eb:226,cm:0.1,M:72.63},{s:'Cd',eb:72,cm:18.0,M:112.41},
+ {s:'Mg',eb:10,cm:75.5,M:24.31},{s:'Hg',eb:98,cm:1.0,M:200.59},{s:'Ga',eb:100,cm:0.1,M:69.72},
+ {s:'Rh',eb:93,cm:0.1,M:102.91},{s:'Tl',eb:89,cm:0.1,M:204.38},{s:'Pt',eb:67,cm:0.1,M:195.08}];
+const KB=8.617333e-5,J0=0.28,JCAP=23.2,MLI=6.94,F=96485,EA=0.04;
+const COL=['--c1','--c4','--c3','--c2'];
+const $=id=>document.getElementById(id);
+const css=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const S={i:0};
+const boost=(e,T)=>Math.exp(e.eb/1000/(KB*T));
+const eta=(e,c,T)=>1+c/100*boost(e,T);
+const ccd=(e,c,T)=>Math.min(eta(e,c,T)*J0,JCAP);
+const cap=(e,c)=>{const x=c/100;return (1-x)*F/(3.6*((1-x)*MLI+x*e.M));};
+function fmt(v,d){if(v>=1000)return Math.round(v).toLocaleString('en-AU');if(v>=100)return v.toFixed(0);if(v>=10)return v.toFixed(d===undefined?1:d);return v.toFixed(d===undefined?2:d);}
+function fmtC(c){return c<0.1?c.toFixed(3):c<1?c.toFixed(2):c<10?c.toFixed(2):c.toFixed(1);}
+/* segmented control */
+const seg=$('segE');EL.forEach((e,i)=>{const b=document.createElement('button');b.type='button';b.textContent=e.s;b.dataset.i=i;b.setAttribute('aria-pressed',i===0);
+ b.addEventListener('click',()=>{S.i=i;seg.querySelectorAll('button').forEach(q=>q.setAttribute('aria-pressed',q===b));$('cc').value=Math.log10(e.cm);show();});seg.appendChild(b);});
+/* table */
+$('tbl').innerHTML=EL.map(e=>{const b=boost(e,300),n=eta(e,e.cm,300);return '<tr><td>'+e.s+'</td><td>'+e.eb+'</td><td>'+fmt(b,1)+'</td><td>'+e.cm+'</td><td>'+n.toFixed(1)+'</td><td>'+ccd(e,e.cm,300).toFixed(3)+'</td><td>'+Math.round(cap(e,e.cm))+'</td></tr>';}).join('');
+/* canvas helpers */
+function setup(cv){const r=cv.getBoundingClientRect(),d=devicePixelRatio||1;cv.width=Math.round(r.width*d);cv.height=Math.round(r.height*d);const x=cv.getContext('2d');x.setTransform(d,0,0,d,0,0);x.font='12px '+css('--font');return [x,r.width,r.height];}
+function axes(x,W,H,m,X,Y,xt,yt,xl,yl,fx,fy){
+ x.strokeStyle=css('--grid');x.lineWidth=1;x.fillStyle=css('--muted');x.textAlign='right';x.textBaseline='middle';
+ yt.forEach(v=>{x.beginPath();x.moveTo(m.l,Y(v));x.lineTo(W-m.r,Y(v));x.stroke();x.fillText(fy?fy(v):v,m.l-6,Y(v));});
+ x.textAlign='center';x.textBaseline='top';xt.forEach(v=>{x.beginPath();x.moveTo(X(v),m.t);x.lineTo(X(v),H-m.b);x.stroke();x.fillText(fx?fx(v):v,X(v),H-m.b+6);});
+ x.fillText(xl,(m.l+W-m.r)/2,H-16);x.save();x.translate(12,(m.t+H-m.b)/2);x.rotate(-Math.PI/2);x.textBaseline='middle';x.fillText(yl,0,0);x.restore();}
+function hline(x,W,m,Y,v,col,lab){x.strokeStyle=css(col);x.lineWidth=1.5;x.setLineDash([6,4]);x.beginPath();x.moveTo(m.l,Y(v));x.lineTo(W-m.r,Y(v));x.stroke();x.setLineDash([]);
+ if(lab){x.fillStyle=css(col);x.textAlign='left';x.textBaseline='bottom';x.fillText(lab,m.l+6,Y(v)-3);}}
+function lin(a,b,A,B){return v=>A+(v-a)/(b-a)*(B-A);}
+const lg=v=>Math.log10(v);
+const supL=v=>({'-2':'0.01','-1':'0.1','0':'1','1':'10','2':'100'})[v];
+/* plot 1: CCD vs c */
+function drawCCD(T,c){const [x,W,H]=setup($('ccd')),m={l:58,r:14,t:14,b:40};
+ const X=v=>lin(-2,2,m.l,W-m.r)(lg(v)),Yl=lin(lg(0.2),lg(30),H-m.b,m.t),Y=v=>Yl(lg(v));
+ axes(x,W,H,m,v=>lin(-2,2,m.l,W-m.r)(v),v=>Y(v),[-2,-1,0,1,2],[0.2,0.5,1,2,5,10,20],'solute concentration (at.%)','CCD (mA cm⁻²)',supL,v=>v);
+ x.fillStyle=css('--grid');x.globalAlpha=0.6;x.fillRect(m.l,Y(1),W-m.l-m.r,Y(0.2)-Y(1));x.globalAlpha=1;
+ hline(x,W,m,Y,1,'--c3','1 mA cm⁻² target');hline(x,W,m,Y,4,'--c2','4 mA cm⁻² industrial target');hline(x,W,m,Y,JCAP,'--muted','electrolyte limit '+JCAP);
+ EL.forEach((e,i)=>{const sel=i===S.i;if(sel)return;x.strokeStyle=css('--muted');x.globalAlpha=0.55;x.lineWidth=1.4;x.beginPath();let f=true;
+  for(let v=-2;v<=lg(e.cm)+1e-9;v+=0.02){const cc=Math.pow(10,v);const px=X(cc),py=Y(ccd(e,cc,T));f?x.moveTo(px,py):x.lineTo(px,py);f=false;}x.stroke();
+  const py=Y(ccd(e,e.cm,T));x.globalAlpha=0.8;x.fillStyle=css('--muted');x.beginPath();x.arc(X(e.cm),py,3,0,6.3);x.fill();
+  x.textAlign='left';x.textBaseline='middle';x.fillText(e.s,X(e.cm)+5,py-(e.s==='Rh'?8:e.s==='Tl'?-8:0));x.globalAlpha=1;});
+ const e=EL[S.i];x.strokeStyle=css('--c1');x.lineWidth=3;x.beginPath();let f=true;
+ for(let v=-2;v<=lg(e.cm)+1e-9;v+=0.01){const cc=Math.pow(10,v);f?x.moveTo(X(cc),Y(ccd(e,cc,T))):x.lineTo(X(cc),Y(ccd(e,cc,T)));f=false;}x.lineTo(X(e.cm),Y(ccd(e,e.cm,T)));x.stroke();
+ x.setLineDash([5,5]);x.lineWidth=2;x.beginPath();f=true;for(let v=lg(e.cm);v<=2+1e-9;v+=0.01){const cc=Math.pow(10,v);const py=Y(Math.min(ccd(e,cc,T),30));f?x.moveTo(X(cc),py):x.lineTo(X(cc),py);f=false;}x.stroke();x.setLineDash([]);
+ x.fillStyle=css('--c1');x.beginPath();x.arc(X(e.cm),Y(ccd(e,e.cm,T)),4,0,6.3);x.fill();
+ x.fillStyle=css('--c2');x.strokeStyle=css('--card-solid');x.lineWidth=2;x.beginPath();x.arc(X(c),Y(ccd(e,c,T)),6.5,0,6.3);x.fill();x.stroke();
+ $('lg1').innerHTML='<span style="--k:var(--c1)">'+e.s+' (solid up to its '+e.cm+' at.% solubility limit, dashed beyond)</span><span style="--k:var(--muted)">other solutes, ending at their limits</span><span style="--k:var(--c2)">your setting</span>';}
+/* plot 2: CCD vs capacity */
+function drawTrade(T,c){const [x,W,H]=setup($('trade')),m={l:58,r:14,t:14,b:40};
+ const X=lin(0,4000,m.l,W-m.r),Yl=lin(lg(0.2),lg(30),H-m.b,m.t),Y=v=>Yl(lg(v));
+ axes(x,W,H,m,X,Y,[0,500,1000,1500,2000,2500,3000,3500,4000],[0.2,0.5,1,2,5,10,20],'theoretical capacity (mAh g⁻¹)','CCD (mA cm⁻²)',null,v=>v);
+ hline(x,W,m,Y,1,'--c3');hline(x,W,m,Y,4,'--c2');
+ EL.forEach((e,i)=>{const sel=i===S.i;x.strokeStyle=css(sel?'--c1':'--muted');x.globalAlpha=sel?1:0.5;x.lineWidth=sel?3:1.4;x.beginPath();let f=true;
+  for(let v=-3;v<=lg(e.cm)+1e-9;v+=0.01){const cc=Math.pow(10,v);const px=X(cap(e,cc)),py=Y(ccd(e,cc,T));f?x.moveTo(px,py):x.lineTo(px,py);f=false;}x.stroke();
+  if(!sel){x.fillStyle=css('--muted');x.textAlign='right';x.textBaseline='middle';const px=X(cap(e,e.cm)),py=Y(ccd(e,e.cm,T));if(ccd(e,e.cm,T)>0.35){x.fillText(e.s,px-6,py);}}x.globalAlpha=1;});
+ const e=EL[S.i];x.fillStyle=css('--c2');x.strokeStyle=css('--card-solid');x.lineWidth=2;x.beginPath();x.arc(X(cap(e,c)),Y(ccd(e,c,T)),6.5,0,6.3);x.fill();x.stroke();
+ x.fillStyle=css('--muted');x.textAlign='right';x.textBaseline='top';x.fillText('pure Li: 3862 mAh g⁻¹, 0.28 mA cm⁻²',W-m.r-4,Y(0.28)+6);}
+/* plot 3: silver trap */
+function rD(c,T,esc){const ag=EL[0],nb=boost(ag,T),f=8*c/100;return (1-f)+nb*f*Math.exp(-(esc-EA)/(KB*T));}
+function drawTrap(T,c,esc){const [x,W,H]=setup($('trap')),m={l:58,r:14,t:14,b:40},ag=EL[0];
+ const X=lin(0,12.5,m.l,W-m.r),Yl=lin(0,lg(300),H-m.b,m.t),Y=v=>Yl(lg(v));
+ axes(x,W,H,m,X,Y,[0,2,4,6,8,10,12],[1,3,10,30,100,300],'silver concentration (at.%)','factor vs pure lithium',null,v=>v+'×');
+ const nb=boost(ag,T),cur=[[c2=>1+c2/100*nb,'--c4',2,[]],[c2=>1+(nb-1)*8*c2/100,'--muted',2,[6,4]],[c2=>rD(c2,T,esc),'--c1',3,[]]];
+ cur.forEach(([fn,col,lw,d])=>{x.strokeStyle=css(col);x.lineWidth=lw;x.setLineDash(d);x.beginPath();for(let k=0;k<=250;k++){const cc=k*12.5/250,v=Math.max(1,Math.min(300,fn(cc)));k?x.lineTo(X(cc),Y(v)):x.moveTo(X(cc),Y(v));}x.stroke();});x.setLineDash([]);
+ x.strokeStyle=css('--muted');x.lineWidth=1;x.setLineDash([2,4]);x.beginPath();x.moveTo(X(9),m.t);x.lineTo(X(9),H-m.b);x.stroke();x.setLineDash([]);x.fillStyle=css('--muted');x.textAlign='left';x.textBaseline='top';x.fillText('solubility limit 9 at.%',X(9)+4,m.t+4);
+ if(c<=12.5){x.strokeStyle=css('--c2');x.lineWidth=2;x.beginPath();x.moveTo(X(c),m.t);x.lineTo(X(c),H-m.b);x.stroke();}}
+function show(){const e=EL[S.i],c=+Math.pow(10,+$('cc').value).toPrecision(3),T=+$('tt').value,esc=+$('esc').value;
+ $('cco').textContent=fmtC(c)+' at.%';$('tto').textContent=T+' K';$('esco').textContent=esc.toFixed(3)+' eV';
+ const b=boost(e,T),n=eta(e,c,T),J=ccd(e,c,T),Q=cap(e,c);
+ $('sEta').textContent=fmt(b,1)+'×';$('sN').textContent=fmt(n)+'×';
+ $('sJ').innerHTML=J.toFixed(2)+'<small>mA cm⁻²</small>';$('sJ').classList.toggle('good',J>=1);$('sJ').classList.toggle('bad',J<1);
+ $('sQ').innerHTML=Math.round(Q)+'<small>mAh g⁻¹</small>';
+ const cstar=(1/J0-1)/b*100;let msg=e.s+': E_b = '+e.eb+' meV, solubility limit '+e.cm+' at.%. ';
+ if(c>e.cm*1.001)msg+='You are past the solubility limit: in practice the extra '+e.s+' would form a separate compound instead of staying dissolved. ';
+ if(J>=JCAP)msg+='The electrolyte, not the lithium, now limits the current. ';
+ msg+=cstar<=e.cm?'Reaching 1 mA cm⁻² needs '+fmtC(cstar)+' at.% '+e.s+' (capacity '+Math.round(cap(e,cstar))+' mAh g⁻¹).':'Even at its solubility limit '+e.s+' reaches only '+ccd(e,e.cm,T).toFixed(2)+' mA cm⁻², short of the 1 mA cm⁻² target at '+T+' K.';
+ $('status').textContent=msg;
+ const ca=S.i===0?c:9;const f=8*ca/100,nb=boost(EL[0],T);
+ $('tF').textContent=(f*100).toFixed(f<0.1?1:0)+'%'+(f>1?' (overlap!)':'');$('tA').textContent=fmt(1+(nb-1)*f)+'×';$('tR').textContent=fmt(rD(ca,T,esc))+'×';
+ drawCCD(T,c);drawTrade(T,c);drawTrap(T,S.i===0?c:9,esc);document.body.dataset.ready='1';}
+['cc','tt','esc'].forEach(id=>$(id).addEventListener('input',show));
+addEventListener('resize',show);matchMedia('(prefers-color-scheme: dark)').addEventListener('change',show);
+show();
+</script>
+</body></html>
