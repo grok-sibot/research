@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="light dark">
+<title>The ice shelf that can’t switch back — Research Explorer, 28 Oct 2026</title>
+<link rel="stylesheet" href="../assets/style.css">
+<style>
+/* page-specific: warm/cold colours, canvas heights, segmented buttons, regime badge */
+:root{--warm:#c93400;--cold:#0062cc;--ice:#d8e6f2;--sea-w:rgba(201,52,0,.22);--sea-c:rgba(0,98,204,.20);--both:rgba(137,68,171,.16)}
+@media (prefers-color-scheme:dark){:root{--warm:#ff9f0a;--cold:#64a8ff;--ice:#c9d6e3;--sea-w:rgba(255,159,10,.26);--sea-c:rgba(100,168,255,.24);--both:rgba(218,143,255,.2)}}
+canvas#cav{height:260px} canvas#hyst{height:330px} canvas#map{height:300px}
+.seg{display:inline-flex;flex-wrap:wrap;gap:2px;padding:2px;border-radius:10px;background:var(--accent-soft);margin:4px 0 10px}
+.seg button{font:500 14px var(--font);color:var(--text);background:transparent;border:0;border-radius:8px;padding:6px 14px;cursor:pointer;min-height:32px}
+.seg button[aria-pressed=true]{background:var(--card-solid);box-shadow:0 1px 3px rgba(0,0,0,.18);font-weight:600}
+.btns{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 14px}
+.btn{font:600 15px var(--font);color:#fff;background:var(--accent);border:0;border-radius:980px;padding:8px 18px;min-height:36px;cursor:pointer}
+.btn.sec{color:var(--accent);background:var(--accent-soft)}
+.btn:disabled{opacity:.5;cursor:default}
+.stat .v.warm{color:var(--warm)} .stat .v.cold{color:var(--cold)}
+.stat .v small{font-size:15px;font-weight:500;color:var(--muted);margin-left:4px}
+.legend span.w::before{background:var(--warm)} .legend span.c::before{background:var(--cold)}
+#restbl th,#restbl td{text-align:left}
+label output{white-space:nowrap}
+</style></head><body><main>
+<a class="back" href="../">‹ All demos</a>
+<div class="eyebrow">28 Oct 2026 · Climate</div>
+<h1>The ice shelf that can’t switch back</h1>
+<p class="lede">Floating Antarctic ice shelves are melted from below by the ocean. Sea ice freezing in open-water patches (polynyas) at the ice front makes surface water salty and heavy, and that cold water sinks and shields the cavity. This study shows that if sea-ice formation weakens enough to let warm deep water in, the high-melt state can lock itself in.</p>
+<p class="authors">Louis Saddier, Corentin Herbert, Christopher Y. S. Bull &amp; Louis-Alexandre Couston</p>
+
+<section class="card why" aria-labelledby="why-h">
+<h2 id="why-h">Why it matters</h2>
+<p>Ice shelves hold back the grounded Antarctic ice that raises sea level when it slides into the ocean, and regional models suggest cavities such as Filchner-Ronne and Amery could flip from cold, slow-melting to warm, fast-melting this century. This study shows that flip can be irreversible: once weaker sea-ice formation lets warm water in, returning to the original sea-ice conditions does not switch it back, and the depth of the warm layer at the ice front can serve as a warning sign.</p>
+</section>
+
+<section class="card" aria-labelledby="paper-h">
+<h2 id="paper-h">The paper</h2>
+<p style="margin:0 0 6px"><strong>Bistability of ice-shelf cavity circulation and melt under coastal polynya forcing</strong></p>
+<p class="cite" style="margin:0">Louis Saddier (ENS de Lyon, CNRS), Corentin Herbert (CNRS, ENS de Lyon), Christopher Y. S. Bull (ACCESS-NRI, Australian National University) &amp; Louis-Alexandre Couston (Université Claude Bernard Lyon 1, ENS de Lyon, CNRS). arXiv:2610.35359 [physics.ao-ph], submitted 26 Oct 2026; prepared for JGR: Oceans. <a href="https://arxiv.org/abs/2610.35359">Read on arXiv</a> · <a href="https://arxiv.org/pdf/2610.35359">PDF</a></p>
+<p style="margin-top:14px">In plain language: beneath every ice shelf is a cavity of seawater. Some cavities are filled with water at the surface freezing point (about −1.9 °C) and melt slowly. Others are flooded by Circumpolar Deep Water at about +1 °C and melt fast. Which one you get depends on the polynya in front: when lots of sea ice forms there, the salt it squeezes out makes the surface water dense enough to sink all the way down (deep convection), mixing away the warm layer.</p>
+<p>The authors ran a 3D ocean model of an idealised 100 km ice shelf and slowly turned the polynya’s salt flux F<sub>S</sub> up, then down, in 10-year steps over 160 years. Going up, the cavity stays warm until a high threshold; going down, it stays cold until a much lower one. In between, <em>both</em> states are stable (bistability), so the history decides. The reason is a feedback: warm-mode meltwater is light and fresh, a gyre at the ice front keeps it trapped over the polynya, and that fresh lid stops convection. The overlap widens with warmer offshore water and shrinks with stronger salinity layering; with free-slip walls (no gyre) the switch becomes gradual and fully reversible.</p>
+</section>
+
+<section class="card" aria-labelledby="demo-h">
+<h2 id="demo-h">Try it: turn the polynya up and down</h2>
+<p class="note" style="margin:0 0 12px">A toy version of the paper’s quasi-static experiments. It keeps the paper’s scaling laws (warm-mode melt ∝ thermal driving², cold-mode melt ∝ thermal driving, Section 3.3.1) and its qualitative threshold rules (Sections 3.3.2–4.2), with thresholds tuned to sit inside the paper’s tested range. The demo remembers which state the cavity is in, so the result depends on where you came from. Melt is shown relative to the warm state at T<sub>0</sub> = 1 °C with no polynya.</p>
+<div class="controls">
+ <div><label for="fs"><span>Sea-ice salt flux F<sub>S</sub></span> <output id="fso"></output></label><input id="fs" type="range" min="0" max="0.08" step="0.001" value="0"></div>
+ <div><label for="t0"><span>Offshore deep water T<sub>0</sub></span> <output id="t0o"></output></label><input id="t0" type="range" min="-1.9" max="2" step="0.1" value="1"></div>
+ <div><label for="ds"><span>Salinity layering ΔS</span> <output id="dso"></output></label><input id="ds" type="range" min="0.2" max="0.8" step="0.05" value="0.5"></div>
+</div>
+<div class="seglabel" id="bc-l" style="font-size:15px;font-weight:600;margin:0 0 2px">Circulation at the ice front</div>
+<div class="seg" role="group" aria-labelledby="bc-l" id="segBC">
+ <button type="button" data-g="1" aria-pressed="true">Gyre traps meltwater (no-slip)</button>
+ <button type="button" data-g="0" aria-pressed="false">One big gyre flushes it away (free-slip)</button>
+</div>
+<div class="btns">
+ <button class="btn" id="sweep" type="button">Run the 160-year experiment up and back down</button>
+ <button class="btn sec" id="setW" type="button">Start warm</button>
+ <button class="btn sec" id="setC" type="button">Start cold</button>
+</div>
+<div class="stats" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr))">
+ <div class="stat"><div class="v" id="sReg"></div><div class="l">Current cavity state</div></div>
+ <div class="stat"><div class="v" id="sMelt"></div><div class="l">Basal melt (relative)</div></div>
+ <div class="stat"><div class="v" id="sUp"></div><div class="l">Warm → cold needs F<sub>S</sub> above (g m⁻² s⁻¹)</div></div>
+ <div class="stat"><div class="v" id="sDn"></div><div class="l">Cold → warm when F<sub>S</sub> falls below</div></div>
+ <div class="stat"><div class="v" id="sW"></div><div class="l">Width of the “both possible” zone</div></div>
+</div>
+<p class="note" id="status" aria-live="polite" style="margin:10px 0 0"></p>
+<div style="margin-top:16px"><div class="plot-title">Side view: open ocean, polynya and the cavity under the ice</div>
+ <canvas id="cav" role="img" aria-label="Cross-section of the ice shelf cavity coloured by the current warm or cold state"></canvas></div>
+<div style="margin-top:22px"><div class="plot-title">Melt vs polynya forcing: the hysteresis loop</div>
+ <canvas id="hyst" role="img" aria-label="Basal melt against surface salt flux showing warm and cold branches"></canvas>
+ <div class="legend"><span class="w">warm branch (deep water floods the cavity)</span><span class="c">cold branch (convection keeps it cold)</span><span style="--k:var(--c4);opacity:.6">shaded: both states stable</span><span style="--k:var(--c4)">your cavity, with its recent path</span></div></div>
+<div style="margin-top:22px"><div class="plot-title">Regime map: which states exist for each offshore temperature</div>
+ <canvas id="map" role="img" aria-label="Map of warm only, cold only and bistable regions against salt flux and offshore temperature"></canvas>
+ <div class="legend"><span class="w">only warm</span><span style="--k:var(--c4)">both (history decides)</span><span class="c">only cold</span><span style="--k:var(--c4)">your setting</span></div></div>
+</section>
+
+<section class="card" aria-labelledby="res-h">
+<h2 id="res-h">What the paper found</h2>
+<table id="restbl">
+<thead><tr><th>Experiment (Table 1)</th><th>What changed</th><th>Transition</th></tr></thead>
+<tbody>
+<tr><td>TEMP −1.9, −1, 0</td><td>cold offshore deep water</td><td>reversible, little melt change</td></tr>
+<tr><td>TEMP 0.5, 1, 1.5, 2</td><td>warm offshore deep water</td><td>abrupt, irreversible (hysteresis); overlap grows with T<sub>0</sub></td></tr>
+<tr><td>SSS 33.8 / SBS 34.7</td><td>stronger salinity layering (N = 8.5 × 10⁻³ s⁻¹)</td><td>overlap vanishes: reversible</td></tr>
+<tr><td>SSS 34.2 / SBS 34.3</td><td>weaker layering (N = 1.4 × 10⁻³ s⁻¹)</td><td>wider overlap</td></tr>
+<tr><td>FSLIP</td><td>free-slip side walls, no trapping gyre</td><td>gradual and reversible</td></tr>
+<tr><td>NUH 1.3, NUH 32</td><td>5× lower / higher horizontal viscosity</td><td>overlap shrinks either way</td></tr>
+</tbody></table>
+<p class="note">Other results: warm-mode melt fits a power law with exponent 2.06 (for thermal driving above 2 °C), cold-mode melt 1.05. The cold-to-warm threshold is set mainly by the offshore density layering, while the warm-to-cold threshold is set by how much meltwater the warm cavity makes. Only relative salinity matters: changing surface or bottom salinity by the same amount gives identical melt. The thermocline depth under the polynya tracks the regime and is proposed as an indicator.</p>
+<p class="warn">Limits: this is an idealised box (flat 600 m seabed, linear ice base, prescribed far-field ocean, sea ice represented only as a salt flux) at 2 km resolution, which only partly resolves the meltwater boundary current. The thresholds depend on model choices like viscosity and side-wall friction, which may explain why earlier realistic studies disagree about reversibility. The demo’s numbers are illustrative, not the paper’s exact values.</p>
+</section>
+
+<section class="card" aria-labelledby="math-h">
+<h2 id="math-h">The maths</h2>
+<p>Thermal driving uses the freezing point at the deepest ice draft, T<sub>b</sub>(H) = −2.33 °C. The paper’s melt scaling laws, normalised in the demo so the TEMP1 warm state at F<sub>S</sub> = 0 is 1, with small F<sub>S</sub> trends matching Fig. 7 (warm melt falls as the thermocline deepens, cold melt rises as the front gyre strengthens):</p>
+<div class="eq math">ΔT = T<sub>0</sub> − T<sub>b</sub>(H)     m<sub>warm</sub> ∝ ΔT²     m<sub>cold</sub> ∝ ΔT</div>
+<p>The buoyancy budget under the polynya (Equations 2–4): the regime flips when the buoyancy removed by brine balances the buoyancy added by meltwater, with polynya area 𝒜<sub>p</sub> and ice-shelf area 𝒜<sub>c</sub>:</p>
+<div class="eq math">B<sub>polynya</sub> = −(βg/ρ<sub>⋆</sub>) 𝒜<sub>p</sub> F<sub>S</sub>
+B<sub>melt</sub> = (βg/ρ<sub>⋆</sub>) 𝒜<sub>c</sub>⟨S<sub>b</sub>q<sub>fw</sub>⟩ − (αg/ρ<sub>⋆</sub>) 𝒜<sub>c</sub> (𝓛/c<sub>p</sub>) ⟨q<sub>fw</sub>⟩
+F<sub>S</sub><sup>warm→cold</sup> = (𝒜<sub>c</sub>/𝒜<sub>p</sub>) (⟨S<sub>b</sub>q<sub>fw</sub><sup>warm</sup>⟩ − (α𝓛/βc<sub>p</sub>) ⟨q<sub>fw</sub><sup>warm</sup>⟩)</div>
+<p>Because the warm state makes far more meltwater than the cold one, the budget predicts two different thresholds, and the gap between them is the bistable range. Rescaled with Equation 5, all bistable runs collapse onto one curve, but warm-to-cold happens at f<sub>S</sub> ≈ 0.4 rather than the predicted 1, because some meltwater escapes the polynya.</p>
+<p>Demo rules (toy calibration): F<sub>S</sub><sup>warm→cold</sup> = 0.045 × ΔT / 3.33 (rises with the meltwater the warm state makes), and F<sub>S</sub><sup>cold→warm</sup> = 0.032 × exp[1.9 (ΔS − 0.5)] (rises with offshore layering, independent of T<sub>0</sub>). If the second is at least the first, or the free-slip option is chosen, there is no overlap and the demo blends the two branches smoothly around the midpoint.</p>
+</section>
+
+<section class="card" aria-labelledby="how-h">
+<h2 id="how-h">How to use it</h2>
+<ul>
+<li><strong>Run the experiment:</strong> press the blue button. F<sub>S</sub> climbs from 0 to 0.075 and back, like the paper’s two 160-year runs. Watch the purple dot stay on the red warm branch long past the point where it later returns on the blue cold branch.</li>
+<li><strong>Feel the memory:</strong> press “Start warm”, drag F<sub>S</sub> to the middle of the purple zone, then press “Start cold” at the same setting. Same forcing, very different melt.</li>
+<li><strong>The irreversible step:</strong> at the default settings press “Start cold” with F<sub>S</sub> at 0.040, drag it down until the cavity flips warm (below 0.032), then drag it back to 0.040. It stays warm: you have to push past 0.045 to recover the cold state.</li>
+<li><strong>Warmer ocean:</strong> raise T<sub>0</sub> to 2 °C and the overlap widens; drop it to 0 °C or below and the switch becomes reversible, as in the paper.</li>
+<li><strong>Layering and circulation:</strong> raise ΔS to 0.7 or pick free-slip and the overlap disappears.</li>
+</ul>
+</section>
+
+<p class="note" style="margin-top:24px">Demo by Grok Bot for the Daily Research Explorer. The physics and findings come from arXiv:2610.35359; the demo’s thresholds and melt values are a simplified illustration computed in your browser.</p>
+</main>
+<script>
+"use strict";
+const $=id=>document.getElementById(id);
+const css=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const TB=-2.33,DT1=1-TB,FMAX=0.08;
+const S={fs:0,t0:1,ds:0.5,gyre:true,state:'warm',path:[],anim:null};
+const dT=t0=>Math.max(t0-TB,0.05);
+const mWarm=(t0,fs)=>Math.pow(dT(t0)/DT1,2)*(1-0.3*fs/0.075);
+const mCold=(t0,fs)=>0.12*(dT(t0)/DT1)*(1+1.2*fs/0.075);
+const fUp=t0=>0.045*dT(t0)/DT1;
+const fDn=ds=>0.032*Math.exp(1.9*(ds-0.5));
+function thr(t0,ds,g){const u=fUp(t0),d=fDn(ds);if(!g||d>=u){const mid=g?(u+d)/2:(u+d)/2;return {bi:false,up:mid,dn:mid,mid};}return {bi:true,up:u,dn:d};}
+/* smooth (reversible) blend weight of the cold state */
+function wCold(fs,mid,g){const s=g?0.0025:0.008;return 1/(1+Math.exp(-(fs-mid)/s));}
+function melt(fs,t0,ds,g,state){const T=thr(t0,ds,g);if(T.bi)return state==='warm'?mWarm(t0,fs):mCold(t0,fs);
+ const w=wCold(fs,T.mid,g);return (1-w)*mWarm(t0,fs)+w*mCold(t0,fs);}
+function update(){const T=thr(S.t0,S.ds,S.gyre);
+ if(T.bi){if(S.state==='warm'&&S.fs>T.up)S.state='cold';else if(S.state==='cold'&&S.fs<T.dn)S.state='warm';}
+ else S.state=wCold(S.fs,T.mid,S.gyre)>0.5?'cold':'warm';}
+function setup(cv){const r=cv.getBoundingClientRect(),d=devicePixelRatio||1;cv.width=Math.round(r.width*d);cv.height=Math.round(r.height*d);const x=cv.getContext('2d');x.setTransform(d,0,0,d,0,0);x.font='12px '+css('--font');return [x,r.width,r.height];}
+const lin=(a,b,A,B)=>v=>A+(v-a)/(b-a)*(B-A);
+function axes(x,W,H,m,X,Y,xt,yt,xl,yl,fx,fy){x.strokeStyle=css('--grid');x.lineWidth=1;x.fillStyle=css('--muted');x.textAlign='right';x.textBaseline='middle';
+ yt.forEach(v=>{x.beginPath();x.moveTo(m.l,Y(v));x.lineTo(W-m.r,Y(v));x.stroke();x.fillText(fy?fy(v):v,m.l-6,Y(v));});
+ x.textAlign='center';x.textBaseline='top';xt.forEach(v=>{x.beginPath();x.moveTo(X(v),m.t);x.lineTo(X(v),H-m.b);x.stroke();x.fillText(fx?fx(v):v,X(v),H-m.b+6);});
+ x.fillText(xl,(m.l+W-m.r)/2,H-16);x.save();x.translate(13,(m.t+H-m.b)/2);x.rotate(-Math.PI/2);x.textBaseline='middle';x.fillText(yl,0,0);x.restore();}
+const f3=v=>v.toFixed(3);
+function drawHyst(){const [x,W,H]=setup($('hyst')),m={l:54,r:14,t:14,b:42},T=thr(S.t0,S.ds,S.gyre);
+ const ymax=Math.max(1.2,mWarm(S.t0,0)*1.15);const X=lin(0,FMAX,m.l,W-m.r),Y=lin(0,ymax,H-m.b,m.t);
+ if(T.bi){x.fillStyle=css('--both');x.fillRect(X(T.dn),m.t,X(T.up)-X(T.dn),H-m.b-m.t);}
+ const yt=[];for(let v=0;v<=ymax+1e-9;v+=ymax>2.4?0.5:0.25)yt.push(+v.toFixed(2));
+ axes(x,W,H,m,X,Y,[0,0.01,0.02,0.03,0.04,0.05,0.06,0.07,0.08],yt,'polynya salt flux Fₛ (g m⁻² s⁻¹)','basal melt (relative)',v=>v.toFixed(2),v=>v.toFixed(2));
+ const line=(f,a,b,col,w,dash)=>{x.strokeStyle=css(col);x.lineWidth=w;x.setLineDash(dash||[]);x.beginPath();for(let i=0;i<=200;i++){const v=a+(b-a)*i/200;i?x.lineTo(X(v),Y(f(v))):x.moveTo(X(v),Y(f(v)));}x.stroke();x.setLineDash([]);};
+ if(T.bi){line(v=>mWarm(S.t0,v),0,T.up,'--warm',3);line(v=>mWarm(S.t0,v),T.up,FMAX,'--warm',1.5,[5,5]);
+  line(v=>mCold(S.t0,v),T.dn,FMAX,'--cold',3);line(v=>mCold(S.t0,v),0,T.dn,'--cold',1.5,[5,5]);
+  x.strokeStyle=css('--muted');x.lineWidth=1.2;x.setLineDash([3,3]);
+  [[T.up,mWarm(S.t0,T.up),mCold(S.t0,T.up)],[T.dn,mCold(S.t0,T.dn),mWarm(S.t0,T.dn)]].forEach(([f,a,b])=>{x.beginPath();x.moveTo(X(f),Y(a));x.lineTo(X(f),Y(b));x.stroke();
+   const dir=b>a?-1:1;x.setLineDash([]);x.fillStyle=css('--muted');x.beginPath();x.moveTo(X(f),Y(b));x.lineTo(X(f)-5,Y(b)+8*dir);x.lineTo(X(f)+5,Y(b)+8*dir);x.fill();x.setLineDash([3,3]);});
+  x.setLineDash([]);x.fillStyle=css('--muted');x.textAlign='center';x.textBaseline='top';x.fillText('both stable',(X(T.up)+X(T.dn))/2,m.t+6);}
+ else{line(v=>melt(v,S.t0,S.ds,S.gyre,'warm'),0,FMAX,'--c4',3);}
+ if(S.path.length>1){x.strokeStyle=css('--c4');x.globalAlpha=.45;x.lineWidth=2;x.beginPath();S.path.forEach((p,i)=>i?x.lineTo(X(p[0]),Y(p[1])):x.moveTo(X(p[0]),Y(p[1])));x.stroke();x.globalAlpha=1;}
+ const my=melt(S.fs,S.t0,S.ds,S.gyre,S.state);x.fillStyle=css('--c4');x.strokeStyle=css('--card-solid');x.lineWidth=2;x.beginPath();x.arc(X(S.fs),Y(my),7,0,6.3);x.fill();x.stroke();}
+function drawMap(){const [x,W,H]=setup($('map')),m={l:54,r:14,t:14,b:42};const X=lin(0,FMAX,m.l,W-m.r),Y=lin(-1.9,2,H-m.b,m.t);
+ const N=120,A=[],B=[];for(let j=0;j<=N;j++){const t0=-1.9+3.9*j/N,T=thr(t0,S.ds,S.gyre);A.push([Math.min(T.bi?T.dn:T.mid,FMAX),t0]);B.push([Math.min(T.bi?T.up:T.mid,FMAX),t0]);}
+ const poly=(pts,col)=>{x.fillStyle=css(col);x.beginPath();pts.forEach((p,i)=>i?x.lineTo(X(p[0]),Y(p[1])):x.moveTo(X(p[0]),Y(p[1])));x.closePath();x.fill();};
+ poly([[0,-1.9],...A,[0,2]],'--sea-w');poly([...A,...B.slice().reverse()],'--both');poly([...B,[FMAX,2],[FMAX,-1.9]],'--sea-c');
+ axes(x,W,H,m,X,Y,[0,0.01,0.02,0.03,0.04,0.05,0.06,0.07,0.08],[-1.5,-1,-0.5,0,0.5,1,1.5,2],'polynya salt flux Fₛ (g m⁻² s⁻¹)','offshore T₀ (°C)',v=>v.toFixed(2),v=>v);
+ x.fillStyle=css('--text');x.textBaseline='middle';x.textAlign='left';x.font='600 13px '+css('--font');x.fillText('only warm',m.l+8,Y(1.75));x.textAlign='right';x.fillText('only cold',W-m.r-8,Y(-1.6));
+ x.fillStyle=css('--c4');x.strokeStyle=css('--card-solid');x.lineWidth=2;x.beginPath();x.arc(X(S.fs),Y(S.t0),7,0,6.3);x.fill();x.stroke();}
+function drawCav(){const [x,W,H]=setup($('cav'));const T=thr(S.t0,S.ds,S.gyre);
+ const cold=S.state==='cold',w=T.bi?(cold?1:0):wCold(S.fs,T.mid,S.gyre);
+ const surf=40,bed=H-24,front=W*0.58,gl=W-20;
+ /* water: base colour by state */
+ x.fillStyle=css('--card-solid');x.fillRect(0,0,W,H);
+ /* offshore always layered: cold top, warm deep */
+ const g=x.createLinearGradient(0,surf,0,bed);g.addColorStop(0,css('--sea-c'));g.addColorStop(0.45,css('--sea-c'));g.addColorStop(1,css('--sea-w'));
+ x.fillStyle=g;x.fillRect(0,surf,front*0.45,bed-surf);
+ /* polynya and cavity region */
+ x.save();x.beginPath();x.rect(front*0.45,surf,W,bed-surf);x.clip();
+ /* warm-mode layering: thin cold lid, warm below */
+ const gw=x.createLinearGradient(0,surf,0,bed);gw.addColorStop(0,css('--sea-c'));gw.addColorStop(0.3,css('--sea-w'));gw.addColorStop(1,css('--sea-w'));
+ x.globalAlpha=1-w;x.fillStyle=gw;x.fillRect(0,surf,W,bed-surf);x.globalAlpha=w;x.fillStyle=css('--sea-c');x.fillRect(0,surf,W,bed-surf);x.globalAlpha=1;x.restore();
+ /* ice shelf wedge */
+ const draftF=surf+60,draftG=bed-30;
+ x.fillStyle=css('--ice');x.strokeStyle=css('--muted');x.lineWidth=1;x.beginPath();x.moveTo(front,surf-14);x.lineTo(gl,surf-26);x.lineTo(gl,draftG);x.lineTo(front,draftF);x.closePath();x.fill();x.stroke();
+ /* seabed */
+ x.fillStyle=css('--muted');x.globalAlpha=.35;x.fillRect(0,bed,W,H-bed);x.globalAlpha=1;
+ x.strokeStyle=css('--muted');x.beginPath();x.moveTo(0,surf);x.lineTo(front,surf);x.stroke();
+ /* polynya: sea-ice bits + brine arrows scaled by Fs */
+ const px0=front*0.62,px1=front-6,k=S.fs/0.075;
+ x.fillStyle=css('--ice');for(let i=0;i<Math.round(3+k*9);i++){const xx=px0+(px1-px0)*((i*0.618)%1);x.fillRect(xx,surf-5,10,4);}
+ x.fillStyle=css('--muted');x.font='12px '+css('--font');x.textAlign='center';x.textBaseline='bottom';x.fillText('polynya: sea ice forms, salt sinks',(px0+px1)/2,surf-8);
+ x.fillText('open ocean',front*0.2,surf-8);x.fillStyle='#3a3a3c';x.fillText('floating ice shelf',(front+gl)/2+40,surf+4);
+ const arrow=(x0,y0,x1,y1,col,lw)=>{x.strokeStyle=css(col);x.fillStyle=css(col);x.lineWidth=lw;x.beginPath();x.moveTo(x0,y0);x.lineTo(x1,y1);x.stroke();const a=Math.atan2(y1-y0,x1-x0);x.beginPath();x.moveTo(x1,y1);x.lineTo(x1-9*Math.cos(a-0.45),y1-9*Math.sin(a-0.45));x.lineTo(x1-9*Math.cos(a+0.45),y1-9*Math.sin(a+0.45));x.fill();};
+ const conv=w;if(conv>0.05){for(let i=0;i<3;i++){const xx=px0+15+i*(px1-px0-30)/2;x.globalAlpha=conv;arrow(xx,surf+8,xx,surf+8+(bed-surf-30)*(0.4+0.6*conv),'--cold',2.5);}x.globalAlpha=1;
+  x.globalAlpha=conv;arrow(front-10,bed-22,front+W*0.25,draftG-8,'--cold',3);x.globalAlpha=1;}
+ if(1-w>0.05){x.globalAlpha=1-w;arrow(front*0.2,bed-20,front+W*0.25,draftG-6,'--warm',3.5);
+  const yb=xx=>draftF+(draftG-draftF)*(xx-front)/(gl-front),xa=front+W*0.16;arrow(xa,yb(xa)+16,front-40,draftF+12,'--muted',2);x.fillStyle=css('--muted');x.textAlign='right';x.textBaseline='top';x.fillText('fresh meltwater flows out',xa-4,yb(xa)+20);
+  x.globalAlpha=1;}
+ /* melt drips along base */
+ const mr=melt(S.fs,S.t0,S.ds,S.gyre,S.state);x.fillStyle=css(w>0.5?'--cold':'--warm');
+ for(let i=0;i<10;i++){const tt=(i+0.5)/10,xx=front+(gl-front)*tt,yy=draftF+(draftG-draftF)*tt;const r=1.5+Math.min(mr,2.5)*2.2*(1-0.3*tt);x.beginPath();x.arc(xx,yy+r+2,r,0,6.3);x.fill();}
+ x.font='600 14px '+css('--font');x.textAlign='left';x.textBaseline='top';x.fillStyle=css(w>0.5?'--cold':'--warm');
+ x.fillText(w>0.5?'Cold cavity: convection mixes cold water down':'Warm cavity: deep water floods in',12,surf+10);
+ x.font='12px '+css('--font');x.fillStyle=css('--muted');x.fillText('warm deep water offshore ('+S.t0.toFixed(1)+' °C)',12,bed-18);}
+function show(){update();const T=thr(S.t0,S.ds,S.gyre),my=melt(S.fs,S.t0,S.ds,S.gyre,S.state);
+ S.path.push([S.fs,my]);if(S.path.length>400)S.path.shift();
+ $('fso').textContent=S.fs.toFixed(3)+' g m⁻² s⁻¹';$('t0o').textContent=S.t0.toFixed(1)+' °C';$('dso').textContent=S.ds.toFixed(2)+' g kg⁻¹';
+ const r=$('sReg');r.textContent=S.state==='warm'?'Warm':'Cold';r.className='v '+S.state;
+ $('sMelt').innerHTML=my.toFixed(2)+'<small>×</small>';
+ if(T.bi){$('sUp').textContent=f3(T.up);$('sDn').textContent=f3(T.dn);$('sW').textContent=f3(T.up-T.dn);}
+ else{$('sUp').textContent='≈ '+f3(T.mid);$('sDn').textContent='≈ '+f3(T.mid);$('sW').textContent='none';}
+ let st;if(!T.bi)st=S.gyre?'No overlap at these settings: the switch is reversible, so the cavity simply follows the forcing.':'Free-slip: one domain-wide gyre carries meltwater away, the feedback is lost, and the change is gradual and reversible (paper Section 4.2).';
+ else if(S.fs>T.dn&&S.fs<T.up)st='You are inside the “both stable” zone: this cavity is '+S.state+' only because of where it came from. '+(S.state==='warm'?'Push Fₛ above '+f3(T.up)+' to flip it cold.':'Drop Fₛ below '+f3(T.dn)+' and it flips warm, and coming back here will not undo it.');
+ else st=S.fs>=T.up?'Strong sea-ice formation: only the cold state can exist here.':'Weak sea-ice formation: only the warm state can exist here.';
+ $('status').textContent=st;drawCav();drawHyst();drawMap();}
+function setFs(v){S.fs=Math.max(0,Math.min(FMAX,v));$('fs').value=S.fs;show();}
+$('fs').addEventListener('input',e=>{stop();setFs(+e.target.value);});
+$('t0').addEventListener('input',e=>{S.t0=+e.target.value;S.path=[];show();});
+$('ds').addEventListener('input',e=>{S.ds=+e.target.value;S.path=[];show();});
+document.querySelectorAll('#segBC button').forEach(b=>b.addEventListener('click',()=>{S.gyre=b.dataset.g==='1';document.querySelectorAll('#segBC button').forEach(q=>q.setAttribute('aria-pressed',q===b));S.path=[];show();}));
+$('setW').addEventListener('click',()=>{stop();S.state='warm';S.path=[];show();});
+$('setC').addEventListener('click',()=>{stop();S.state='cold';S.path=[];show();});
+function stop(){if(S.anim){clearInterval(S.anim);S.anim=null;$('sweep').disabled=false;}}
+$('sweep').addEventListener('click',()=>{stop();S.state='warm';S.path=[];setFs(0);let k=0;const steps=[];
+ for(let i=0;i<=15;i++)steps.push(i*0.005);for(let i=15;i>=0;i--)steps.push(i*0.005);
+ const fine=[];for(let i=0;i<steps.length-1;i++)for(let j=0;j<6;j++)fine.push(steps[i]+(steps[i+1]-steps[i])*j/6);fine.push(0);
+ const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;$('sweep').disabled=true;
+ if(reduce){fine.forEach(v=>{S.fs=v;update();S.path.push([v,melt(v,S.t0,S.ds,S.gyre,S.state)]);});setFs(0);$('sweep').disabled=false;return;}
+ S.anim=setInterval(()=>{if(k>=fine.length){stop();return;}setFs(fine[k++]);},40);});
+addEventListener('resize',()=>{drawCav();drawHyst();drawMap();});
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>{drawCav();drawHyst();drawMap();});
+show();
+</script>
+</body></html>
