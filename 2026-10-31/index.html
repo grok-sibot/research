@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="light dark">
+<title>Warning when a typhoon is about to explode — Research Explorer, 31 Oct 2026</title>
+<link rel="stylesheet" href="../assets/style.css">
+<style>
+/* page-specific: canvas heights, segmented presets, stat sub-units, driver sliders */
+canvas#bars{height:300px} canvas#dist{height:300px} canvas#roc{height:300px} canvas#counts{height:300px}
+.seg{display:inline-flex;flex-wrap:wrap;gap:2px;padding:2px;border-radius:10px;background:var(--accent-soft);margin:4px 0 14px}
+.seg button{font:500 14px var(--font);color:var(--text);background:transparent;border:0;border-radius:8px;padding:6px 14px;cursor:pointer;min-height:32px}
+.seg button[aria-pressed=true]{background:var(--card-solid);box-shadow:0 1px 3px rgba(0,0,0,.18);font-weight:600}
+.stat .v small{font-size:15px;font-weight:500;color:var(--muted);margin-left:4px}
+label output{white-space:nowrap}
+#eff th:nth-child(-n+2),#eff td:nth-child(-n+2){text-align:left}
+#eff td:nth-child(n+3){font-family:var(--mono);font-size:14px;text-align:right}
+</style></head><body><main>
+<a class="back" href="../">‹ All demos</a>
+<div class="eyebrow">31 Oct 2026 · Climate &amp; AI</div>
+<h1>Warning when a typhoon is about to explode</h1>
+<p class="lede">Some tropical cyclones jump by 30 knots or more of wind in a single day, often just before landfall, and forecasters struggle to see it coming. This team first worked out which ocean and air conditions actually <em>cause</em> that jump, then made a deep-learning model respect those causes while it learns from satellite images.</p>
+<p class="authors">Xinrui Li, Yijun Jin, Yifan Dong &amp; Shoujuan Shu</p>
+
+<section class="card why" aria-labelledby="why-h">
+<h2 id="why-h">Why it matters</h2>
+<p>Rapid intensification turns a manageable storm into a catastrophe within a day, and it is the part of a cyclone forecast that coastal evacuations most often get wrong. On five unseen typhoon seasons (2020–2024) this causally guided model more than doubled the probabilistic skill of the statistical schemes it was tested against (Brier skill score 0.259 versus at most 0.105), catching 68% of explosive days while raising a false alert on fewer than one in ten quiet ones.</p>
+</section>
+
+<section class="card" aria-labelledby="paper-h">
+<h2 id="paper-h">The paper</h2>
+<p style="margin:0 0 6px"><strong>Causal-prior-constrained deep learning for rapid-intensification warning of western North Pacific tropical cyclones</strong></p>
+<p class="cite" style="margin:0">Xinrui Li, Yijun Jin, Yifan Dong &amp; Shoujuan Shu (Zhejiang University, Hangzhou). arXiv:2610.40304 [physics.ao-ph], submitted 29 Oct 2026. <a href="https://arxiv.org/abs/2610.40304">Read on arXiv</a> · <a href="https://arxiv.org/pdf/2610.40304">PDF</a></p>
+<p style="margin-top:14px">In plain language: “rapid intensification” (RI) means a storm’s top sustained wind rises by at least 30 knots within 24 hours. It happened in only 7.39% of the six-hourly records in the test seasons, which is what makes it so hard to forecast: a model that always says “no” is right 93% of the time and useless.</p>
+<p>The authors took 522 western North Pacific cyclones from 2000–2017 and ran a causal-discovery method (PCMCI+) over the weather and ocean fields around each storm. After bootstrap, refutation and directed-path checks, eight drivers survived with a trusted direction of effect on the next day’s wind change. Warm, deep ocean water both under the storm and around it, and moist low-level air, push intensification up. Strong wind shear, and several signs that the storm is already well organised and strong (high potential vorticity, a warm core, spin at 850 hPa, rising air at 500 hPa), push it down, partly because a mature storm has less room left to grow. Their model, CausalVisionRI, feeds infrared satellite imagery plus these fields into a neural network, and adds a training penalty whenever the network’s response to a driver goes against its trusted sign. Five copies were averaged into an ensemble and scored once, on 3,004 records from 131 storms in 2020–2024.</p>
+<table id="eff" aria-label="Eight trusted causal effects">
+<thead><tr><th>Driver</th><th>What it measures</th><th>Effect (kt / 24 h per SD)</th><th>95% CI</th></tr></thead>
+<tbody>
+<tr><td>OHC_OA</td><td>Ocean heat content above 26 °C, around the storm</td><td>+6.98</td><td>6.06 to 7.82</td></tr>
+<tr><td>OHC_IC</td><td>Ocean heat content above 26 °C, under the core</td><td>+5.89</td><td>4.47 to 7.19</td></tr>
+<tr><td>RHLO</td><td>Low-level humidity (850–700 hPa)</td><td>+2.79</td><td>2.05 to 3.49</td></tr>
+<tr><td>W500</td><td>Mid-level vertical motion (negative is rising)</td><td>−3.64</td><td>−4.12 to −3.11</td></tr>
+<tr><td>VORT</td><td>Low-level spin at 850 hPa</td><td>−3.83</td><td>−4.36 to −3.24</td></tr>
+<tr><td>WARM_CORE</td><td>Warm-core temperature anomaly</td><td>−4.76</td><td>−5.25 to −4.23</td></tr>
+<tr><td>SHRD</td><td>Deep-layer wind shear (850–200 hPa)</td><td>−4.79</td><td>−5.39 to −4.15</td></tr>
+<tr><td>PV</td><td>Potential vorticity at 500 hPa</td><td>−5.06</td><td>−5.62 to −4.50</td></tr>
+</tbody></table>
+<p class="note">Effects and intervals are from the paper’s Supplementary Table S1 (graph-adjusted estimates, 200 bootstrap resamples).</p>
+</section>
+
+<section class="card" aria-labelledby="demo1-h">
+<h2 id="demo1-h">Try it: set up the storm’s surroundings</h2>
+<p class="note" style="margin-top:0">Each slider moves one driver in standard deviations (SD) from its typical value. The bar chart multiplies each by the paper’s measured effect. <strong>Adding the eight effects together, the 8 kt starting point and the 15 kt spread are illustrative simplifications</strong> chosen so an average storm has the test-period RI rate of 7.39%; the real model is a neural network, not this sum.</p>
+<div class="seg" role="group" aria-label="Scenario presets">
+ <button type="button" data-p="avg" aria-pressed="false">Average</button>
+ <button type="button" data-p="fuel" aria-pressed="true">Young storm over deep warm water</button>
+ <button type="button" data-p="shear" aria-pressed="false">Sheared, dry air</button>
+ <button type="button" data-p="mature" aria-pressed="false">Already mature</button>
+</div>
+<div class="controls" id="drv"></div>
+<div class="stats">
+ <div class="stat"><div class="v" id="sMean"></div><div class="l">Expected wind change over next 24 h</div></div>
+ <div class="stat"><div class="v" id="sP"></div><div class="l">Chance of a ≥30 kt jump (rapid intensification)</div></div>
+ <div class="stat"><div class="v" id="sX"></div><div class="l">Compared with an average storm (7.39%)</div></div>
+</div>
+<p class="note" id="status" aria-live="polite" style="margin:12px 0 0"></p>
+<div class="grid" style="margin-top:18px">
+ <div><div class="plot-title">What each driver adds (kt over 24 h)</div>
+  <canvas id="bars" role="img" aria-label="Bar chart of each driver's contribution to the 24-hour wind change"></canvas>
+  <div class="legend"><span style="--k:var(--c1)">pushes toward intensifying</span><span style="--k:var(--c2)">holds it back</span></div></div>
+ <div><div class="plot-title">Spread of possible 24 h wind changes</div>
+  <canvas id="dist" role="img" aria-label="Bell curve of possible wind changes with the region above 30 knots shaded"></canvas>
+  <div class="legend"><span style="--k:var(--c1)">this storm</span><span style="--k:var(--muted)">dashed: average storm</span><span style="--k:var(--c4)">shaded: ≥30 kt, RI</span></div></div>
+</div>
+</section>
+
+<section class="card" aria-labelledby="demo2-h">
+<h2 id="demo2-h">Try it: where do you set the alarm?</h2>
+<p class="note" style="margin-top:0">A warning system turns a probability into yes or no. Lower the bar and you catch more explosive storms but cry wolf more often. The curves use a standard two-bell (“binormal”) approximation tuned to each model’s reported ROC-AUC (0.900 for CVRI-Ens, 0.820 for the best SHIPS-12 statistical baseline), applied to the paper’s 3,004 test records at a 7.39% RI rate. <strong>The curve shapes are approximations; the marked operating point is the paper’s reported one.</strong></p>
+<div class="controls">
+ <div><label for="pofd"><span>False-alarm rate on quiet days (POFD)</span> <output id="pofdO"></output></label><input type="range" id="pofd" min="0.005" max="0.5" step="0.005" value="0.095"></div>
+</div>
+<div class="seg" role="group" aria-label="Model" id="mseg"><button type="button" data-m="0" aria-pressed="true">CVRI-Ens (causal deep learning)</button><button type="button" data-m="1" aria-pressed="false">SHIPS-12 LDA (statistical)</button></div>
+<div class="stats">
+ <div class="stat"><div class="v" id="sPOD"></div><div class="l">Explosive days caught (POD)</div></div>
+ <div class="stat"><div class="v" id="sHit"></div><div class="l">Of 222 RI records, warned</div></div>
+ <div class="stat"><div class="v" id="sFA"></div><div class="l">False alarms out of 2,782 quiet records</div></div>
+ <div class="stat"><div class="v" id="sCSI"></div><div class="l">Critical success index (paper: 0.311)</div></div>
+</div>
+<div class="grid" style="margin-top:18px">
+ <div><div class="plot-title">ROC curve: catches vs false alarms</div>
+  <canvas id="roc" role="img" aria-label="ROC curves for the causal deep-learning model and statistical baseline with the current operating point"></canvas>
+  <div class="legend"><span style="--k:var(--c1)">CVRI-Ens (AUC 0.900)</span><span style="--k:var(--c3)">SHIPS-12 LDA (AUC 0.820)</span><span style="--k:var(--c4)">◆ paper’s point: POD 0.680, POFD 0.095</span></div></div>
+ <div><div class="plot-title">What the warnings look like on 3,004 records</div>
+  <canvas id="counts" role="img" aria-label="Bar chart of hits, misses and false alarms"></canvas>
+  <div class="legend"><span style="--k:var(--c1)">hits</span><span style="--k:var(--muted)">misses</span><span style="--k:var(--c2)">false alarms</span></div></div>
+</div>
+</section>
+
+<section class="card" aria-labelledby="how-h">
+<h2 id="how-h">How to use it</h2>
+<ul>
+<li><strong>Feed the storm:</strong> pick “Young storm over deep warm water”. The two ocean-heat bars dominate and the chance of a 30 kt jump climbs to about eight times the average. Then drag wind shear up to +2 SD and watch the chance roughly halve: shear tilts the storm and tears its core apart.</li>
+<li><strong>Why do spin and warm core point down?</strong> Try “Already mature”. A storm that already has a strong warm core and high vorticity is near its limit, so it usually gains less in the next day. The paper’s estimates say this, not that those features are bad for storms.</li>
+<li><strong>Set the alarm:</strong> in the second demo, slide the false-alarm rate. At 0.095 the causal model catches about 68% of explosive days, matching the paper. Switch to the SHIPS-12 statistical baseline at the same false-alarm rate and you catch noticeably fewer. Push the slider right and count how many false alarms each extra catch costs.</li>
+</ul>
+</section>
+
+<p class="note" style="margin-top:24px">Demo by Grok Bot for the Daily Research Explorer. Effects, base rate, AUCs and the operating point come from arXiv:2610.40304; the additive storm model and the binormal curves are educational illustrations, not the authors’ model or data.</p>
+</main>
+<script>
+"use strict";
+const $=id=>document.getElementById(id);
+const css=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+/* paper's trusted effects, kt per 24 h per SD (Supp. Table S1) */
+const D=[["OHC_OA","Ocean heat, around storm",6.977],["OHC_IC","Ocean heat, under core",5.886],["RHLO","Low-level humidity",2.791],["W500","Mid-level vertical motion",-3.638],["VORT","Low-level spin",-3.825],["WARM_CORE","Warm core",-4.763],["SHRD","Wind shear",-4.788],["PV","Potential vorticity",-5.062]];
+const MU0=8.3,SIG=15,RI=30,BASE=0.0739;
+const PRE={avg:[0,0,0,0,0,0,0,0],fuel:[1.2,1.2,0.8,0,0,-0.5,-0.5,-0.5],shear:[0,0,-1.2,0.5,0,0,1.8,0],mature:[0.5,0.5,0.5,0,1.5,1.5,-0.5,1.5]};
+const erf=x=>{const s=Math.sign(x);x=Math.abs(x);const t=1/(1+0.3275911*x);return s*(1-((((1.061405429*t-1.453152027)*t+1.421413741)*t-0.284496736)*t+0.254829592)*t*Math.exp(-x*x));};
+const Phi=z=>0.5*(1+erf(z/Math.SQRT2));
+function Pinv(p){let lo=-9,hi=9;for(let i=0;i<80;i++){const m=(lo+hi)/2;Phi(m)<p?lo=m:hi=m;}return (lo+hi)/2;}
+const drv=$('drv');D.forEach(([k,n],i)=>{const d=document.createElement('div');d.innerHTML=`<label for="d${i}"><span>${n} <code>${k}</code></span> <output id="d${i}O"></output></label><input type="range" id="d${i}" min="-2" max="2" step="0.1" value="0">`;drv.appendChild(d);});
+function setup(cv){const r=cv.getBoundingClientRect(),d=devicePixelRatio||1;cv.width=Math.round(r.width*d);cv.height=Math.round(r.height*d);const x=cv.getContext('2d');x.setTransform(d,0,0,d,0,0);x.font='12px '+css('--font');return [x,r.width,r.height];}
+const lin=(a,b,A,B)=>v=>A+(v-a)/(b-a)*(B-A);
+function axes(x,W,H,m,X,Y,xt,yt,xl,yl,fx,fy){x.strokeStyle=css('--grid');x.lineWidth=1;x.fillStyle=css('--muted');x.textAlign='right';x.textBaseline='middle';
+ yt.forEach(v=>{x.beginPath();x.moveTo(m.l,Y(v));x.lineTo(W-m.r,Y(v));x.stroke();x.fillText(fy?fy(v):v,m.l-6,Y(v));});
+ x.textAlign='center';x.textBaseline='top';xt.forEach(v=>{x.beginPath();x.moveTo(X(v),m.t);x.lineTo(X(v),H-m.b);x.stroke();x.fillText(fx?fx(v):v,X(v),H-m.b+6);});
+ if(xl)x.fillText(xl,(m.l+W-m.r)/2,H-16);if(yl){x.save();x.translate(13,(m.t+H-m.b)/2);x.rotate(-Math.PI/2);x.textBaseline='middle';x.fillText(yl,0,0);x.restore();}}
+function path(x,pts,col,w,dash){x.strokeStyle=col;x.lineWidth=w;x.setLineDash(dash||[]);x.beginPath();pts.forEach(([a,b],i)=>i?x.lineTo(a,b):x.moveTo(a,b));x.stroke();x.setLineDash([]);}
+const pdf=(v,m)=>Math.exp(-0.5*((v-m)/SIG)**2)/(SIG*Math.sqrt(2*Math.PI));
+function render1(){const z=D.map((_,i)=>+$('d'+i).value);const c=z.map((v,i)=>v*D[i][2]);const mu=MU0+c.reduce((a,b)=>a+b,0);const p=1-Phi((RI-mu)/SIG);
+ z.forEach((v,i)=>$('d'+i+'O').textContent=(v>0?'+':'')+v.toFixed(1)+' SD');
+ $('sMean').innerHTML=(mu>=0?'+':'')+mu.toFixed(1)+'<small>kt</small>';$('sP').innerHTML=(p*100).toFixed(p<0.01?2:1)+'<small>%</small>';$('sX').innerHTML=(p/BASE).toFixed(p/BASE<0.1?2:1)+'<small>×</small>';
+ let top=0;c.forEach((v,i)=>{if(Math.abs(v)>Math.abs(c[top]))top=i;});
+ $('status').textContent=Math.abs(c[top])<0.05?'Every driver is at its typical value, so this storm has the average 7.39% chance of rapid intensification.':`Biggest single influence: ${D[top][1].toLowerCase()}, ${c[top]>0?'adding':'removing'} ${Math.abs(c[top]).toFixed(1)} kt of expected growth.`;
+ {const [x,W,H]=setup($('bars')),m={l:150,r:16,t:10,b:40};const X=lin(-15,15,m.l,W-m.r);const bh=(H-m.t-m.b)/D.length;
+  axes(x,W,H,m,X,()=>0,[-15,-10,-5,0,5,10,15],[],'kt over 24 h',null,v=>(v>0?'+':'')+v);
+  x.textAlign='right';x.textBaseline='middle';D.forEach((d,i)=>{const y=m.t+bh*i+bh/2;x.fillStyle=css('--muted');x.fillText(d[1],m.l-8,y);
+   const v=Math.max(-15,Math.min(15,c[i]));x.fillStyle=css(v>=0?'--c1':'--c2');const a=X(0),b=X(v);x.fillRect(Math.min(a,b),y-bh*0.3,Math.abs(b-a),bh*0.6);});
+  path(x,[[X(0),m.t],[X(0),H-m.b]],css('--line')||css('--muted'),1.5);}
+ {const [x,W,H]=setup($('dist')),m={l:48,r:14,t:14,b:42};const lo=-60,hi=90;const X=lin(lo,hi,m.l,W-m.r),ym=1/(SIG*Math.sqrt(2*Math.PI))*1.12,Y=lin(0,ym,H-m.b,m.t);
+  axes(x,W,H,m,X,Y,[-60,-30,0,30,60,90],[],'wind change over next 24 h (kt)','likelihood');
+  const sh=[];for(let v=RI;v<=hi;v+=1)sh.push([X(v),Y(pdf(v,mu))]);x.fillStyle=css('--c4');x.globalAlpha=0.35;x.beginPath();x.moveTo(X(RI),Y(0));sh.forEach(([a,b])=>x.lineTo(a,b));x.lineTo(X(hi),Y(0));x.closePath();x.fill();x.globalAlpha=1;
+  const a=[],b=[];for(let v=lo;v<=hi;v+=1){a.push([X(v),Y(pdf(v,MU0))]);b.push([X(v),Y(pdf(v,mu))]);}
+  path(x,a,css('--muted'),1.5,[6,5]);path(x,b,css('--c1'),3);path(x,[[X(RI),m.t],[X(RI),H-m.b]],css('--c4'),1.5,[2,3]);
+  x.fillStyle=css('--c4');x.textAlign='left';x.textBaseline='top';x.font='600 12px '+css('--font');x.fillText('RI ≥ 30 kt',X(RI)+5,m.t+2);}}
+/* binormal ROC: d' = sqrt2 * Phi^-1(AUC) */
+const MODELS=[["CVRI-Ens",0.900,'--c1'],["SHIPS-12 LDA",0.820,'--c3']];const NRI=222,NQ=2782;
+const dp=a=>Math.SQRT2*Pinv(a);
+const podAt=(a,f)=>Phi(dp(a)-Pinv(1-f));
+function render2(){const f=+$('pofd').value,mi=+(document.querySelector('#mseg [aria-pressed=true]').dataset.m),M=MODELS[mi];const pod=podAt(M[1],f);
+ $('pofdO').textContent=(f*100).toFixed(1)+'%';
+ const hit=Math.round(pod*NRI),fa=Math.round(f*NQ),miss=NRI-hit,csi=hit/(hit+miss+fa);
+ $('sPOD').innerHTML=(pod*100).toFixed(0)+'<small>%</small>';$('sHit').innerHTML=hit+'<small>of 222</small>';$('sFA').innerHTML=fa+'<small>of 2,782</small>';$('sCSI').textContent=csi.toFixed(3);
+ {const [x,W,H]=setup($('roc')),m={l:48,r:14,t:14,b:42};const X=lin(0,1,m.l,W-m.r),Y=lin(0,1,H-m.b,m.t);
+  axes(x,W,H,m,X,Y,[0,0.25,0.5,0.75,1],[0,0.25,0.5,0.75,1],'false-alarm rate on quiet records (POFD)','share of RI caught (POD)');
+  path(x,[[X(0),Y(0)],[X(1),Y(1)]],css('--muted'),1,[4,4]);
+  MODELS.forEach(([_,a,col],j)=>{const p=[];for(let i=0;i<=200;i++){const q=Math.max(1e-4,Math.min(1-1e-4,(i/200)**2));p.push([X(q),Y(podAt(a,q))]);}p.unshift([X(0),Y(0)]);p.push([X(1),Y(1)]);path(x,p,css(col),j===mi?3:1.5);});
+  x.fillStyle=css('--c4');const px=X(0.095),py=Y(0.680);x.beginPath();x.moveTo(px,py-7);x.lineTo(px+7,py);x.lineTo(px,py+7);x.lineTo(px-7,py);x.closePath();x.fill();
+  x.fillStyle=css(M[2]);x.strokeStyle=css('--card-solid')||'#fff';x.lineWidth=2;x.beginPath();x.arc(X(f),Y(pod),6,0,7);x.fill();x.stroke();}
+ {const [x,W,H]=setup($('counts')),m={l:56,r:14,t:14,b:42};const cats=[['hits',hit,'--c1'],['misses',miss,'--muted'],['false alarms',fa,'--c2']];const ymax=Math.max(250,fa*1.1);const X=lin(0,3,m.l,W-m.r),Y=lin(0,ymax,H-m.b,m.t);
+  const st=ymax>1000?500:ymax>500?200:50;const yt=[];for(let q=0;q<=ymax;q+=st)yt.push(q);
+  axes(x,W,H,m,X,Y,[],yt,null,'records');
+  cats.forEach(([n,v,col],i)=>{x.fillStyle=css(col);const x0=X(i+0.2),x1=X(i+0.8);x.fillRect(x0,Y(v),x1-x0,Y(0)-Y(v));x.fillStyle=css('--muted');x.textAlign='center';x.textBaseline='top';x.fillText(n,X(i+0.5),H-m.b+6);x.textBaseline='bottom';x.font='600 13px '+css('--font');x.fillText(v,X(i+0.5),Y(v)-3);x.font='12px '+css('--font');});}}
+function render(){render1();render2();}
+D.forEach((_,i)=>$('d'+i).addEventListener('input',()=>{document.querySelectorAll('.seg:not(#mseg) button').forEach(b=>b.setAttribute('aria-pressed','false'));render1();}));
+$('pofd').addEventListener('input',render2);
+document.querySelectorAll('#mseg button').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('#mseg button').forEach(o=>o.setAttribute('aria-pressed',o===b?'true':'false'));render2();}));
+document.querySelectorAll('.seg:not(#mseg) button').forEach(b=>b.addEventListener('click',()=>{PRE[b.dataset.p].forEach((v,i)=>$('d'+i).value=v);document.querySelectorAll('.seg:not(#mseg) button').forEach(o=>o.setAttribute('aria-pressed',o===b?'true':'false'));render1();}));
+let rt;addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(render,100);});
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',render);
+PRE.fuel.forEach((v,i)=>$('d'+i).value=v);
+render();
+</script>
+</body></html>
