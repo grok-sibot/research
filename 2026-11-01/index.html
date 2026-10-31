@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="light dark">
+<title>Steering a radiation beam to follow a breathing tumour — Research Explorer, 1 Nov 2026</title>
+<link rel="stylesheet" href="../assets/style.css">
+<style>
+/* page-specific: canvas heights, segmented controls, playback row */
+canvas#bev{height:260px} canvas#trace{height:300px} canvas#dose{height:300px} canvas#lag{height:300px}
+.seg{display:inline-flex;flex-wrap:wrap;gap:2px;padding:2px;border-radius:10px;background:var(--accent-soft);margin:4px 12px 14px 0}
+.seg button{font:500 14px var(--font);color:var(--text);background:transparent;border:0;border-radius:8px;padding:6px 14px;cursor:pointer;min-height:32px}
+.seg button[aria-pressed=true]{background:var(--card-solid);box-shadow:0 1px 3px rgba(0,0,0,.18);font-weight:600}
+.stat .v small{font-size:15px;font-weight:500;color:var(--muted);margin-left:4px}
+.play{display:flex;align-items:center;gap:12px;margin:12px 0 0}
+.play button{font:600 15px var(--font);color:#fff;background:var(--accent);border:0;border-radius:980px;padding:8px 18px;min-height:36px;cursor:pointer}
+.play span{font-size:14px;color:var(--muted);font-variant-numeric:tabular-nums}
+details summary{cursor:pointer;font-weight:600;font-size:15px;color:var(--accent);margin:4px 0 8px;min-height:28px}
+label output{white-space:nowrap}
+</style></head><body><main>
+<a class="back" href="../">‹ All demos</a>
+<div class="eyebrow">1 Nov 2026 · Medicine</div>
+<h1>Steering a radiation beam to follow a breathing tumour</h1>
+<p class="lede">Pancreas and liver tumours ride up and down with every breath. This team took a 3D MRI method fast enough to locate the tumour every 148 milliseconds, added a predictor that guesses where it will be a moment later, and used it to slide the radiation machine’s metal shaping leaves so the beam follows the target.</p>
+<p class="authors">Tianyu Yang, William P. Donahue, Aniket Pramanik, Victor Murray, Can Wu, Ricardo Otazo &amp; Grace Tang</p>
+
+<section class="card why" aria-labelledby="why-h">
+<h2 id="why-h">Why it matters</h2>
+<p>Abdominal tumours can move more than a centimetre with each breath, so patients are currently asked to hold their breath, wear a compression belt, or accept a wider margin of irradiated healthy tissue. Using real-time 3D MRI with no implanted markers, this system kept the beam within 0.7–1.8 mm of a moving target and raised the dose agreement for a clinical pancreas plan from 84.5% to 99.3%.</p>
+</section>
+
+<section class="card" aria-labelledby="paper-h">
+<h2 id="paper-h">The paper</h2>
+<p style="margin:0 0 6px"><strong>Real-time volumetric MRI-guided MLC tracking: A feasibility study</strong></p>
+<p class="cite" style="margin:0">Tianyu Yang, William P. Donahue, Aniket Pramanik, Victor Murray, Can Wu, Ricardo Otazo &amp; Grace Tang (Memorial Sloan Kettering Cancer Center, New York). arXiv:2610.37832 [physics.med-ph], submitted 27 Oct 2026. <a href="https://arxiv.org/abs/2610.37832">Read on arXiv</a> · <a href="https://arxiv.org/pdf/2610.37832">PDF</a></p>
+<p style="margin-top:14px">In plain language: an MR-Linac is a radiotherapy machine with an MRI scanner built in, so doctors can see soft tissue during treatment. The beam’s shape is set by a <em>multileaf collimator</em> (MLC), rows of tungsten “leaves” that slide in and out. Normally the leaves stay put while the tumour moves underneath them. Here, a technique called MRSIGMA (MR SIGnature MAtching) first learns 30 breathing “states” and their 3D tumour positions, then during treatment matches each new radial MRI readout to the closest state, giving a fresh 3D position every 148 ms.</p>
+<p>Those positions are smoothed with an exponential moving average, then fed to a linear Kalman filter that tracks position, velocity and acceleration and predicts two imaging intervals (2 × 148 ms) ahead. The software turns the change between successive predictions into leaf speeds and sends them to the linac every 40 ms. On an MRI-compatible motion platform moving 15 mm peak to peak, with a 10 cm circular field and a real patient breathing trace, they measured:</p>
+<table aria-label="Results from the paper's Tables 1 and 2">
+<thead><tr><th>Motion</th><th>Tracking error (RMSE)</th><th>System latency</th><th>Gamma pass, no tracking</th><th>Gamma pass, tracking</th></tr></thead>
+<tbody>
+<tr><td>Sine, period 8 s</td><td>0.79 mm</td><td>&lt;40 ms</td><td>87.9%</td><td>99.9%</td></tr>
+<tr><td>Sine, period 6 s</td><td>1.30 mm</td><td>71 ms</td><td>87.6%</td><td>96.5%</td></tr>
+<tr><td>Sine, period 5 s</td><td>1.79 mm</td><td>125 ms</td><td>87.2%</td><td>100%</td></tr>
+<tr><td>Patient trace</td><td>0.70 mm</td><td>70 ms</td><td>88.5%</td><td>99.4%</td></tr>
+<tr><td>Patient trace, pancreas SBRT plan</td><td>—</td><td>—</td><td>84.5%</td><td>99.3%</td></tr>
+</tbody></table>
+<p class="note">Gamma pass rate (3%/2 mm) is the share of film points whose dose matches the no-motion reference within 3% or within 2 mm. Values are from the paper’s Tables 1 and 2. Clinical acceptability is usually ≥95%.</p>
+</section>
+
+<section class="card" aria-labelledby="demo1-h">
+<h2 id="demo1-h">Try it: track a breathing target</h2>
+<p class="note" style="margin-top:0">This simulator follows the paper’s pipeline step by step: noisy position every Δt → exponential moving average → constant-acceleration Kalman filter predicting 2Δt ahead → leaf speed = (new prediction − previous prediction) / Δt, applied at the next 40 ms control cycle. <strong>The noise level, smoothing weight, Kalman tuning, penumbra and the irregular breathing trace are illustrative choices</strong>, since the paper does not publish them; the dose part is a 1D slice through a 10 cm field, not film. Leaves are placed once after a 4 s filter learning period and then only receive speeds, as in the paper, so any miss at that moment stays as a small constant offset; the authors list feeding back actual leaf positions as future work.</p>
+<div><div class="seg" role="group" aria-label="Breathing trace" id="kseg"><button type="button" data-k="sine" aria-pressed="true">Regular (sine, like the phantom)</button><button type="button" data-k="irr" aria-pressed="false">Irregular breathing</button></div>
+<div class="seg" role="group" aria-label="Tracking mode" id="mseg"><button type="button" data-m="off" aria-pressed="false">No tracking</button><button type="button" data-m="ema" aria-pressed="false">Follow last image</button><button type="button" data-m="kalman" aria-pressed="true">Kalman prediction</button></div></div>
+<div class="controls">
+ <div><label for="per"><span>Breathing period</span> <output id="perO"></output></label><input type="range" id="per" min="3" max="8" step="0.5" value="5"></div>
+ <div><label for="amp"><span>Motion, peak to peak</span> <output id="ampO"></output></label><input type="range" id="amp" min="5" max="30" step="1" value="15"></div>
+ <div><label for="dt"><span>Time between MRI positions (Δt)</span> <output id="dtO"></output></label><input type="range" id="dt" min="50" max="500" step="2" value="148"></div>
+</div>
+<details><summary>Filter settings</summary>
+<div class="controls">
+ <div><label for="noise"><span>Position noise per image</span> <output id="noiseO"></output></label><input type="range" id="noise" min="0" max="2" step="0.1" value="0.5"></div>
+ <div><label for="alpha"><span>Smoothing weight on newest image (EMA α)</span> <output id="alphaO"></output></label><input type="range" id="alpha" min="0.1" max="1" step="0.05" value="0.5"></div>
+ <div><label for="q"><span>Kalman flexibility (process noise, log₁₀)</span> <output id="qO"></output></label><input type="range" id="q" min="-1" max="3" step="0.1" value="1"></div>
+</div></details>
+<div class="stats">
+ <div class="stat"><div class="v" id="sR"></div><div class="l">Tracking error, RMSE (paper: 0.70–1.79 mm)</div></div>
+ <div class="stat"><div class="v" id="sL"></div><div class="l">Lag by cross-correlation (paper: &lt;40–125 ms)</div></div>
+ <div class="stat"><div class="v" id="sW"></div><div class="l">Time target within 2 mm of beam centre</div></div>
+ <div class="stat"><div class="v" id="sG"></div><div class="l">1D gamma pass, 3%/2 mm (no tracking shown below)</div></div>
+</div>
+<p class="note" id="status" aria-live="polite" style="margin:12px 0 0"></p>
+<div style="margin-top:18px"><div class="plot-title">Beam’s-eye view: leaves (grey) shape a 10 cm circle around the target</div>
+ <canvas id="bev" role="img" aria-label="Animated view of the multileaf collimator aperture following a moving target"></canvas>
+ <div class="play"><button type="button" id="playBtn" aria-pressed="false">Play</button><span id="clock">t = 0.0 s</span></div></div>
+<div class="grid" style="margin-top:18px">
+ <div><div class="plot-title">Position along the leaf direction (last 15 s)</div>
+  <canvas id="trace" role="img" aria-label="Target position, MRI samples and leaf aperture centre over time"></canvas>
+  <div class="legend"><span style="--k:var(--muted)">true target</span><span style="--k:var(--c3)">dots: MRI positions</span><span style="--k:var(--c1)">aperture centre</span><span style="--k:var(--c2)">error</span></div></div>
+ <div><div class="plot-title">Dose across the field edge, relative to plan</div>
+  <canvas id="dose" role="img" aria-label="Planned dose profile versus delivered dose with and without tracking"></canvas>
+  <div class="legend"><span style="--k:var(--muted)">plan, no motion</span><span style="--k:var(--c2)">moving, no tracking</span><span style="--k:var(--c1)">this mode</span><span style="--k:var(--c4)">failing gamma points</span></div></div>
+</div>
+</section>
+
+<section class="card" aria-labelledby="demo2-h">
+<h2 id="demo2-h">Why predict? The cost of lag</h2>
+<p class="note" style="margin-top:0">If the beam simply copies where the target was τ seconds ago, a sine motion x(t) = (A/2)·sin(2πt/T) leaves a worst-case gap of exactly</p>
+<p class="eq">error<sub>max</sub> = A · sin(π τ / T)</p>
+<p class="note">With no prediction, τ is at least the imaging interval plus processing, about 300 ms here. The Kalman filter’s job is to cancel most of that delay. AAPM Task Group 264 recommends tracking latency under 500 ms.</p>
+<div class="controls">
+ <div><label for="tau"><span>Latency τ</span> <output id="tauO"></output></label><input type="range" id="tau" min="0" max="600" step="5" value="300"></div>
+</div>
+<div class="stats">
+ <div class="stat"><div class="v" id="l5"></div><div class="l">Worst gap, 5 s breath, 15 mm motion</div></div>
+ <div class="stat"><div class="v" id="l8"></div><div class="l">Worst gap, 8 s breath, 15 mm motion</div></div>
+</div>
+<div style="margin-top:18px"><div class="plot-title">Worst-case beam–target gap versus latency (15 mm peak to peak)</div>
+ <canvas id="lag" role="img" aria-label="Curves of worst-case error against latency for breathing periods of 3, 5 and 8 seconds"></canvas>
+ <div class="legend"><span style="--k:var(--c2)">3 s breath</span><span style="--k:var(--c1)">5 s</span><span style="--k:var(--c3)">8 s</span><span style="--k:var(--c4)">dashed: 2 mm, the gamma distance tolerance</span></div></div>
+</section>
+
+<section class="card" aria-labelledby="how-h">
+<h2 id="how-h">How to use it</h2>
+<ul>
+<li><strong>See the problem:</strong> choose “No tracking” and press Play. The target slides out from the centre of the fixed circle, and in the dose plot the field edges blur. About 85% of points pass gamma, close to the paper’s 87–88% for untracked delivery.</li>
+<li><strong>Just copy the last image:</strong> pick “Follow last image”. The beam now chases the target but trails by roughly 0.4 s, so the error is largest mid-breath when the target moves fastest. Shorten the breathing period to make it worse.</li>
+<li><strong>Predict:</strong> switch to “Kalman prediction”. The lag drops to about 0.1 s and the error to around 1–1.5 mm, the same range the paper measured. Watch the peaks and valleys: like the authors report, the filter overshoots where the target turns around.</li>
+<li><strong>Tune it:</strong> open Filter settings. More Kalman flexibility reacts faster but amplifies noise; heavier smoothing (lower α) adds lag. Raise Δt to see why fast imaging matters, and try irregular breathing.</li>
+<li><strong>Lag budget:</strong> in the second card, slide τ to see how quickly a delay turns into millimetres of miss for fast breathing.</li>
+</ul>
+</section>
+
+<p class="note" style="margin-top:24px">Demo by Grok Bot for the Daily Research Explorer. Pipeline structure (148 ms imaging, EMA, constant-acceleration Kalman filter with 2Δt horizon, 40 ms leaf updates, 15 mm motion, 10 cm field, 3%/2 mm gamma) and all quoted results come from arXiv:2610.37832. Noise, filter tuning, penumbra, the irregular trace and the 1D dose model are educational assumptions, not the authors’ data.</p>
+</main>
+<script>
+"use strict";
+const $=id=>document.getElementById(id);
+const css=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const erf=x=>{const s=Math.sign(x);x=Math.abs(x);const t=1/(1+0.3275911*x);return s*(1-((((1.061405429*t-1.453152027)*t+1.421413741)*t-0.284496736)*t+0.254829592)*t*Math.exp(-x*x));};
+function rng(seed){let s=seed>>>0;return()=>{s=(s*1664525+1013904223)>>>0;return s/4294967296;};}
+function gauss(r){const u=r()||1e-9,v=r();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+const DUR=60,T0=10,LEARN=4,CTRL=0.04,FIELD=100,SIG=3,ROW=5; /* field width mm, penumbra sigma mm, leaf width mm (illustrative) */
+/* breathing traces: sine like the phantom; irregular = Lujan-style cos^4 shape with drifting period, depth and baseline */
+function motion(kind,T,pp){const A=pp/2;
+ if(kind==='sine')return t=>A*Math.sin(2*Math.PI*t/T);
+ return t=>{const ph=Math.PI*(t/T+0.08*Math.sin(2*Math.PI*t/29));const a=pp*(0.85+0.18*Math.sin(2*Math.PI*t/23));return a*(Math.pow(Math.cos(ph),4)-0.375)+1.2*Math.sin(2*Math.PI*t/53);};}
+function simulate(o){const {f,dt,noise,alpha,q,mode}=o;const r=rng(11);
+ let x=[0,0,0],P=[[100,0,0],[0,100,0],[0,0,100]];const R=0.01;
+ const F=[[1,dt,dt*dt/2],[0,1,dt],[0,0,1]];
+ const Q=[[dt**5/20,dt**4/8,dt**3/6],[dt**4/8,dt**3/3,dt**2/2],[dt**3/6,dt**2/2,dt]].map(rw=>rw.map(v=>v*q));
+ const mul=(A,B)=>A.map(rw=>B[0].map((_,j)=>rw.reduce((s,v,k)=>s+v*B[k][j],0)));const tr=A=>A[0].map((_,j)=>A.map(rw=>rw[j]));
+ let ema=null,prev=null;const cmds=[],samples=[];const h=2*dt,lat=dt;
+ for(let k=0;k*dt<DUR;k++){const tk=k*dt,z=f(tk)+noise*gauss(r);ema=ema===null?z:alpha*z+(1-alpha)*ema;
+  x=mul(F,x.map(v=>[v])).map(rw=>rw[0]);P=mul(mul(F,P),tr(F)).map((rw,i)=>rw.map((v,j)=>v+Q[i][j]));
+  const S=P[0][0]+R,K=[P[0][0]/S,P[1][0]/S,P[2][0]/S],y=ema-x[0];x=x.map((v,i)=>v+K[i]*y);P=P.map((rw,i)=>rw.map((v,j)=>v-K[i]*P[0][j]));
+  const pred=mode==='kalman'?x[0]+x[1]*h+x[2]*h*h/2:ema;samples.push({t:tk,z});
+  if(prev!==null&&tk>=LEARN)cmds.push({tEff:Math.ceil((tk+lat)/CTRL)*CTRL,vel:(pred-prev)/dt,start:prev});prev=pred;}
+ /* leaves sit still during the filter's learning period, are placed once at the last prediction, then move only by commanded speeds */
+ const out=[];let pos=0,ci=-1,vel=0;const st=0.001;
+ for(let i=0;i*st<DUR;i++){const t=i*st;while(ci+1<cmds.length&&cmds[ci+1].tEff<=t+1e-9){ci++;vel=cmds[ci].vel;if(ci===0)pos=cmds[0].start;}
+  if(mode!=='off')pos+=vel*st;else pos=0;if(i%40===0)out.push({t,mlc:pos,tgt:f(t)});}
+ return {samples,out};}
+function metrics(out){const a=out.filter(p=>p.t>=T0);let s=0,w=0;a.forEach(p=>{const e=p.mlc-p.tgt;s+=e*e;if(Math.abs(e)<=2)w++;});
+ const mx=a.reduce((s,p)=>s+p.mlc,0)/a.length,mt=a.reduce((s,p)=>s+p.tgt,0)/a.length;let best=-Infinity,lag=0,vm=0;a.forEach(p=>vm+=(p.mlc-mx)**2);
+ for(let L=-5;L<=25;L++){let c=0;for(let i=0;i<a.length;i++){const j=i-L;if(j>=0&&j<a.length)c+=(a[i].mlc-mx)*(a[j].tgt-mt);}if(c>best){best=c;lag=L*CTRL;}}
+ return {rmse:Math.sqrt(s/a.length),within:w/a.length,lag:vm>1e-6?lag:null};}
+const prof=y=>0.5*(erf((y+FIELD/2)/(Math.SQRT2*SIG))-erf((y-FIELD/2)/(Math.SQRT2*SIG)));
+const YS=[];for(let y=-70;y<=70;y+=0.25)YS.push(y);const REF=YS.map(prof);
+function doseGamma(out){const es=out.filter(p=>p.t>=T0).map(p=>p.tgt-p.mlc);const del=YS.map(y=>{let s=0;for(const e of es)s+=prof(y+e);return s/es.length;});
+ let m=0,n=0;REF.forEach(v=>{if(v>=0.25){m+=v;n++;}});const dd=0.03*m/n;let pass=0,tot=0;const fail=[];
+ for(let i=0;i<YS.length;i++){if(REF[i]<0.25)continue;tot++;let g=Infinity;for(let j=Math.max(0,i-12);j<=Math.min(YS.length-1,i+12);j++){const v=((del[i]-REF[j])/dd)**2+((YS[i]-YS[j])/2)**2;if(v<g)g=v;}if(g<=1)pass++;else fail.push(i);}
+ return {del,pass:pass/tot,fail};}
+function setup(cv){const r=cv.getBoundingClientRect(),d=devicePixelRatio||1;cv.width=Math.round(r.width*d);cv.height=Math.round(r.height*d);const x=cv.getContext('2d');x.setTransform(d,0,0,d,0,0);x.font='12px '+css('--font');return [x,r.width,r.height];}
+const lin=(a,b,A,B)=>v=>A+(v-a)/(b-a)*(B-A);
+function axes(x,W,H,m,X,Y,xt,yt,xl,yl,fx,fy){x.strokeStyle=css('--grid');x.lineWidth=1;x.fillStyle=css('--muted');x.textAlign='right';x.textBaseline='middle';
+ yt.forEach(v=>{x.beginPath();x.moveTo(m.l,Y(v));x.lineTo(W-m.r,Y(v));x.stroke();x.fillText(fy?fy(v):v,m.l-6,Y(v));});
+ x.textAlign='center';x.textBaseline='top';xt.forEach(v=>{x.beginPath();x.moveTo(X(v),m.t);x.lineTo(X(v),H-m.b);x.stroke();x.fillText(fx?fx(v):v,X(v),H-m.b+6);});
+ if(xl)x.fillText(xl,(m.l+W-m.r)/2,H-18);if(yl){x.save();x.translate(13,(m.t+H-m.b)/2);x.rotate(-Math.PI/2);x.fillText(yl,0,-6);x.restore();}}
+function path(x,p,col,w,dash){x.strokeStyle=col;x.lineWidth=w;x.setLineDash(dash||[]);x.beginPath();p.forEach(([a,b],i)=>i?x.lineTo(a,b):x.moveTo(a,b));x.stroke();x.setLineDash([]);}
+const seg=id=>document.querySelector('#'+id+' [aria-pressed=true]');
+let S=null,OFF=null,G=null,GOFF=null,tPlay=T0,playing=false,last=0;
+function params(){return {kind:seg('kseg').dataset.k,mode:seg('mseg').dataset.m,T:+$('per').value,pp:+$('amp').value,dt:+$('dt').value/1000,noise:+$('noise').value,alpha:+$('alpha').value,q:10**(+$('q').value)};}
+function compute(){const p=params();const f=motion(p.kind,p.T,p.pp);
+ $('perO').textContent=p.T.toFixed(1)+' s';$('ampO').textContent=p.pp+' mm';$('dtO').textContent=Math.round(p.dt*1000)+' ms';$('noiseO').textContent=p.noise.toFixed(1)+' mm';$('alphaO').textContent=p.alpha.toFixed(2);$('qO').textContent=(+$('q').value).toFixed(1);
+ S=simulate({...p,f});S.f=f;S.mode=p.mode;OFF=simulate({...p,f,mode:'off'});G=doseGamma(S.out);GOFF=p.mode==='off'?G:doseGamma(OFF.out);const M=metrics(S.out);
+ $('sR').innerHTML=M.rmse.toFixed(2)+'<small>mm</small>';$('sL').innerHTML=M.lag===null?'—':Math.round(M.lag*1000)+'<small>ms</small>';$('sW').innerHTML=(M.within*100).toFixed(0)+'<small>%</small>';
+ $('sG').innerHTML=(G.pass*100).toFixed(1)+'<small>% vs '+(GOFF.pass*100).toFixed(1)+'%</small>';
+ const name={off:'No tracking',ema:'Following the last image',kalman:'Kalman prediction'}[p.mode];
+ $('status').textContent=`${name}: ${M.rmse.toFixed(2)} mm RMS error, ${(G.pass*100).toFixed(1)}% gamma pass (untracked: ${(GOFF.pass*100).toFixed(1)}%). ${G.pass>=0.95?'Above':'Below'} the usual 95% clinical threshold.`;
+ drawTrace();drawDose();drawBev();}
+function drawTrace(){const [x,W,H]=setup($('trace')),m={l:48,r:14,t:14,b:42};const t1=DUR,t0=DUR-15;const A=Math.max(10,+$('amp').value*0.75);
+ const X=lin(t0,t1,m.l,W-m.r),Y=lin(-A,A,H-m.b,m.t);const st=A>15?10:5;const yt=[];for(let v=-Math.floor(A/st)*st;v<=A;v+=st)yt.push(v);
+ const xt=[];for(let v=Math.ceil(t0/5)*5;v<=t1;v+=5)xt.push(v);axes(x,W,H,m,X,Y,xt,yt,'time (s)','position (mm)');
+ const pts=S.out.filter(p=>p.t>=t0);path(x,pts.map(p=>[X(p.t),Y(p.tgt)]),css('--muted'),2);
+ path(x,pts.map(p=>[X(p.t),Y(p.mlc-p.tgt)]),css('--c2'),1.2);path(x,pts.map(p=>[X(p.t),Y(p.mlc)]),css('--c1'),2.5);
+ x.fillStyle=css('--c3');S.samples.filter(s=>s.t>=t0).forEach(s=>{x.beginPath();x.arc(X(s.t),Y(s.z),2.4,0,7);x.fill();});
+ if(tPlay>=t0){x.strokeStyle=css('--accent');x.lineWidth=1;x.setLineDash([3,3]);x.beginPath();x.moveTo(X(tPlay),m.t);x.lineTo(X(tPlay),H-m.b);x.stroke();x.setLineDash([]);}}
+function drawDose(){const [x,W,H]=setup($('dose')),m={l:48,r:14,t:14,b:42};const X=lin(30,66,m.l,W-m.r),Y=lin(0,1.08,H-m.b,m.t);
+ axes(x,W,H,m,X,Y,[30,40,50,60],[0,0.25,0.5,0.75,1],'distance from field centre (mm)','relative dose',null,v=>Math.round(v*100)+'%');
+ const pick=a=>YS.map((y,i)=>[y,a[i]]).filter(([y])=>y>=30&&y<=66).map(([y,v])=>[X(y),Y(v)]);
+ path(x,pick(REF),css('--muted'),2,[6,5]);path(x,pick(GOFF.del),css('--c2'),2);path(x,pick(G.del),css('--c1'),3);
+ x.fillStyle=css('--c4');G.fail.forEach(i=>{if(YS[i]>=30&&YS[i]<=66){x.fillRect(X(YS[i])-1.5,H-m.b-8,3,6);}});}
+function drawBev(){const [x,W,H]=setup($('bev'));const p=S.out[Math.min(S.out.length-1,Math.round(tPlay/CTRL))]||S.out[0];
+ const sc=Math.min(W/170,H/130),cx=W/2,cy=H/2,R=FIELD/2;x.fillStyle=css('--card-solid');x.fillRect(0,0,W,H);
+ const leaf=css('--muted');x.globalAlpha=0.55;
+ for(let yr=-60;yr<60;yr+=ROW){const yc=yr+ROW/2;const half=Math.abs(yc)<R?Math.sqrt(R*R-yc*yc):0;const a=p.mlc-half,b=p.mlc+half;const py=cy+yr*sc,ph=ROW*sc-1;
+  x.fillStyle=leaf;x.fillRect(0,py,cx+a*sc,ph);x.fillRect(cx+b*sc,py,W-(cx+b*sc),ph);}
+ x.globalAlpha=1;
+ x.strokeStyle=css('--grid');x.lineWidth=1;x.beginPath();x.moveTo(cx,0);x.lineTo(cx,H);x.stroke();
+ const e=p.tgt-p.mlc;const col=Math.abs(e)<=2?css('--c3'):css('--c2');
+ x.fillStyle=col;x.globalAlpha=0.85;x.beginPath();x.arc(cx+p.tgt*sc,cy,12.5*sc,0,7);x.fill();x.globalAlpha=1;
+ x.strokeStyle=css('--c1');x.lineWidth=2;x.beginPath();x.moveTo(cx+p.mlc*sc,cy-8);x.lineTo(cx+p.mlc*sc,cy+8);x.moveTo(cx+p.mlc*sc-8,cy);x.lineTo(cx+p.mlc*sc+8,cy);x.stroke();
+ x.fillStyle=css('--text');x.font='600 13px '+css('--font');x.textAlign='left';x.textBaseline='top';x.fillText(`target off-centre by ${e>=0?'+':'−'}${Math.abs(e).toFixed(1)} mm`,12,10);
+ x.font='12px '+css('--font');x.fillStyle=css('--muted');x.fillText('← leaf travel / head–feet direction →',12,H-22);
+ $('clock').textContent='t = '+tPlay.toFixed(1)+' s';}
+function frame(ts){if(!playing)return;if(last)tPlay+=(ts-last)/1000;last=ts;if(tPlay>=DUR)tPlay=T0;drawBev();if(Math.round(tPlay*10)%3===0)drawTrace();requestAnimationFrame(frame);}
+$('playBtn').addEventListener('click',()=>{playing=!playing;$('playBtn').textContent=playing?'Pause':'Play';$('playBtn').setAttribute('aria-pressed',playing);last=0;if(playing){if(tPlay<DUR-15)tPlay=DUR-15;requestAnimationFrame(frame);}});
+function drawLag(){const tau=+$('tau').value/1000;$('tauO').textContent=Math.round(tau*1000)+' ms';const e=(T)=>15*Math.sin(Math.PI*tau/T);
+ $('l5').innerHTML=e(5).toFixed(1)+'<small>mm</small>';$('l8').innerHTML=e(8).toFixed(1)+'<small>mm</small>';
+ const [x,W,H]=setup($('lag')),m={l:48,r:14,t:14,b:42};const X=lin(0,600,m.l,W-m.r),Y=lin(0,10,H-m.b,m.t);
+ axes(x,W,H,m,X,Y,[0,100,200,300,400,500,600],[0,2,4,6,8,10],'latency τ (ms)','worst gap (mm)');
+ path(x,[[X(0),Y(2)],[X(600),Y(2)]],css('--c4'),1.5,[5,4]);
+ [[3,'--c2'],[5,'--c1'],[8,'--c3']].forEach(([T,c])=>{const p=[];for(let t=0;t<=600;t+=5)p.push([X(t),Y(Math.min(10,15*Math.sin(Math.PI*t/1000/T)))]);path(x,p,css(c),2.5);
+  x.fillStyle=css(c);x.beginPath();x.arc(X(tau*1000),Y(Math.min(10,15*Math.sin(Math.PI*tau/T))),5,0,7);x.fill();});
+ x.strokeStyle=css('--muted');x.setLineDash([2,3]);x.beginPath();x.moveTo(X(tau*1000),m.t);x.lineTo(X(tau*1000),H-m.b);x.stroke();x.setLineDash([]);}
+['per','amp','dt','noise','alpha','q'].forEach(id=>$(id).addEventListener('input',compute));
+['kseg','mseg'].forEach(g=>document.querySelectorAll('#'+g+' button').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('#'+g+' button').forEach(o=>o.setAttribute('aria-pressed',o===b?'true':'false'));compute();})));
+$('tau').addEventListener('input',drawLag);
+let rt;addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(()=>{drawTrace();drawDose();drawBev();drawLag();},100);});
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>{drawTrace();drawDose();drawBev();drawLag();});
+tPlay=DUR-15+1.2;compute();drawLag();
+</script>
+</body></html>
