@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="light dark">
+<title>Cooling with magnets instead of rare helium — Research Explorer, 2 Nov 2026</title>
+<link rel="stylesheet" href="../assets/style.css">
+<style>
+/* page-specific: canvas heights, segmented control */
+canvas#ds{height:300px} canvas#dt{height:300px} canvas#bars{height:420px}
+.seg{display:inline-flex;flex-wrap:wrap;gap:2px;padding:2px;border-radius:10px;background:var(--accent-soft);margin:4px 12px 14px 0}
+.seg button{font:500 14px var(--font);color:var(--text);background:transparent;border:0;border-radius:8px;padding:6px 14px;cursor:pointer;min-height:32px}
+.seg button[aria-pressed=true]{background:var(--card-solid);box-shadow:0 1px 3px rgba(0,0,0,.18);font-weight:600}
+.stat .v small{font-size:15px;font-weight:500;color:var(--muted);margin-left:4px}
+label output{white-space:nowrap}
+</style></head><body><main>
+<a class="back" href="../">‹ All demos</a>
+<div class="eyebrow">2 Nov 2026 · Materials</div>
+<h1>Cooling with magnets instead of rare helium</h1>
+<p class="lede">Some crystals hold tiny magnets that point every which way. Switch on a strong field and they line up, giving off heat; let the heat drain away, switch the field off, and the crystal gets colder. This team found that a simple tellurium oxide of gadolinium, Gd₂TeO₆, does this unusually well at a few degrees above absolute zero.</p>
+<p class="authors">Abhijit Nayak, Gurunathan Angusamy, Kusampal Yadav, S. K. Panda, Devajyoti Mukherjee, Raivo Stern, Tanmoy Chakrabarty &amp; Krishnamurthy Jyothinagaram</p>
+
+<section class="card why" aria-labelledby="why-h">
+<h2 id="why-h">Why it matters</h2>
+<p>Quantum computers, sensitive detectors and low-temperature physics labs need to be cooled to a few kelvin or below, and the usual way relies on helium-3, a scarce and costly isotope made mainly from decaying tritium. Gd₂TeO₆ is an easy-to-make oxide powder whose magnetic cooling power under a 7 tesla field beats the commercial standard refrigerant GGG by about 43% per kilogram and 48% per cubic centimetre, which could make magnet-driven cryocoolers smaller and less dependent on helium.</p>
+</section>
+
+<section class="card" aria-labelledby="paper-h">
+<h2 id="paper-h">The paper</h2>
+<p style="margin:0 0 6px"><strong>Large Magnetocaloric Effect and Adiabatic Temperature Change in the Tellurate: Gd2TeO6</strong></p>
+<p class="cite" style="margin:0">Abhijit Nayak, Gurunathan Angusamy, Kusampal Yadav, S. K. Panda, Devajyoti Mukherjee, Raivo Stern, Tanmoy Chakrabarty &amp; Krishnamurthy Jyothinagaram (NIT Andhra Pradesh; National Institute of Chemical Physics and Biophysics, Tallinn; Indian Association for the Cultivation of Science, Kolkata; Bennett University; Krea University). arXiv:2610.40296 [cond-mat.mtrl-sci], submitted 29 Oct 2026. <a href="https://arxiv.org/abs/2610.40296">Read on arXiv</a> · <a href="https://arxiv.org/pdf/2610.40296">PDF</a></p>
+<p style="margin-top:14px">In plain language: each gadolinium ion (Gd³⁺) carries a magnetic moment with 8 possible orientations (spin J = 7/2), and Gd₂TeO₆ packs two of them into every small, light formula unit. With no field, those orientations are random, which is a lot of <em>entropy</em> (disorder). A magnetic field lines them up and squeezes that disorder out as heat. Run backwards in a thermally isolated container, removing the field pulls heat out of whatever is attached, which is how an adiabatic demagnetization refrigerator (ADR) works.</p>
+<p>The team measured magnetisation up to 14 T and heat capacity, then used the Maxwell relation ΔS<sub>M</sub> = ∫<sub>0</sub><sup>H</sup> (∂M/∂T)<sub>H</sub> dH to get the entropy change. The neighbouring Gd ions barely interact (Weiss temperature −1.25 K) and the crystal shows no magnetic ordering down to 2 K, so nearly all of the disorder stays available.</p>
+<table aria-label="Results from the paper">
+<thead><tr><th>Field change</th><th>−ΔS<sub>M</sub> at 2.5 K (J kg⁻¹ K⁻¹)</th><th>−ΔS<sub>V</sub> max (mJ cm⁻³ K⁻¹)</th><th>Peak ΔT<sub>ad</sub> (K)</th></tr></thead>
+<tbody>
+<tr><td>0–2 T</td><td>21.40</td><td>156.31</td><td>7.8</td></tr>
+<tr><td>0–5 T</td><td>48.51</td><td>354.47</td><td>18.3</td></tr>
+<tr><td>0–7 T</td><td>54.81</td><td>400.50</td><td>22.7 (near 12 K)</td></tr>
+<tr><td>0–14 T</td><td>63.51</td><td>464.03</td><td>31.7 (at 12.5 K)</td></tr>
+</tbody></table>
+<p class="note">The theoretical ceiling is 2R ln(2J+1) = 2R ln 8 = 34.57 J mol⁻¹ K⁻¹, or 64.25 J kg⁻¹ K⁻¹ for Gd₂TeO₆, so 14 T reaches 98.8% of it. ΔT<sub>ad</sub> is the paper’s indirect estimate from magnetisation and heat capacity, not a direct refrigerator measurement.</p>
+</section>
+
+<section class="card" aria-labelledby="demo1-h">
+<h2 id="demo1-h">Try it: line up the magnets</h2>
+<p class="note" style="margin-top:0">This model treats each Gd³⁺ as a free spin J = 7/2 (g = 2) feeling a weakened field, with the interaction folded in Curie–Weiss style by replacing T with T + |θ|. Per ion, with y = gμ<sub>B</sub>B / k<sub>B</sub>(T + |θ|):</p>
+<p class="eq">S/R = ln[ sinh(4y) / sinh(y/2) ] − y·[ 4 coth(4y) − ½ coth(y/2) ]</p>
+<p class="note">Two ions per formula unit and a molar mass of 538.1 g/mol convert this to J kg⁻¹ K⁻¹. For ΔT<sub>ad</sub>, the crystal’s vibrations are added as a Debye solid with the paper’s fitted Debye temperature of 398 K, and the demo finds the temperature where total entropy in the field equals the zero-field entropy you started with. <strong>The single-θ shortcut and Debye-only lattice are simplifications</strong>; the authors’ Einstein-mode weights are not used.</p>
+<div class="controls">
+ <div><label for="B"><span>Field change, 0 to</span> <output id="BO"></output></label><input type="range" id="B" min="0.5" max="14" step="0.5" value="7"></div>
+ <div><label for="T"><span>Starting temperature</span> <output id="TO"></output></label><input type="range" id="T" min="2.5" max="30" step="0.5" value="12"></div>
+ <div><label for="th"><span>Interaction strength |θ|</span> <output id="thO"></output></label><input type="range" id="th" min="0" max="4" step="0.05" value="1.25"></div>
+</div>
+<div class="stats">
+ <div class="stat"><div class="v" id="s1"></div><div class="l">Entropy squeezed out, −ΔS<sub>M</sub></div></div>
+ <div class="stat"><div class="v" id="s2"></div><div class="l">Share of the 64.25 J kg⁻¹ K⁻¹ ceiling</div></div>
+ <div class="stat"><div class="v" id="s3"></div><div class="l">Per volume (density 7.31 g cm⁻³)</div></div>
+ <div class="stat"><div class="v" id="s4"></div><div class="l">Temperature jump, ΔT<sub>ad</sub></div></div>
+</div>
+<p class="note" id="status" aria-live="polite" style="margin:12px 0 0"></p>
+<div class="grid" style="margin-top:18px">
+ <div><div class="plot-title">Entropy change versus temperature</div>
+  <canvas id="ds" role="img" aria-label="Model magnetic entropy change against temperature with the paper's measured points"></canvas>
+  <div class="legend"><span style="--k:var(--c1)">your field</span><span style="--k:var(--muted)">2, 5, 7, 14 T</span><span style="--k:var(--c2)">dots: paper at 2.5 K</span><span style="--k:var(--c4)">dashed: theoretical ceiling</span></div></div>
+ <div><div class="plot-title">Adiabatic temperature change versus temperature</div>
+  <canvas id="dt" role="img" aria-label="Model adiabatic temperature change against starting temperature with the paper's estimates"></canvas>
+  <div class="legend"><span style="--k:var(--c1)">your field</span><span style="--k:var(--c3)">dots: paper, 7 T</span><span style="--k:var(--c2)">dots: paper, 14 T</span></div></div>
+</div>
+<p class="note">With the measured |θ| = 1.25 K, the model gives 23.1, 47.5, 54.8 and 63.0 J kg⁻¹ K⁻¹ at 2.5 K for 2, 5, 7 and 14 T, close to the paper’s 21.4, 48.5, 54.8 and 63.5. Above about 8 K the temperature jump tracks the paper within a few kelvin. Below that, the model overshoots badly (about 30 K instead of 7.5 K at 2.5 K) because it keeps all of the zero-field disorder down to the lowest temperature, while the real crystal is already starting to settle and store magnetic heat there.</p>
+</section>
+
+<section class="card" aria-labelledby="demo2-h">
+<h2 id="demo2-h">How it compares</h2>
+<p class="note" style="margin-top:0">Maximum entropy change for a 0–7 T field change, from the paper’s Table I (values compiled from earlier reports). GGG, gadolinium gallium garnet, is the established commercial ADR material. Per volume matters because a fridge’s magnet bore is small.</p>
+<div class="seg" role="group" aria-label="Units" id="useg"><button type="button" data-u="kg" aria-pressed="true">Per kilogram</button><button type="button" data-u="v" aria-pressed="false">Per cubic centimetre</button></div>
+<canvas id="bars" role="img" aria-label="Bar chart of entropy change for Gd-based refrigerant materials"></canvas>
+<p class="note" id="barnote"></p>
+</section>
+
+<section class="card" aria-labelledby="how-h">
+<h2 id="how-h">How to use it</h2>
+<ul>
+<li><strong>Feel the field:</strong> drag the field slider. Below about 2 T only a fraction of the spins line up; by 14 T nearly all of the 64.25 J kg⁻¹ K⁻¹ ceiling is used, as the paper found.</li>
+<li><strong>Move in temperature:</strong> the effect is biggest at the coldest end, because heat jiggles the spins less there, so a given field lines up more of them.</li>
+<li><strong>Change the neighbours:</strong> raise |θ| to make the ions push on each other more. The entropy change drops, especially at low field, which is why weakly interacting, Gd-dense crystals like this one are prized.</li>
+<li><strong>Compare materials:</strong> switch the bar chart between per kilogram and per cubic centimetre. Gd₂TeO₆ is not the record holder, but it is well ahead of GGG on both counts.</li>
+</ul>
+</section>
+
+<p class="note" style="margin-top:24px">Demo by Grok Bot for the Daily Research Explorer. Measured values (entropy changes, ΔT<sub>ad</sub> estimates, θ = −1.25 K, Debye temperature 398 K, comparison table) come from arXiv:2610.40296. Density is derived from the paper’s gravimetric and volumetric values (400.50 / 54.81). The free-spin model with a Curie–Weiss shift and Debye-only lattice is an educational approximation, not the authors’ analysis.</p>
+</main>
+<script>
+"use strict";
+const $=id=>document.getElementById(id);
+const css=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const R=8.314,J=3.5,G=2,MUK=0.67171,MM=0.5381,RHO=400.50/54.81,SMAX=2*R*Math.log(8)/MM,TD=398,NAT=9;
+/* magnetic entropy per kg for two free J=7/2 spins, Curie-Weiss shifted */
+function Sm(T,B,th){const y=G*MUK*B/(T+th);if(y<1e-7)return SMAX;const a=(2*J+1)/2*y,b=y/2;
+ const lnZ=a<300?Math.log(Math.sinh(a)/Math.sinh(b)):a-b-Math.log1p(-Math.exp(-2*b));
+ const m=(2*J+1)/2/Math.tanh(a)-0.5/Math.tanh(b);return 2*R*(lnZ-y*m)/MM;}
+/* Debye lattice entropy per kg */
+function Sl(T){const xd=TD/T,n=200,h=xd/n;let I=0;for(let i=0;i<=n;i++){const x=i===0?1e-9:i*h;const f=x*x*x/Math.expm1(x);I+=f*(i===0||i===n?1:(i%2?4:2));}I*=h/3;
+ return 3*NAT*R*(4/(xd*xd*xd)*I-Math.log(1-Math.exp(-xd)))/MM;}
+function dTad(Ti,B,th){const S0=Sm(Ti,0,th)+Sl(Ti);let lo=Ti,hi=Ti+200;if(Sm(hi,B,th)+Sl(hi)<S0)return null;
+ for(let k=0;k<60;k++){const mid=(lo+hi)/2;if(Sm(mid,B,th)+Sl(mid)<S0)lo=mid;else hi=mid;}return (lo+hi)/2-Ti;}
+const dS=(T,B,th)=>Sm(T,0,th)-Sm(T,B,th);
+function setup(cv){const r=cv.getBoundingClientRect(),d=devicePixelRatio||1;cv.width=Math.round(r.width*d);cv.height=Math.round(r.height*d);const x=cv.getContext('2d');x.setTransform(d,0,0,d,0,0);x.font='12px '+css('--font');return [x,r.width,r.height];}
+const lin=(a,b,A,B)=>v=>A+(v-a)/(b-a)*(B-A);
+function axes(x,W,H,m,X,Y,xt,yt,xl,yl){x.strokeStyle=css('--grid');x.lineWidth=1;x.fillStyle=css('--muted');x.textAlign='right';x.textBaseline='middle';
+ yt.forEach(v=>{x.beginPath();x.moveTo(m.l,Y(v));x.lineTo(W-m.r,Y(v));x.stroke();x.fillText(v,m.l-6,Y(v));});
+ x.textAlign='center';x.textBaseline='top';xt.forEach(v=>{x.beginPath();x.moveTo(X(v),m.t);x.lineTo(X(v),H-m.b);x.stroke();x.fillText(v,X(v),H-m.b+6);});
+ if(xl)x.fillText(xl,(m.l+W-m.r)/2,H-18);if(yl){x.save();x.translate(13,(m.t+H-m.b)/2);x.rotate(-Math.PI/2);x.fillText(yl,0,-6);x.restore();}}
+function path(x,p,col,w,dash){x.strokeStyle=col;x.lineWidth=w;x.setLineDash(dash||[]);x.beginPath();p.forEach(([a,b],i)=>i?x.lineTo(a,b):x.moveTo(a,b));x.stroke();x.setLineDash([]);}
+function dot(x,X,Y,col,r){x.fillStyle=col;x.beginPath();x.arc(X,Y,r||4.5,0,7);x.fill();}
+const P=()=>({B:+$('B').value,T:+$('T').value,th:+$('th').value});
+const PAPER_DS=[[2,21.40],[5,48.51],[7,54.81],[14,63.51]];
+const PAPER_7=[[2.5,7.5],[12,22.7]],PAPER_14=[[3.5,11.99],[5,16.14],[7,22.29],[9,27.00],[12.5,31.74]];
+function compute(){const p=P();$('BO').textContent=p.B.toFixed(1)+' T';$('TO').textContent=p.T.toFixed(1)+' K';$('thO').textContent=p.th.toFixed(2)+' K';
+ const v=dS(p.T,p.B,p.th),d=dTad(p.T,p.B,p.th);
+ $('s1').innerHTML=v.toFixed(1)+'<small>J kg⁻¹ K⁻¹</small>';$('s2').innerHTML=(100*v/SMAX).toFixed(0)+'<small>%</small>';
+ $('s3').innerHTML=(v*RHO).toFixed(0)+'<small>mJ cm⁻³ K⁻¹</small>';$('s4').innerHTML=d===null?'—':d.toFixed(1)+'<small>K</small>';
+ $('status').textContent=`Switching on ${p.B.toFixed(1)} T at ${p.T.toFixed(1)} K squeezes out ${v.toFixed(1)} J kg⁻¹ K⁻¹ of magnetic disorder, ${(100*v/SMAX).toFixed(0)}% of the maximum, and in an insulated sample would warm it by about ${d===null?'—':d.toFixed(1)} K.${p.T<8?' (Below about 8 K this simple model overestimates the jump; see the note below.)':''}`;
+ drawDS(p);drawDT(p);}
+function drawDS(p){const [x,W,H]=setup($('ds')),m={l:48,r:14,t:14,b:42};const X=lin(2,30,m.l,W-m.r),Y=lin(0,70,H-m.b,m.t);
+ axes(x,W,H,m,X,Y,[2,5,10,15,20,25,30],[0,10,20,30,40,50,60,70],'temperature (K)','−ΔS (J kg⁻¹ K⁻¹)');
+ path(x,[[X(2),Y(SMAX)],[X(30),Y(SMAX)]],css('--c4'),1.5,[5,4]);
+ const curve=B=>{const a=[];for(let T=2;T<=30.001;T+=0.25)a.push([X(T),Y(dS(T,B,p.th))]);return a;};
+ [2,5,7,14].forEach(B=>path(x,curve(B),css('--muted'),1.2,[3,3]));path(x,curve(p.B),css('--c1'),3);
+ PAPER_DS.forEach(([B,v])=>{dot(x,X(2.5),Y(v),css('--c2'));x.fillStyle=css('--muted');x.textAlign='left';x.textBaseline='middle';x.fillText(B+' T',X(2.5)+8,Y(v));});
+ dot(x,X(p.T),Y(dS(p.T,p.B,p.th)),css('--c1'),5.5);}
+function drawDT(p){const [x,W,H]=setup($('dt')),m={l:48,r:14,t:14,b:42};const X=lin(2,30,m.l,W-m.r),Y=lin(0,45,H-m.b,m.t);
+ axes(x,W,H,m,X,Y,[2,5,10,15,20,25,30],[0,10,20,30,40],'starting temperature (K)','ΔT (K)');
+ const a=[];for(let T=2.5;T<=30.001;T+=0.5){const d=dTad(T,p.B,p.th);if(d!==null)a.push([X(T),Y(Math.min(45,d))]);}path(x,a,css('--c1'),3);
+ PAPER_7.forEach(([T,v])=>dot(x,X(T),Y(v),css('--c3')));PAPER_14.forEach(([T,v])=>dot(x,X(T),Y(v),css('--c2')));
+ const d=dTad(p.T,p.B,p.th);if(d!==null)dot(x,X(p.T),Y(Math.min(45,d)),css('--c1'),5.5);}
+const MATS=[["Gd₅BSi₂O₁₃",67,461],["Gd₉.₃₃[SiO₄]₆O₂",66.6,430],["GdPO₄",62,357.8],["Gd₂Si₂O₇",58.81,null],["Gd₃TeBO₉",57.44,408],["Gd₂TeO₆ (this work)",54.81,400.5],["Gd₃BWO₉",54.80,null],["Gd₂CuTiO₆",51.4,378.2],["GdScO₃",50.77,null],["GdVO₄",47.90,null],["Gd₂MgTiO₆",46.21,null],["GdFeO₃",44,null],["GGG (commercial)",38.4,271],["Gd₂MoO₆",36.7,null],["GdCrTiO₅",36,null],["Gd₂WO₆",34.8,null]];
+function drawBars(){const u=document.querySelector('#useg [aria-pressed=true]').dataset.u;const k=u==='kg'?1:2;
+ const rows=MATS.filter(r=>r[k]!==null).slice().sort((a,b)=>b[k]-a[k]);const cv=$('bars');cv.style.height=(rows.length*24+50)+'px';
+ const [x,W,H]=setup(cv),m={l:150,r:60,t:8,b:36};const max=u==='kg'?70:500;const X=lin(0,max,m.l,W-m.r);const bh=(H-m.t-m.b)/rows.length;
+ const ticks=u==='kg'?[0,10,20,30,40,50,60,70]:[0,100,200,300,400,500];x.strokeStyle=css('--grid');x.fillStyle=css('--muted');x.textAlign='center';x.textBaseline='top';
+ ticks.forEach(v=>{x.beginPath();x.moveTo(X(v),m.t);x.lineTo(X(v),H-m.b);x.stroke();x.fillText(v,X(v),H-m.b+6);});
+ x.fillText(u==='kg'?'−ΔS, 0–7 T (J kg⁻¹ K⁻¹)':'−ΔS per volume, 0–7 T (mJ cm⁻³ K⁻¹)',(m.l+W-m.r)/2,H-18);
+ rows.forEach((r,i)=>{const y=m.t+i*bh;const hi=r[0].startsWith('Gd₂TeO₆'),gg=r[0].startsWith('GGG');
+  x.fillStyle=hi?css('--c1'):gg?css('--c2'):css('--muted');x.globalAlpha=hi||gg?1:0.45;const w=X(r[k])-m.l;
+  x.beginPath();x.roundRect?x.roundRect(m.l,y+3,w,bh-6,4):x.rect(m.l,y+3,w,bh-6);x.fill();x.globalAlpha=1;
+  x.fillStyle=css('--text');x.textAlign='right';x.textBaseline='middle';x.font=(hi?'600 ':'')+'12px '+css('--font');x.fillText(r[0],m.l-8,y+bh/2);
+  x.textAlign='left';x.fillText(r[k],m.l+w+6,y+bh/2);x.font='12px '+css('--font');});
+ $('barnote').textContent=u==='kg'?'Gd₂TeO₆ sits mid-pack per kilogram, about 43% ahead of GGG. Its light molar mass gives it a higher ceiling (64.25) than its sister compound Gd₂WO₆ (58.2).':'Only materials with a reported volumetric value are shown. Per volume Gd₂TeO₆ is fourth here and about 48% ahead of GGG.';}
+['B','T','th'].forEach(id=>$(id).addEventListener('input',compute));
+document.querySelectorAll('#useg button').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('#useg button').forEach(o=>o.setAttribute('aria-pressed',o===b?'true':'false'));drawBars();}));
+const redraw=()=>{compute();drawBars();};let rt;addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(redraw,100);});
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',redraw);
+redraw();
+</script>
+</body></html>
