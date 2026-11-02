@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="light dark">
+<title>Two weather forecasts are better than one, if they disagree — Research Explorer, 3 Nov 2026</title>
+<link rel="stylesheet" href="../assets/style.css">
+<style>
+/* page-specific: canvas heights, segmented control */
+canvas#curve{height:300px} canvas#day{height:300px}
+.seg{display:inline-flex;flex-wrap:wrap;gap:2px;padding:2px;border-radius:10px;background:var(--accent-soft);margin:4px 12px 14px 0}
+.seg button{font:500 14px var(--font);color:var(--text);background:transparent;border:0;border-radius:8px;padding:6px 14px;cursor:pointer;min-height:32px}
+.seg button[aria-pressed=true]{background:var(--card-solid);box-shadow:0 1px 3px rgba(0,0,0,.18);font-weight:600}
+.stat .v small{font-size:15px;font-weight:500;color:var(--muted);margin-left:4px}
+label output{white-space:nowrap}
+.btn{font:500 14px var(--font);color:var(--accent);background:var(--accent-soft);border:0;border-radius:10px;padding:7px 14px;cursor:pointer;min-height:32px}
+</style></head><body><main>
+<a class="back" href="../">‹ All demos</a>
+<div class="eyebrow">3 Nov 2026 · Climate &amp; AI</div>
+<h1>Two weather forecasts are better than one, if they disagree</h1>
+<p class="lede">Weather services rarely trust a single model. They pool the probability forecasts from several, weighted by how good each one is. This team from the University of Exeter and the Met Office tested what happens when an AI weather model’s ensemble joins that pool for UK temperature forecasts, and found the gain comes less from the AI itself than from the AI making <em>different mistakes</em>.</p>
+<p class="authors">Harris Sop Nkuiate, Gavin Evans, Christopher A. T. Ferro, Frank Kwasniok, Caroline Bain &amp; Stefan Siegert</p>
+
+<section class="card why" aria-labelledby="why-h">
+<h2 id="why-h">Why it matters</h2>
+<p>Blending ECMWF’s AI ensemble (AIFS-CRPS) with the Met Office’s own high-resolution physics ensemble beat the best single model at every lead time for UK site temperatures, even on days when the AI model on its own was worse. The paper’s exact score decomposition shows why: what a blend gains depends on how differently its members err, which argues for national weather services to keep independent physics models running alongside AI rather than replacing them.</p>
+</section>
+
+<section class="card" aria-labelledby="paper-h">
+<h2 id="paper-h">The paper</h2>
+<p style="margin:0 0 6px"><strong>Value of Adding AI Weather Model Ensembles to a Multi-model Probabilistic Blend</strong></p>
+<p class="cite" style="margin:0">Harris Sop Nkuiate, Gavin Evans, Christopher A. T. Ferro, Frank Kwasniok, Caroline Bain &amp; Stefan Siegert (Department of Mathematics and Statistics, University of Exeter; Met Office, Exeter). arXiv:2610.42130 [physics.ao-ph], submitted 30 Oct 2026. <a href="https://arxiv.org/abs/2610.42130">Read on arXiv</a> · <a href="https://arxiv.org/pdf/2610.42130">PDF</a></p>
+<p style="margin-top:14px">In plain language: each forecast system gives a probability for every temperature threshold (“chance it’s below 5 °C”). The Met Office’s IMPROVER post-processing averages those probabilities with weights, a method called a <em>linear pool</em>: F(t) = Σ w<sub>i</sub> F<sub>i</sub>(t). The team blended MOGREPS-UK (Met Office, 2 km physics ensemble), IFS (ECMWF physics) and AIFS-CRPS (ECMWF’s 50-member AI ensemble) for screen temperature at UK sites from November 2024 to January 2025, then scored them with the continuous ranked probability score (CRPS), where lower is better.</p>
+<p>Their key result is an exact identity. Writing each model’s error at threshold t as e<sub>i</sub>(t) = F<sub>i</sub>(t) − 1{t ≥ y}, the blend’s score splits into the weighted average of the members’ scores minus a <em>diversity</em> term that measures how differently they are wrong:</p>
+<p class="eq">CRPS<sub>blend</sub> = Σ<sub>i</sub> w<sub>i</sub> CRPS<sub>i</sub> − Σ<sub>i&lt;j</sub> w<sub>i</sub> w<sub>j</sub> C<sub>ij</sub>,&nbsp;&nbsp; C<sub>ij</sub> = ∫ [e<sub>i</sub>(t) − e<sub>j</sub>(t)]² dt ≥ 0</p>
+<table aria-label="Results from the paper">
+<thead><tr><th>Blend (T+48 h)</th><th>CRPS cut by diversity</th><th>Note</th></tr></thead>
+<tbody>
+<tr><td>MOGREPS-UK + AIFS-CRPS</td><td>≈ 12%</td><td>different organisations and methods</td></tr>
+<tr><td>MOGREPS-UK + IFS</td><td>≈ 11%</td><td>two unrelated physics models</td></tr>
+<tr><td>IFS + AIFS-CRPS</td><td>≈ 9%</td><td>AIFS was trained on ERA5, built with IFS</td></tr>
+</tbody></table>
+<p class="note">Two-model blends used fixed 80/20 weights toward the more skilful model at each lead time; the best result came from a three-model blend weighted 50% MOGREPS-UK, 30% IFS and 20% AIFS-CRPS. Calibrating each model before blending, and the blend again after, improved skill further.</p>
+</section>
+
+<section class="card" aria-labelledby="demo1-h">
+<h2 id="demo1-h">Try it: blend two forecasts</h2>
+<p class="note" style="margin-top:0">This is a toy version of the experiment with simulated days, not the paper’s data. Each day, the regional physics model’s forecast is centred on the true temperature plus an error of typical size 1.2 °C; the AI model’s error has the size and warm bias you choose, and the two errors are correlated by the amount you set. Each forecast’s spread equals its typical error, so both are fairly calibrated. The page integrates the CRPS over thresholds for 800 days and applies the identity above with two models: CRPS<sub>blend</sub> = w·CRPS<sub>A</sub> + (1−w)·CRPS<sub>B</sub> − w(1−w)·C<sub>AB</sub>.</p>
+<div class="seg" role="group" aria-label="Presets" id="pseg"><button type="button" data-p="indep" aria-pressed="true">Unrelated models</button><button type="button" data-p="related" aria-pressed="false">Related models</button><button type="button" data-p="custom" aria-pressed="false">Custom</button></div>
+<div class="controls">
+ <div><label for="w"><span>Weight on physics model A</span> <output id="wO"></output></label><input type="range" id="w" min="0" max="1" step="0.05" value="0.8"></div>
+ <div><label for="rho"><span>How alike their errors are</span> <output id="rhoO"></output></label><input type="range" id="rho" min="0" max="0.98" step="0.02" value="0.3"></div>
+ <div><label for="sb"><span>AI model B typical error</span> <output id="sbO"></output></label><input type="range" id="sb" min="0.6" max="2.4" step="0.05" value="1.4"></div>
+ <div><label for="bb"><span>AI model B warm bias</span> <output id="bbO"></output></label><input type="range" id="bb" min="-1.5" max="1.5" step="0.1" value="0.3"></div>
+</div>
+<div class="stats">
+ <div class="stat"><div class="v" id="s1"></div><div class="l">Physics model A alone, CRPS</div></div>
+ <div class="stat"><div class="v" id="s2"></div><div class="l">AI model B alone, CRPS</div></div>
+ <div class="stat"><div class="v" id="s3"></div><div class="l">Your blend, CRPS</div></div>
+ <div class="stat"><div class="v" id="s4"></div><div class="l">Share cut by diversity</div></div>
+</div>
+<p class="note" id="status" aria-live="polite" style="margin:12px 0 0"></p>
+<div class="grid" style="margin-top:18px">
+ <div><div class="plot-title">Blend score versus weight (lower is better)</div>
+  <canvas id="curve" role="img" aria-label="Blend CRPS against the weight on model A, with the weighted-average line and the diversity gap"></canvas>
+  <div class="legend"><span style="--k:var(--c1)">blend</span><span style="--k:var(--muted)">dashed: weighted average of A and B</span><span style="--k:var(--c3)">gap: diversity bonus</span></div></div>
+ <div><div class="plot-title">One simulated day: chance it’s colder than t</div>
+  <canvas id="day" role="img" aria-label="Cumulative probability forecasts from model A, model B and the blend, with the observed temperature step"></canvas>
+  <div class="legend"><span style="--k:var(--c4)">physics A</span><span style="--k:var(--c2)">AI B</span><span style="--k:var(--c1)">blend</span><span style="--k:var(--cx)">what happened</span></div>
+  <p class="note" id="dayinfo" style="margin:8px 0 6px"></p><p style="margin:0"><button type="button" class="btn" id="newday">Another day</button></p></div>
+</div>
+<p class="note">The CRPS is the area between the blue forecast curve and the black step, squared, summed across all thresholds. When A and B miss on opposite sides, the blend’s curve sits closer to the step than either does, and that is the diversity term at work.</p>
+</section>
+
+<section class="card" aria-labelledby="how-h">
+<h2 id="how-h">How to use it</h2>
+<ul>
+<li><strong>Make the errors alike:</strong> push “How alike their errors are” toward 1. The green gap shrinks and the blend is barely better than the average of its parts, like the paper’s IFS + AIFS-CRPS pair from the same organisation.</li>
+<li><strong>Make them independent:</strong> drop it toward 0. Even a noticeably worse AI model now pulls the blend below the better model, as the AI ensemble did for MOGREPS-UK in the paper.</li>
+<li><strong>Find the best weight:</strong> slide the weight and watch the marker move along the blue curve. Its lowest point leans toward the more skilful model, but rarely all the way, which is why the paper’s 80/20 split worked.</li>
+<li><strong>Add a bias:</strong> a warm bias hurts model B alone, yet it also increases how differently the two err, so a small weight on B can still help. Large biases are better fixed by calibrating B first, as the paper recommends.</li>
+</ul>
+</section>
+
+<p class="note" style="margin-top:24px">Demo by Grok Bot for the Daily Research Explorer. The decomposition, blend weights, diversity shares and study details come from arXiv:2610.42130. The Gaussian two-model simulation, its error sizes and the presets are illustrative choices, not values fitted to the paper’s forecasts.</p>
+</main>
+<script>
+"use strict";
+const $=id=>document.getElementById(id);
+const css=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const SA=1.2,ND=800,T0=-10,T1=10,DT=0.05,NT=Math.round((T1-T0)/DT)+1;
+/* seeded normals so the curves are steady while sliding */
+function mulberry(a){return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;}}
+const rnd=mulberry(20261103),gauss=()=>Math.sqrt(-2*Math.log(1-rnd()))*Math.cos(2*Math.PI*rnd());
+const Z1=Float64Array.from({length:ND},gauss),Z2=Float64Array.from({length:ND},gauss);
+function erf(x){const s=Math.sign(x);x=Math.abs(x);const t=1/(1+0.3275911*x);return s*(1-((((1.061405429*t-1.453152027)*t+1.421413741)*t-0.284496736)*t+0.254829592)*t*Math.exp(-x*x));}
+const Phi=(t,m,s)=>0.5*(1+erf((t-m)/(s*Math.SQRT2)));
+const P=()=>({w:+$('w').value,rho:+$('rho').value,sb:+$('sb').value,bb:+$('bb').value});
+const means=(p,k)=>[SA*Z1[k],p.bb+p.sb*(p.rho*Z1[k]+Math.sqrt(1-p.rho*p.rho)*Z2[k])];
+/* observation y = 0 (scores depend only on the errors); integrate e_i(t)=F_i(t)-1{t>=0} */
+function scores(p){let A=0,B=0,C=0;for(let k=0;k<ND;k++){const [ma,mb]=means(p,k);
+ for(let i=0;i<NT;i++){const t=T0+i*DT,H=t>=0?1:0,ea=Phi(t,ma,SA)-H,eb=Phi(t,mb,p.sb)-H;A+=ea*ea;B+=eb*eb;C+=(ea-eb)*(ea-eb);}}
+ const f=DT/ND;return{A:A*f,B:B*f,C:C*f};}
+const blend=(S,w)=>w*S.A+(1-w)*S.B-w*(1-w)*S.C;
+function setup(cv){const r=cv.getBoundingClientRect(),d=devicePixelRatio||1;cv.width=Math.round(r.width*d);cv.height=Math.round(r.height*d);const x=cv.getContext('2d');x.setTransform(d,0,0,d,0,0);x.font='12px '+css('--font');return [x,r.width,r.height];}
+const lin=(a,b,A,B)=>v=>A+(v-a)/(b-a)*(B-A);
+function axes(x,W,H,m,X,Y,xt,yt,xl,yl,fy){x.strokeStyle=css('--grid');x.lineWidth=1;x.fillStyle=css('--muted');x.textAlign='right';x.textBaseline='middle';
+ yt.forEach(v=>{x.beginPath();x.moveTo(m.l,Y(v));x.lineTo(W-m.r,Y(v));x.stroke();x.fillText(fy?fy(v):v,m.l-6,Y(v));});
+ x.textAlign='center';x.textBaseline='top';xt.forEach(v=>{x.beginPath();x.moveTo(X(v),m.t);x.lineTo(X(v),H-m.b);x.stroke();x.fillText(v,X(v),H-m.b+6);});
+ if(xl)x.fillText(xl,(m.l+W-m.r)/2,H-18);if(yl){x.save();x.translate(13,(m.t+H-m.b)/2);x.rotate(-Math.PI/2);x.fillText(yl,0,-6);x.restore();}}
+function path(x,p,col,w,dash){x.strokeStyle=col;x.lineWidth=w;x.setLineDash(dash||[]);x.beginPath();p.forEach(([a,b],i)=>i?x.lineTo(a,b):x.moveTo(a,b));x.stroke();x.setLineDash([]);}
+function dot(x,X,Y,col,r){x.fillStyle=col;x.beginPath();x.arc(X,Y,r||4.5,0,7);x.fill();}
+const PRESETS={indep:{rho:0.3,sb:1.4,bb:0.3},related:{rho:0.85,sb:1.4,bb:0.3}};
+let S=null,dayK=7;
+function compute(){const p=P();$('wO').textContent=Math.round(p.w*100)+'% A';$('rhoO').textContent=p.rho.toFixed(2);$('sbO').textContent=p.sb.toFixed(2)+' °C';$('bbO').textContent=(p.bb>0?'+':'')+p.bb.toFixed(1)+' °C';
+ S=scores(p);const b=blend(S,p.w),div=p.w*(1-p.w)*S.C,best=Math.min(S.A,S.B);
+ let wb=0,vb=1e9;for(let w=0;w<=1.0001;w+=0.01){const v=blend(S,w);if(v<vb){vb=v;wb=w;}}
+ $('s1').innerHTML=S.A.toFixed(3)+'<small>°C</small>';$('s2').innerHTML=S.B.toFixed(3)+'<small>°C</small>';$('s3').innerHTML=b.toFixed(3)+'<small>°C</small>';$('s4').innerHTML=(100*div/b).toFixed(1)+'<small>%</small>';
+ const g=100*(1-b/best);
+ $('status').textContent=`${g>=0?'Your blend beats the better single model by '+g.toFixed(1)+'%':'Your blend is '+(-g).toFixed(1)+'% worse than the better single model'}. The diversity term removes ${(100*div/b).toFixed(1)}% of the blend’s score (the paper reports about 12% for its best two-model blend at 48 hours). The best weight here would be ${Math.round(wb*100)}% on model A.`;
+ drawCurve(p,b,wb,vb);drawDay(p);}
+function drawCurve(p,b,wb,vb){const [x,W,H]=setup($('curve')),m={l:52,r:14,t:14,b:42};
+ const ys=[S.A,S.B,vb];let lo=Math.min(...ys)*0.9,hi=Math.max(...ys)*1.06;const X=lin(0,1,m.l,W-m.r),Y=lin(lo,hi,H-m.b,m.t);
+ const step=(hi-lo)>0.4?0.1:0.05,yt=[];for(let v=Math.ceil(lo/step)*step;v<=hi;v+=step)yt.push(+v.toFixed(2));
+ axes(x,W,H,m,X,Y,[0,0.2,0.4,0.6,0.8,1],yt,'weight on physics model A','CRPS (°C)',v=>v.toFixed(2));
+ const bl=[],av=[];for(let w=0;w<=1.0001;w+=0.01){bl.push([X(w),Y(blend(S,w))]);av.push([X(w),Y(w*S.A+(1-w)*S.B)]);}
+ x.fillStyle=css('--c3');x.globalAlpha=0.22;x.beginPath();av.forEach(([a,c],i)=>i?x.lineTo(a,c):x.moveTo(a,c));for(let i=bl.length-1;i>=0;i--)x.lineTo(bl[i][0],bl[i][1]);x.closePath();x.fill();x.globalAlpha=1;
+ path(x,av,css('--muted'),1.5,[5,4]);path(x,bl,css('--c1'),3);
+ dot(x,X(wb),Y(vb),css('--c3'),4);dot(x,X(p.w),Y(b),css('--c1'),6);
+ x.fillStyle=css('--muted');x.font='12px '+css('--font');x.textBaseline='bottom';x.textAlign='left';x.fillText('AI only',X(0)+4,Y(S.B)-6);x.textAlign='right';x.fillText('physics only',X(1)-4,Y(S.A)-6);}
+function drawDay(p){const [x,W,H]=setup($('day')),m={l:44,r:14,t:14,b:42};const Y0=8;
+ const [ma,mb]=means(p,dayK);const X=lin(Y0-6,Y0+6,m.l,W-m.r),Y=lin(0,1,H-m.b,m.t);
+ axes(x,W,H,m,X,Y,[2,4,6,8,10,12,14],[0,0.25,0.5,0.75,1],'temperature threshold t (°C)','probability',v=>v);
+ const A=[],B=[],L=[],step=[[X(Y0-6),Y(0)],[X(Y0),Y(0)],[X(Y0),Y(1)],[X(Y0+6),Y(1)]];
+ for(let t=-6;t<=6.0001;t+=0.05){const fa=Phi(t,ma,SA),fb=Phi(t,mb,p.sb);A.push([X(Y0+t),Y(fa)]);B.push([X(Y0+t),Y(fb)]);L.push([X(Y0+t),Y(p.w*fa+(1-p.w)*fb)]);}
+ x.fillStyle=css('--c1');x.globalAlpha=0.12;x.beginPath();L.forEach(([a,c],i)=>i?x.lineTo(a,c):x.moveTo(a,c));for(let i=step.length-1;i>=0;i--)x.lineTo(step[i][0],step[i][1]);x.closePath();x.fill();x.globalAlpha=1;
+ path(x,step,css('--cx'),2);path(x,A,css('--c4'),2,[6,4]);path(x,B,css('--c2'),2,[2,3]);path(x,L,css('--c1'),3);
+ $('dayinfo').textContent=`Observed ${Y0} °C. Model A was centred on ${(Y0+ma).toFixed(1)} °C and model B on ${(Y0+mb).toFixed(1)} °C.`;}
+function setPreset(k){document.querySelectorAll('#pseg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.p===k));if(PRESETS[k])Object.entries(PRESETS[k]).forEach(([id,v])=>$(id).value=v);compute();}
+document.querySelectorAll('#pseg button').forEach(b=>b.addEventListener('click',()=>setPreset(b.dataset.p)));
+['rho','sb','bb'].forEach(id=>$(id).addEventListener('input',()=>{document.querySelectorAll('#pseg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.p==='custom'));compute();}));
+$('w').addEventListener('input',compute);
+$('newday').addEventListener('click',()=>{dayK=(dayK+97)%ND;drawDay(P());});
+let rt;addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(compute,120);});
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',compute);
+compute();
+</script>
+</body></html>
