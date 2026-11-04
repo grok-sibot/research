@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="light dark">
+<title>Low-carbon cement that stores CO₂, watched as it sets — Research Explorer, 5 Nov 2026</title>
+<link rel="stylesheet" href="../assets/style.css">
+<style>
+/* page-specific: canvas heights, segmented control */
+canvas#kin{height:300px} canvas#msh{height:200px}
+.seg{display:inline-flex;flex-wrap:wrap;gap:2px;padding:2px;border-radius:10px;background:var(--accent-soft);margin:4px 12px 14px 0}
+.seg button{font:500 14px var(--font);color:var(--text);background:transparent;border:0;border-radius:8px;padding:6px 14px;cursor:pointer;min-height:32px}
+.seg button[aria-pressed=true]{background:var(--card-solid);box-shadow:0 1px 3px rgba(0,0,0,.18);font-weight:600}
+.stat .v small{font-size:15px;font-weight:500;color:var(--muted);margin-left:4px}
+label output{white-space:nowrap}
+</style></head><body><main>
+<a class="back" href="../">‹ All demos</a>
+<div class="eyebrow">5 Nov 2026 · Materials &amp; Climate</div>
+<h1>Low-carbon cement that stores CO₂, watched as it sets</h1>
+<p class="lede">Ordinary Portland cement releases CO₂ twice: from burning fuel, and from baking limestone, which gives off CO₂ as it turns into lime. A binder made from magnesium oxide (MgO) and silica avoids the limestone step, and adding a magnesium carbonate locks CO₂ into the hardened material. Princeton researchers used a synchrotron X-ray beam to watch these pastes react every 20 minutes for their first day, and found the strength-giving gel starts forming within an hour, earlier than the textbook sequence says.</p>
+<p class="authors">Jordan Mravca-Bailey &amp; Claire E. White</p>
+
+<section class="card why" aria-labelledby="why-h">
+<h2 id="why-h">Why it matters</h2>
+<p>Cement production causes 7–8% of global human CO₂ emissions, and most of that comes from baking limestone, so a binder that skips limestone and permanently stores about 12–15% CO₂ by weight in its powder attacks the problem from both ends. Knowing that the strength-giving magnesium silicate hydrate gel forms within the first hour, and that a carbonate additive gets all the MgO reacting within a day instead of more than a week, gives engineers the timing they need to design mixes that set reliably on a building site.</p>
+</section>
+
+<section class="card" aria-labelledby="paper-h">
+<h2 id="paper-h">The paper</h2>
+<p style="margin:0 0 6px"><strong>Early-age formation of MgO-SiO₂ binders and the effect of hydromagnesite and dehydrated hydromagnesite: An in situ synchrotron X-ray diffraction and pair distribution function study</strong></p>
+<p class="cite" style="margin:0">Jordan Mravca-Bailey and Claire E. White (Department of Civil and Environmental Engineering and Andlinger Center for Energy and the Environment, Princeton University). arXiv:2611.03929 [cond-mat.mtrl-sci], submitted 2 Nov 2026. <a href="https://arxiv.org/abs/2611.03929">Read on arXiv</a> · <a href="https://arxiv.org/pdf/2611.03929">PDF</a></p>
+<p style="margin-top:14px">In plain language: the team mixed three pastes of reactive MgO, silica fume (SF, a fine glassy silica) and water. One had nothing else, one had hydromagnesite (HY, a hydrated magnesium carbonate, Mg₅(CO₃)₄(OH)₂·4H₂O), and one had the same mineral after heating it to 325 °C to drive out its water (DHY). They sealed each paste in a 1 mm tube and recorded X-ray diffraction, which sees crystals, and pair-distribution-function (PDF) data, which also sees disordered gels, roughly every 20 minutes for 24 hours, then again at 1, 3, 7, 14 and 42 days.</p>
+<ul>
+<li><strong>The gel comes first.</strong> Magnesium silicate hydrate (M-S-H), the main strength-giving phase, was already present in the first scan at about 45 minutes in all three pastes, before any brucite (Mg(OH)₂) or its carbonate-bearing cousin (HCB) had appeared. So early M-S-H forms directly from dissolving MgO and silica, not only via brucite.</li>
+<li><strong>Carbonate speeds up the MgO.</strong> With HY or DHY, all of the MgO had dissolved by 24 hours; without it, about 12% was left and some MgO survived past 7 days.</li>
+<li><strong>Dehydrated carbonate delays things, then wins.</strong> DHY soaked water back in during the first ~10 hours, which slowed MgO dissolution and held back HCB until ~6.5 h, but by 42 days the DHY paste had the most M-S-H: 1.5 times the HY paste and 1.8 times the plain paste.</li>
+</ul>
+<p class="note">Limits noted in the paper: the two carbonate pastes do not have equal CO₂ content, so the effect of disorder in DHY cannot yet be separated from dosage; the MgO dissolution extent is measured from the first scan at about 1 hour, so earlier dissolution is missed; brucite/HCB peak areas are in arbitrary units and are compared only by their timing. Separately, the samples were 1 mm capillaries and this study did not test strength.</p>
+</section>
+
+<section class="card" aria-labelledby="mix-h">
+<h2 id="mix-h">Try it: design a mix and count the stored CO₂</h2>
+<p class="note" style="margin-top:0">This is the stoichiometry behind the paper’s Table 1. Pick the grams of each powder; the page works out the Mg/Si molar ratio and the CO₂ locked in the dry powder from the ideal formulas MgO, SiO₂, Mg₅(CO₃)₄(OH)₂·4H₂O and Mg₅(CO₃)₄(OH)₂. The presets reproduce the paper’s three pastes.</p>
+<div class="seg" role="group" aria-label="Preset mixes from the paper" id="preset">
+ <button type="button" data-p="0" aria-pressed="false">MgO-SF</button><button type="button" data-p="1" aria-pressed="true">MgO-SF-HY</button><button type="button" data-p="2" aria-pressed="false">MgO-SF-DHY</button></div>
+<div class="seg" role="group" aria-label="Carbonate form" id="carb">
+ <button type="button" data-c="HY" aria-pressed="true">Carbonate as HY (hydrated)</button><button type="button" data-c="DHY" aria-pressed="false">as DHY (heated to 325 °C)</button></div>
+<div class="controls">
+ <div><label for="mgo"><span>Reactive MgO</span> <output id="mgoO"></output></label><input type="range" id="mgo" min="0" max="1" step="0.01" value="0.27"></div>
+ <div><label for="sf"><span>Silica fume (SiO₂)</span> <output id="sfO"></output></label><input type="range" id="sf" min="0.05" max="1" step="0.01" value="0.40"></div>
+ <div><label for="cb"><span>Magnesium carbonate</span> <output id="cbO"></output></label><input type="range" id="cb" min="0" max="1" step="0.01" value="0.33"></div>
+</div>
+<div class="stats">
+ <div class="stat"><div class="v" id="r1"></div><div class="l">Mg/Si molar ratio</div></div>
+ <div class="stat"><div class="v" id="r2"></div><div class="l">CO₂ in the dry powder</div></div>
+ <div class="stat"><div class="v" id="r3"></div><div class="l">CO₂ stored per tonne of dry powder</div></div>
+ <div class="stat"><div class="v" id="r4"></div><div class="l">Water to add to fully rehydrate DHY</div></div>
+</div>
+<p class="note" id="mixnote" aria-live="polite"></p>
+</section>
+
+<section class="card" aria-labelledby="kin-h">
+<h2 id="kin-h">The first day, hour by hour</h2>
+<p class="note" style="margin-top:0">Smooth curves drawn through the milestones the paper reports from its X-ray data (Figure 10): when each process starts, when it is half done, when it levels off, and how far MgO dissolution has got at 24 h. The dots are those reported milestones; the curve shapes between them are fitted here (Avrami-type, <code>1 − e<sup>−ln2·((t−t₀)/(t½−t₀))<sup>n</sup></sup></code>) and are not the paper’s raw data.</p>
+<div class="seg" role="group" aria-label="Paste" id="paste">
+ <button type="button" data-k="0" aria-pressed="false">MgO-SF</button><button type="button" data-k="1" aria-pressed="false">MgO-SF-HY</button><button type="button" data-k="2" aria-pressed="false">MgO-SF-DHY</button><button type="button" data-k="all" aria-pressed="true">Compare all</button></div>
+<div class="controls">
+ <div><label for="t"><span>Time since mixing</span> <output id="tO"></output></label><input type="range" id="t" min="1" max="24" step="0.25" value="6"></div>
+</div>
+<div class="stats" id="kstats"></div>
+<div style="margin-top:18px"><div class="plot-title" id="kintitle"></div>
+<canvas id="kin" role="img" aria-label="Fraction of MgO dissolved and brucite or HCB formed against time over the first 24 hours"></canvas>
+<div class="legend" id="kinleg"></div></div>
+<p class="note" id="kinnote" aria-live="polite"></p>
+</section>
+
+<section class="card" aria-labelledby="msh-h">
+<h2 id="msh-h">Strength-giving gel at 42 days</h2>
+<p class="note" style="margin-top:0">M-S-H content per unit of silicon at 42 days, from the PDF fits. The paper gives the DHY paste’s scale factor (0.32) and says it is 1.5 times the HY paste and 1.8 times the plain paste; the other two bars are worked out from those ratios. In the plain paste, about half of this had already formed by 24 hours.</p>
+<canvas id="msh" role="img" aria-label="Bar chart of M-S-H scale factor at 42 days: MgO-SF about 0.18, MgO-SF-HY about 0.21, MgO-SF-DHY 0.32"></canvas>
+</section>
+
+<section class="card" aria-labelledby="how-h">
+<h2 id="how-h">How to use it</h2>
+<ul>
+<li><strong>Check the paper’s numbers:</strong> tap the three presets. The calculator should show Mg/Si of 0.99 (the paper rounds it to 1.00), 1.54 and 1.63 and CO₂ of 0, 12.4% and 14.7%, matching Table 1.</li>
+<li><strong>Trade CO₂ for magnesium balance:</strong> push the carbonate slider up and watch stored CO₂ climb, but the Mg/Si ratio rises too, because the carbonate also brings magnesium. The paper notes that above Mg/Si ≈ 1.2 leftover brucite can persist for years.</li>
+<li><strong>Scrub through the first day:</strong> drag the time slider. Around 2 h the plain and HY pastes start growing brucite or HCB; the DHY paste waits until about 6.5 h while about a third of its MgO has already dissolved, and that magnesium goes into M-S-H gel.</li>
+<li><strong>Compare all three:</strong> the plain paste (blue) never quite finishes dissolving its MgO in a day; both carbonate pastes do.</li>
+</ul>
+</section>
+
+<p class="note" style="margin-top:24px">Demo by Grok Bot for the Daily Research Explorer. Mix proportions, milestone times, final dissolution extents and the 42-day M-S-H ratios come from arXiv:2611.03929. Molar masses are standard values. The smooth curve shapes between milestones, the Avrami exponents and the “CO₂ per tonne” scaling of the lab mix are illustrative choices made for this page, not results from the paper.</p>
+</main>
+<script>
+"use strict";
+const $=id=>document.getElementById(id);
+const css=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+/* molar masses (g/mol) */
+const M={Mg:24.305,C:12.011,O:15.999,H:1.008,Si:28.085};
+const MgO=M.Mg+M.O, SiO2=M.Si+2*M.O, CO2=M.C+2*M.O, H2O=2*M.H+M.O;
+const DHY=5*M.Mg+4*(M.C+3*M.O)+2*(M.O+M.H), HY=DHY+4*H2O;
+/* Table 1 */
+const PRE=[{mgo:0.40,sf:0.60,cb:0,c:'HY'},{mgo:0.27,sf:0.40,cb:0.33,c:'HY'},{mgo:0.27,sf:0.40,cb:0.33,c:'DHY'}];
+let carb='HY';
+function press(sel,attr,val){document.querySelectorAll(sel+' button').forEach(b=>b.setAttribute('aria-pressed',b.dataset[attr]===String(val)));}
+function mix(){const g=+$('mgo').value,s=+$('sf').value,c=+$('cb').value;
+ $('mgoO').textContent=g.toFixed(2)+' g';$('sfO').textContent=s.toFixed(2)+' g';$('cbO').textContent=c.toFixed(2)+' g '+carb;
+ const Mc=carb==='HY'?HY:DHY;const molMg=g/MgO+5*c/Mc,molSi=s/SiO2;const co2=4*c/Mc*CO2,dry=g+s+c;
+ const pct=dry>0?100*co2/dry:0;
+ $('r1').textContent=(molMg/molSi).toFixed(2);
+ $('r2').innerHTML=pct.toFixed(1)+'<small>wt%</small>';
+ $('r3').innerHTML=Math.round(pct*10)+'<small>kg</small>';
+ $('r4').innerHTML=carb==='DHY'?(4*c/Mc*H2O).toFixed(3)+'<small>g</small>':'0<small>g</small>';
+ const hit=PRE.findIndex(p=>Math.abs(p.mgo-g)<1e-6&&Math.abs(p.sf-s)<1e-6&&Math.abs(p.cb-c)<1e-6&&(p.cb===0||p.c===carb));
+ press('#preset','p',hit);
+ let n='';const r=molMg/molSi;
+ if(hit===2)n='The paper added this extra water (1.26 mL instead of 1.20 mL) so the DHY could rebuild into hydromagnesite.';
+ else if(hit>=0)n='This matches the paper’s Table 1 mix.';
+ n+=(n?' ':'')+(r>1.2?'Mg/Si is above 1.2, where earlier work found leftover brucite even after two years at room temperature.':'Mg/Si is at or below 1.2, below the level where earlier work found brucite still left after two years.');
+ $('mixnote').textContent=n;}
+document.querySelectorAll('#preset button').forEach(b=>b.addEventListener('click',()=>{const p=PRE[+b.dataset.p];$('mgo').value=p.mgo;$('sf').value=p.sf;$('cb').value=p.cb;carb=p.c;press('#carb','c',carb);mix();}));
+document.querySelectorAll('#carb button').forEach(b=>b.addEventListener('click',()=>{carb=b.dataset.c;press('#carb','c',carb);mix();}));
+['mgo','sf','cb'].forEach(id=>$(id).addEventListener('input',mix));
+
+/* kinetics milestones (Section 3.4, Fig. 10). alpha measured from first scan (~1 h). */
+const P=[
+ {n:'MgO-SF',col:'--c1',d:{t0:1.0,th:5.5,a24:0.88},b:{t0:2.0,th:4.5,pl:9},prod:'brucite'},
+ {n:'MgO-SF-HY',col:'--c3',d:{t0:0.93,th:4.75,a24:0.995},b:{t0:2.0,th:4.75,pl:10},prod:'HCB'},
+ {n:'MgO-SF-DHY',col:'--c2',d:{t0:0.86,th:8.5,a24:0.98},b:{t0:6.5,th:10.5,pl:null},prod:'HCB'}];
+/* exponent n chosen so curve passes through the 24-h value (dissolution) */
+P.forEach(p=>{const L=Math.log(2),e=24-p.d.t0,h=p.d.th-p.d.t0;p.d.n=Math.log(-Math.log(1-p.d.a24)/L)/Math.log(e/h);p.b.n=2;});
+const av=(t,t0,th,n)=>t<=t0?0:1-Math.exp(-Math.LN2*Math.pow((t-t0)/(th-t0),n));
+const alpha=(p,t)=>av(t,p.d.t0,p.d.th,p.d.n), beta=(p,t)=>av(t,p.b.t0,p.b.th,p.b.n);
+let sel='all';
+function setup(cv){const r=cv.getBoundingClientRect(),d=devicePixelRatio||1;cv.width=Math.round(r.width*d);cv.height=Math.round(r.height*d);const x=cv.getContext('2d');x.setTransform(d,0,0,d,0,0);x.font='12px '+css('--font');return [x,r.width,r.height];}
+const lin=(a,b,A,B)=>v=>A+(v-a)/(b-a)*(B-A);
+function path(x,p,col,w,dash){x.strokeStyle=col;x.lineWidth=w;x.setLineDash(dash||[]);x.beginPath();p.forEach(([a,b],i)=>i?x.lineTo(a,b):x.moveTo(a,b));x.stroke();x.setLineDash([]);}
+function dot(x,a,b,col,hollow){x.beginPath();x.arc(a,b,4.5,0,7);if(hollow){x.strokeStyle=col;x.lineWidth=2;x.stroke();}else{x.fillStyle=col;x.fill();}}
+function kin(){const t=+$('t').value;$('tO').textContent=(t%1?t.toFixed(2).replace(/0$/,''):t)+' h';
+ const [x,W,H]=setup($('kin')),m={l:46,r:14,t:12,b:40};const X=lin(0,24,m.l,W-m.r),Y=lin(0,1,H-m.b,m.t);
+ x.strokeStyle=css('--grid');x.lineWidth=1;x.fillStyle=css('--muted');x.textAlign='right';x.textBaseline='middle';
+ for(let v=0;v<=1.001;v+=0.25){x.beginPath();x.moveTo(m.l,Y(v));x.lineTo(W-m.r,Y(v));x.stroke();x.fillText(Math.round(v*100)+'%',m.l-6,Y(v));}
+ x.textAlign='center';x.textBaseline='top';for(let h=0;h<=24;h+=4){x.beginPath();x.moveTo(X(h),m.t);x.lineTo(X(h),H-m.b);x.stroke();x.fillText(h+' h',X(h),H-m.b+6);}
+ x.fillText('hours since mixing',(m.l+W-m.r)/2,H-18);
+ const show=sel==='all'?P:[P[sel]];
+ show.forEach(p=>{const c=css(p.col),A=[],B=[];for(let s=p.d.t0;s<=24.001;s+=0.1)A.push([X(s),Y(alpha(p,s))]);for(let s=0;s<=24.001;s+=0.1)B.push([X(s),Y(beta(p,s))]);
+  path(x,A,c,3);path(x,B,c,2.2,[6,4]);
+  dot(x,X(p.d.th),Y(0.5),c);dot(x,X(24),Y(p.d.a24),c);dot(x,X(p.b.t0),Y(0),c,true);dot(x,X(p.b.th),Y(0.5),c,true);if(p.b.pl)dot(x,X(p.b.pl),Y(beta(p,p.b.pl)),c,true);});
+ path(x,[[X(t),m.t],[X(t),H-m.b]],css('--text'),1.2,[2,3]);
+ $('kintitle').textContent='MgO dissolved (solid) and '+(sel==='all'?'brucite/HCB':P[sel].prod)+' formed, as a share of its 24-h plateau (dashed)';
+ $('kinleg').innerHTML=show.map(p=>`<span style="--k:var(${p.col})">${p.n}</span>`).join('')+'<span style="--k:var(--muted)">filled dots: reported MgO milestones · rings: reported brucite/HCB milestones</span>';
+ const ps=sel==='all'?P:[P[sel]];
+ $('kstats').innerHTML=ps.map(p=>`<div class="stat"><div class="v">${Math.round(100*alpha(p,t))}<small>%</small></div><div class="l">${p.n}: MgO dissolved since first scan</div></div>`).join('')+
+  (sel==='all'?'':`<div class="stat"><div class="v">${Math.round(100*beta(P[sel],t))}<small>%</small></div><div class="l">${P[sel].prod} grown, share of plateau</div></div><div class="stat"><div class="v">${t>=0.75?'yes':'—'}</div><div class="l">M-S-H gel present (seen from ~45 min)</div></div>`);
+ let n;
+ if(sel==='all')n=t<2?'Before 2 h no paste shows brucite or HCB yet, but M-S-H gel is already detectable in all three: it is forming straight from the dissolving MgO and silica.':t<6.5?'The plain and HY pastes are now growing brucite or HCB; the DHY paste is still rehydrating its carbonate and has none.':t<10?'All three now grow a brucite-type phase. The HY paste levels off near 10 h with essentially all MgO gone.':'By the end of the day both carbonate pastes have dissolved essentially all their MgO; the plain paste still has about 12% left, which lasts past 7 days.';
+ else{const p=P[sel];n=`${p.n}: MgO is half dissolved at about ${p.d.th} h and ${Math.round(p.d.a24*100)}% by 24 h; ${p.prod} first appears at about ${p.b.t0} h and is half-grown at about ${p.b.th} h.`+(sel==2?' DHY takes up water fastest around 5 h and is mostly rehydrated by about 10 h, which is why HCB waits.':'');}
+ $('kinnote').textContent=n;}
+document.querySelectorAll('#paste button').forEach(b=>b.addEventListener('click',()=>{sel=b.dataset.k==='all'?'all':+b.dataset.k;press('#paste','k',b.dataset.k);kin();}));
+$('t').addEventListener('input',kin);
+function msh(){const [x,W,H]=setup($('msh')),m={l:110,r:110,t:10,b:10};const v=[0.32/1.8,0.32/1.5,0.32];
+ const X=lin(0,0.36,m.l,W-m.r),bh=(H-m.t-m.b)/3;
+ P.forEach((p,i)=>{const y=m.t+i*bh;x.fillStyle=css(p.col);x.fillRect(X(0),y+bh*0.2,X(v[i])-X(0),bh*0.6);
+  x.fillStyle=css('--text');x.textAlign='right';x.textBaseline='middle';x.fillText(p.n,m.l-8,y+bh/2);
+  x.textAlign='left';x.fillText(v[i].toFixed(2)+(i<2?' (derived)':''),X(v[i])+6,y+bh/2);});}
+function all(){mix();kin();msh();}
+let rt;addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(all,120);});
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',all);
+all();
+</script>
+</body></html>
