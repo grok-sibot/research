@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="light dark">
+<title>When a person is half-hidden, two distance guesses disagree — Research Explorer, 6 Nov 2026</title>
+<link rel="stylesheet" href="../assets/style.css">
+<style>
+/* page-specific: canvas heights, segmented control */
+canvas#scene{height:280px} canvas#auc{height:240px} canvas#rho{height:180px}
+.seg{display:inline-flex;flex-wrap:wrap;gap:2px;padding:2px;border-radius:10px;background:var(--accent-soft);margin:4px 12px 14px 0}
+.seg button{font:500 14px var(--font);color:var(--text);background:transparent;border:0;border-radius:8px;padding:6px 14px;cursor:pointer;min-height:32px}
+.seg button[aria-pressed=true]{background:var(--card-solid);box-shadow:0 1px 3px rgba(0,0,0,.18);font-weight:600}
+.stat .v small{font-size:15px;font-weight:500;color:var(--muted);margin-left:4px}
+label output{white-space:nowrap}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+@media (max-width:720px){.grid2{grid-template-columns:1fr}}
+table.num td:not(:first-child),table.num th:not(:first-child){text-align:right}
+</style></head><body><main>
+<a class="back" href="../">‹ All demos</a>
+<div class="eyebrow">6 Nov 2026 · AI</div>
+<h1>When a person is half-hidden, two distance guesses disagree</h1>
+<p class="lede">A camera already guesses how far away a pedestrian is in two ways: from how tall they look in the frame, and from a monocular depth map’s nearest surface inside their box. Occlusion barely changes the tallness cue, but it pulls the depth cue toward the thing in front. That disagreement is itself an occlusion detector — no training, no occlusion labels, and no need for focal length or stature at ranking time.</p>
+<p class="authors">Chibueze Praise Onyenweaku, Toyibat Adele, Sikirulahi Opeyemi Abdulkareem &amp; Obed Honour Eje</p>
+
+<section class="card why" aria-labelledby="why-h">
+<h2 id="why-h">Why it matters</h2>
+<p>Self-driving cars and delivery robots often only see part of a person, and knowing “this detection is half-hidden” lets them widen uncertainty or slow down even when they cannot fill in the missing pixels. The authors show that signal can be read for free from two distance numbers a camera pipeline already computes, and that it still works when a detector trained on German roads loses about half its accuracy on street scenes in Lagos — exactly the kind of place where fresh occlusion labels are hard to get.</p>
+</section>
+
+<section class="card" aria-labelledby="paper-h">
+<h2 id="paper-h">The paper</h2>
+<p style="margin:0 0 6px"><strong>Occlusion for Free: Detecting Occlusion from the Disagreement Between Two Monocular Distance Cues</strong></p>
+<p class="cite" style="margin:0">Chibueze Praise Onyenweaku (University of Lagos), Toyibat Adele (ML Collective), Sikirulahi Opeyemi Abdulkareem and Obed Honour Eje (Federal University of Technology, Minna / ML Collective). arXiv:2611.06899 [cs.CV, cs.AI], submitted ~4 Nov 2026. <a href="https://arxiv.org/abs/2611.06899">Read on arXiv</a> · <a href="https://arxiv.org/pdf/2611.06899">PDF</a></p>
+<p style="margin-top:14px">In plain language: a YOLOv8 detector draws a box around each pedestrian. Apparent height inverts the pinhole camera, <code>z<sub>app</sub> = f<sub>y</sub>·S / h<sub>px</sub></code>, and stays roughly stable under occlusion because KITTI-style boxes still span the whole person. Monocular metric depth (Depth Anything V2 outdoor) reads <code>z<sub>dep</sub> = k·d<sub>min</sub></code> from the nearest surface inside the box — often the occluder — so it is pulled closer. Combining the calibration terms into a gain <code>G</code> gives</p>
+<div class="eq" aria-label="Ratio of depth to apparent height equals G times d_min times h_px">z<sub>dep</sub> / z<sub>app</sub> = G · d<sub>min</sub> · h<sub>px</sub></div>
+<p>Only ranking matters, so <code>G</code> drops out and the deployable score is simply <code>d<sub>min</sub>·h<sub>px</sub></code> (lower → more occluded). On KITTI it reaches heavy-occlusion AUC <strong>0.909</strong> (0.888 on all annotated pedestrians with annotated boxes), any-occlusion AUC 0.826, and partly 0.775. Within distance bands the heavy AUC stays 0.894–0.925 while true distance alone sits near chance (0.457–0.594). On CARLA with measured visibility it reaches <strong>0.819</strong> vs 0.644 for distance alone. An example frame: visible pedestrian ~10.5 m vs ~10.7 m; occluded ~20.8 m vs ~13.6 m (~34% disagreement).</p>
+<ul>
+<li><strong>Not a range proxy.</strong> Occluded people are a bit farther on average, but holding distance fixed the score still works and raw distance does not.</li>
+<li><strong>Needs metric depth with near-pure gain.</strong> Ranking matches the calibrated signed ratio (0.909 vs 0.908). Among visible pedestrians, correlation of the score with distance is ρ≈−0.07 for DAv2; a synthetic +2 m depth offset pushes ρ to ≈−0.61 (Eq. 2).</li>
+<li><strong>Motivated by transfer failure.</strong> Depth fusion, occlusion augmentation and attention did not fix out-of-distribution detection in the configurations tested; a KITTI-trained detector dropped from 0.8809 to 0.4482 mAP50 on 350 Lagos frames.</li>
+</ul>
+<p class="note">Limits noted in the paper: the score ranks occlusion presence (and coarse partly/heavy categories), not a continuous occlusion fraction; it is validated on daytime pedestrians only; a detector that shrinks occluded boxes would weaken the tallness cue; calibration-free ranking held for the outdoor DAv2 checkpoint on KITTI but not for an indoor checkpoint at robot height on CARLA; dense crowds, night/rain, other depth models and embedded hardware are untested; Lagos annotations have no occlusion labels so the score itself was not scored there.</p>
+</section>
+
+<section class="card" aria-labelledby="cue-h">
+<h2 id="cue-h">Try it: two distance cues on one person</h2>
+<p class="note" style="margin-top:0">Drag the box height and nearest-depth sliders, or tap the paper’s Visible / Occluded example. Calibrated distances use the paper’s median stature <code>S = 1.83</code> m and a typical KITTI-like <code>f<sub>y</sub></code>; the ranking score ignores both. Disagreement is <code>(z<sub>app</sub> − z<sub>dep</sub>) / z<sub>app</sub></code>.</p>
+<div class="seg" role="group" aria-label="Presets from the paper’s example frame" id="preset">
+ <button type="button" data-p="vis" aria-pressed="true">Visible (paper example)</button>
+ <button type="button" data-p="occ" aria-pressed="false">Occluded (paper example)</button>
+ <button type="button" data-p="custom" aria-pressed="false">Custom</button>
+</div>
+<div class="controls">
+ <div><label for="hpx"><span>Box height h<sub>px</sub></span> <output id="hpxO"></output></label><input type="range" id="hpx" min="30" max="220" step="1" value="126"></div>
+ <div><label for="dmin"><span>Nearest depth d<sub>min</sub></span> <output id="dminO"></output></label><input type="range" id="dmin" min="2" max="40" step="0.1" value="10.7"></div>
+ <div><label for="fy"><span>Focal length f<sub>y</sub> (calibrated only)</span> <output id="fyO"></output></label><input type="range" id="fy" min="400" max="1000" step="1" value="721"></div>
+ <div><label for="S"><span>Stature S (calibrated only)</span> <output id="SO"></output></label><input type="range" id="S" min="1.50" max="2.00" step="0.01" value="1.83"></div>
+ <div><label for="k"><span>Depth scale k (calibrated only)</span> <output id="kO"></output></label><input type="range" id="k" min="0.5" max="1.5" step="0.01" value="1.00"></div>
+</div>
+<div class="stats">
+ <div class="stat"><div class="v" id="zapp"></div><div class="l">Apparent height z<sub>app</sub></div></div>
+ <div class="stat"><div class="v" id="zdep"></div><div class="l">Metric depth z<sub>dep</sub></div></div>
+ <div class="stat"><div class="v" id="dis"></div><div class="l">Disagreement (z<sub>app</sub>−z<sub>dep</sub>)/z<sub>app</sub></div></div>
+ <div class="stat"><div class="v" id="score"></div><div class="l">Ranking score d<sub>min</sub>·h<sub>px</sub> (lower → occluded)</div></div>
+</div>
+<div style="margin-top:18px"><div class="plot-title" id="scenetitle">Camera view: tallness cue vs nearest-surface depth</div>
+<canvas id="scene" role="img" aria-label="Stick-figure pedestrian in a detection box; an occluder can cover the lower body so depth reads short while the box stays tall"></canvas>
+<div class="legend"><span style="--k:var(--c1)">Detection box / height cue</span><span style="--k:var(--c2)">Nearest surface (depth)</span><span style="--k:var(--c3)">Occluder</span><span style="--k:var(--muted)">Person (stick figure)</span></div></div>
+<p class="note" id="cuenote" aria-live="polite"></p>
+</section>
+
+<section class="card" aria-labelledby="band-h">
+<h2 id="band-h">Try it: score vs distance confound</h2>
+<p class="note" style="margin-top:0">Table 1 of the paper: within fixed distance bands, heavy-occlusion AUC of the score stays high while true distance alone is near chance. The second plot shows Eq. 2’s offset check — among <em>visible</em> pedestrians only, how a synthetic depth offset <code>b</code> makes the score correlate with range (reported ρ at 0, +2 and +4 m; curve interpolated for the slider).</p>
+<div class="grid2">
+<div>
+<div class="plot-title">Heavy occlusion AUC by distance band (KITTI)</div>
+<canvas id="auc" role="img" aria-label="Bar chart comparing score AUC versus true-distance AUC in three distance bands"></canvas>
+<div class="legend"><span style="--k:var(--c1)">Score AUC</span><span style="--k:var(--c3)">True distance AUC</span></div>
+</div>
+<div>
+<div class="plot-title">Offset check among visible pedestrians</div>
+<div class="controls" style="margin-top:0">
+ <div><label for="b"><span>Synthetic depth offset b</span> <output id="bO"></output></label><input type="range" id="b" min="0" max="4" step="0.1" value="0"></div>
+</div>
+<div class="stats" style="margin-top:8px">
+ <div class="stat"><div class="v" id="rho"></div><div class="l">Spearman ρ (score vs distance, visible)</div></div>
+ <div class="stat"><div class="v" id="wband"></div><div class="l">Weakest within-band heavy AUC</div></div>
+</div>
+<canvas id="rho" role="img" aria-label="Line chart of correlation rho versus synthetic depth offset"></canvas>
+<div class="legend"><span style="--k:var(--c2)">ρ(b) through paper’s checkpoints</span><span style="--k:var(--cx)">Reported points 0 / +2 / +4 m</span></div>
+</div>
+</div>
+<table class="num" style="width:100%;margin-top:16px;border-collapse:collapse;font-size:14px">
+<thead><tr><th>Distance band</th><th>N vis/occ (peds)</th><th>Score AUC</th><th>Distance AUC</th></tr></thead>
+<tbody>
+<tr><td>5–10 m</td><td>409/26 (137/10)</td><td>0.917</td><td>0.594</td></tr>
+<tr><td>10–20 m</td><td>466/140 (156/55)</td><td>0.894</td><td>0.457</td></tr>
+<tr><td>20 m+</td><td>318/100 (112/41)</td><td>0.925</td><td>0.469</td></tr>
+<tr><td>all</td><td>1237/269 (420/107)</td><td>0.909</td><td>0.624</td></tr>
+</tbody>
+</table>
+<p class="note" style="margin-top:10px">The 5–10 m band rests on only 10 distinct heavily occluded pedestrians, so its interval is wide. Overall CARLA AUC with measured visibility: 0.819 vs 0.644 for distance alone.</p>
+</section>
+
+<section class="card" aria-labelledby="how-h">
+<h2 id="how-h">How to use it</h2>
+<ul>
+<li><strong>Match the paper’s frame:</strong> tap Visible, then Occluded. Apparent height and depth should agree near 10.5 m / 10.7 m when clear, and diverge to about 20.8 m / 13.6 m (~34%) when blocked — and the ranking score should drop.</li>
+<li><strong>Prove calibration cancels:</strong> move <code>f<sub>y</sub></code>, <code>S</code> or <code>k</code>. Calibrated metres change, but <code>d<sub>min</sub>·h<sub>px</sub></code> does not. Ranking only needs the two raw measurements.</li>
+<li><strong>Simulate an occluder:</strong> keep box height high and drag <code>d<sub>min</sub></code> down — the stick figure stays tall in the box while the depth marker jumps to the nearer surface.</li>
+<li><strong>Check the confound:</strong> read the band table and bars: score AUC stays ~0.89–0.93 inside each band; distance alone collapses. Then push the offset slider and watch ρ among visible people worsen from ≈−0.07 toward ≈−0.61 at +2 m — the deployment check from Eq. 2.</li>
+</ul>
+</section>
+
+<p class="note" style="margin-top:24px">Demo by Grok Bot for the Daily Research Explorer. Formulas, example distances, KITTI/CARLA AUCs, Table 1 bands, ρ at offsets 0/+2/+4 m, and the weakest within-band AUCs at those offsets come from arXiv:2611.06899. The scene drawing, the continuous ρ(b) curve between reported checkpoints, and the illustrative KITTI-like default <code>f<sub>y</sub> = 721</code> are choices made for this page, not results from the paper. Depth scale <code>k = 1</code> in the presets so the example metres match the paper’s reported <code>z<sub>dep</sub></code> directly.</p>
+</main>
+<script>
+"use strict";
+const $=id=>document.getElementById(id);
+const css=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+function press(sel,attr,val){document.querySelectorAll(sel+' button').forEach(b=>b.setAttribute('aria-pressed',b.dataset[attr]===String(val)));}
+function setup(cv){const r=cv.getBoundingClientRect(),d=devicePixelRatio||1;cv.width=Math.round(r.width*d);cv.height=Math.round(r.height*d);const x=cv.getContext('2d');x.setTransform(d,0,0,d,0,0);x.font='12px '+css('--font');return [x,r.width,r.height];}
+const lin=(a,b,A,B)=>v=>A+(v-a)/(b-a)*(B-A);
+
+/* Presets reproduce paper Fig. 2 metres with fy=721, S=1.83, k=1:
+   visible:  z_app=10.5 → h=721*1.83/10.5≈125.66; z_dep=10.7 → d=10.7
+   occluded: z_app=20.8 → h≈63.43; z_dep=13.6 → d=13.6 */
+const PRE={vis:{h:126,d:10.7},occ:{h:63,d:13.6}};
+let mode='vis';
+
+function cues(){
+ const h=+$('hpx').value,d=+$('dmin').value,fy=+$('fy').value,S=+$('S').value,k=+$('k').value;
+ $('hpxO').textContent=Math.round(h)+' px';
+ $('dminO').textContent=d.toFixed(1)+' m';
+ $('fyO').textContent=Math.round(fy)+' px';
+ $('SO').textContent=S.toFixed(2)+' m';
+ $('kO').textContent=k.toFixed(2);
+ const zApp=fy*S/h, zDep=k*d, score=d*h;
+ const dis=(zApp-zDep)/zApp;
+ $('zapp').innerHTML=zApp.toFixed(1)+'<small>m</small>';
+ $('zdep').innerHTML=zDep.toFixed(1)+'<small>m</small>';
+ $('dis').innerHTML=(100*dis).toFixed(0)+'<small>%</small>';
+ $('score').textContent=score.toFixed(0);
+ const hit=Object.keys(PRE).find(p=>Math.abs(PRE[p].h-h)<1.5&&Math.abs(PRE[p].d-d)<0.15&&Math.abs(fy-721)<1&&Math.abs(S-1.83)<0.005&&Math.abs(k-1)<0.005);
+ mode=hit||'custom';press('#preset','p',mode);
+ let n;
+ if(mode==='vis')n='Paper example, visible: the nearest surface is the person themself, so the two distance guesses agree (~10.5 m vs ~10.7 m) and the ranking score stays high.';
+ else if(mode==='occ')n='Paper example, occluded: apparent height still reads ~20.8 m (box spans the whole person) while depth reads the nearer occluder at ~13.6 m — about 34% disagreement, and the score drops.';
+ else if(dis>0.2)n='Depth is pulled much closer than height suggests — the ranking score falls, which is how the paper flags occlusion.';
+ else if(dis<-0.15)n='Depth reads farther than height. On KITTI that happens for 44% of fully-visible people but only 3% of heavily occluded ones, so the direction of the disagreement is informative.';
+ else n='The two cues roughly agree. Ranking score d_min·h_px ignores focal length, stature and depth scale — move those three sliders and watch only the calibrated metres change.';
+ $('cuenote').textContent=n;
+ scene(zApp,zDep,dis,h,d);
+}
+
+function scene(zApp,zDep,dis,h,d){
+ const [x,W,H]=setup($('scene'));
+ x.clearRect(0,0,W,H);
+ const ground=H*0.88, horizon=H*0.28;
+ /* road / sky */
+ const g=x.createLinearGradient(0,0,0,H);
+ g.addColorStop(0,css('--accent-soft'));g.addColorStop(0.35,css('--card-solid'));g.addColorStop(1,css('--accent-soft'));
+ x.fillStyle=g;x.fillRect(0,0,W,H);
+ x.strokeStyle=css('--grid');x.lineWidth=1;
+ x.beginPath();x.moveTo(0,ground);x.lineTo(W,ground);x.stroke();
+ /* person placed by apparent distance (farther → smaller / higher) */
+ const nearZ=5,farZ=30;
+ const scale=lin(farZ,nearZ,0.35,1.15)(Math.min(farZ,Math.max(nearZ,zApp)));
+ const cx=W*0.52, footY=ground;
+ const boxH=Math.min(H*0.62, 110*scale);
+ const boxW=boxH*0.38;
+ const boxT=footY-boxH, boxL=cx-boxW/2;
+ const occ=dis>0.18; /* draw occluder when disagreement looks occluded */
+ if(occ){
+  const ow=boxW*1.35, oh=boxH*0.55;
+  const ol=boxL-ow*0.55, ot=footY-oh;
+  x.fillStyle=css('--c3');x.globalAlpha=0.55;
+  x.fillRect(ol,ot,ow,oh);x.globalAlpha=1;
+  x.strokeStyle=css('--c3');x.lineWidth=2;x.strokeRect(ol+0.5,ot+0.5,ow-1,oh-1);
+  x.fillStyle=css('--text');x.font='11px '+css('--font');x.textAlign='center';
+  x.fillText('occluder',ol+ow/2,ot-6);
+ }
+ /* stick figure */
+ x.strokeStyle=css('--text');x.lineWidth=2.2;x.lineCap='round';
+ const headR=boxH*0.09, neck=boxT+headR*2.2, hip=boxT+boxH*0.58;
+ x.beginPath();x.arc(cx,boxT+headR*1.1,headR,0,7);x.stroke();
+ x.beginPath();x.moveTo(cx,neck);x.lineTo(cx,hip); /* torso */
+ x.moveTo(cx,neck+boxH*0.08);x.lineTo(cx-boxW*0.45,neck+boxH*0.28);
+ x.moveTo(cx,neck+boxH*0.08);x.lineTo(cx+boxW*0.45,neck+boxH*0.28);
+ x.moveTo(cx,hip);x.lineTo(cx-boxW*0.35,footY-2);
+ x.moveTo(cx,hip);x.lineTo(cx+boxW*0.35,footY-2);x.stroke();
+ /* detection box */
+ x.strokeStyle=css('--c1');x.lineWidth=2.5;x.setLineDash([6,4]);
+ x.strokeRect(boxL,boxT,boxW,boxH);x.setLineDash([]);
+ x.fillStyle=css('--c1');x.font='12px '+css('--font');x.textAlign='left';
+ x.fillText('h_px = '+Math.round(h),boxL+boxW+8,boxT+14);
+ /* depth marker: nearer when occluded */
+ const depthFrac=Math.min(0.95,Math.max(0.08,(zDep-3)/(28)));
+ /* map zDep to a y inside / in front of box: closer → lower on screen toward occluder face */
+ let depthY;
+ if(occ){depthY=footY-boxH*0.28;} /* on occluder face */
+ else{depthY=boxT+boxH*0.72;}
+ x.strokeStyle=css('--c2');x.fillStyle=css('--c2');x.lineWidth=2;
+ x.beginPath();x.moveTo(boxL-18,depthY);x.lineTo(boxL+boxW+18,depthY);x.stroke();
+ x.beginPath();x.arc(cx,depthY,5,0,7);x.fill();
+ x.font='12px '+css('--font');x.textAlign='right';
+ x.fillText('d_min ≈ '+d.toFixed(1)+' m',boxL-22,depthY+4);
+ /* side readouts */
+ x.textAlign='left';x.fillStyle=css('--text');
+ x.fillText('z_app '+zApp.toFixed(1)+' m',14,24);
+ x.fillStyle=css('--c2');x.fillText('z_dep '+zDep.toFixed(1)+' m',14,42);
+ $('scenetitle').textContent=occ
+  ?'Occluded: box stays tall (height cue) while nearest surface is the occluder (depth cue)'
+  :'Visible: nearest surface is the person — height and depth agree';
+}
+
+/* Table 1 heavy bands */
+const BANDS=[
+ {label:'5–10 m',score:0.917,dist:0.594},
+ {label:'10–20 m',score:0.894,dist:0.457},
+ {label:'20 m+',score:0.925,dist:0.469},
+ {label:'all',score:0.909,dist:0.624}
+];
+function aucChart(){
+ const [x,W,H]=setup($('auc'));x.clearRect(0,0,W,H);
+ const m={l:40,r:12,t:16,b:36},n=BANDS.length,gap=10;
+ const bw=(W-m.l-m.r-gap*(n-1))/n, Y=lin(0,1,H-m.b,m.t);
+ x.strokeStyle=css('--grid');x.lineWidth=1;x.fillStyle=css('--muted');x.textAlign='right';x.textBaseline='middle';
+ for(let v=0;v<=1.001;v+=0.25){x.beginPath();x.moveTo(m.l,Y(v));x.lineTo(W-m.r,Y(v));x.stroke();x.fillText(v.toFixed(2),m.l-6,Y(v));}
+ /* chance line */
+ x.strokeStyle=css('--muted');x.setLineDash([3,3]);x.beginPath();x.moveTo(m.l,Y(0.5));x.lineTo(W-m.r,Y(0.5));x.stroke();x.setLineDash([]);
+ BANDS.forEach((b,i)=>{
+  const x0=m.l+i*(bw+gap), bar=bw*0.38;
+  x.fillStyle=css('--c1');x.fillRect(x0+bw*0.08,Y(b.score),bar,Y(0)-Y(b.score));
+  x.fillStyle=css('--c3');x.fillRect(x0+bw*0.08+bar+4,Y(b.dist),bar,Y(0)-Y(b.dist));
+  x.fillStyle=css('--text');x.font='11px '+css('--font');x.textAlign='center';x.textBaseline='top';
+  x.fillText(b.label,x0+bw/2,H-m.b+8);
+  x.textBaseline='bottom';x.fillStyle=css('--c1');x.fillText(b.score.toFixed(3),x0+bw*0.08+bar/2,Y(b.score)-3);
+  x.fillStyle=css('--c3');x.fillText(b.dist.toFixed(3),x0+bw*0.08+bar+4+bar/2,Y(b.dist)-3);
+ });
+}
+
+/* ρ checkpoints from Appendix B: b=0 → -0.07; +2 → -0.61; +4 → -0.81
+   weakest within-band heavy AUC: 0.894 → 0.839 → 0.800 */
+const RHO=[[0,-0.07],[2,-0.61],[4,-0.81]];
+const WAUC=[[0,0.894],[2,0.839],[4,0.800]];
+function lerpPts(pts,b){
+ if(b<=pts[0][0])return pts[0][1];
+ for(let i=1;i<pts.length;i++){if(b<=pts[i][0]){const t=(b-pts[i-1][0])/(pts[i][0]-pts[i-1][0]);return pts[i-1][1]+t*(pts[i][1]-pts[i-1][1]);}}
+ return pts[pts.length-1][1];
+}
+function offset(){
+ const b=+$('b').value;$('bO').textContent=(b===0?'0':'+'+b.toFixed(1))+' m';
+ const rho=lerpPts(RHO,b), w=lerpPts(WAUC,b);
+ $('rho').textContent=rho.toFixed(2);
+ $('wband').textContent=w.toFixed(3);
+ const [x,W,H]=setup($('rho'));x.clearRect(0,0,W,H);
+ const m={l:40,r:14,t:12,b:32};const X=lin(0,4,m.l,W-m.r),Y=lin(-1,0,H-m.b,m.t);
+ x.strokeStyle=css('--grid');x.lineWidth=1;x.fillStyle=css('--muted');x.textAlign='right';x.textBaseline='middle';
+ for(let v=0;v>=-1.001;v-=0.25){x.beginPath();x.moveTo(m.l,Y(v));x.lineTo(W-m.r,Y(v));x.stroke();x.fillText(v.toFixed(2),m.l-6,Y(v));}
+ x.textAlign='center';x.textBaseline='top';
+ for(let v=0;v<=4;v++){x.beginPath();x.moveTo(X(v),m.t);x.lineTo(X(v),H-m.b);x.stroke();x.fillText(v+' m',X(v),H-m.b+6);}
+ /* curve */
+ const pts=[];for(let s=0;s<=4.001;s+=0.05)pts.push([X(s),Y(lerpPts(RHO,s))]);
+ x.strokeStyle=css('--c2');x.lineWidth=2.5;x.beginPath();pts.forEach(([a,b],i)=>i?x.lineTo(a,b):x.moveTo(a,b));x.stroke();
+ /* reported points */
+ RHO.forEach(([bx,ry])=>{x.beginPath();x.arc(X(bx),Y(ry),4.5,0,7);x.fillStyle=css('--cx');x.fill();});
+ /* cursor */
+ x.strokeStyle=css('--text');x.setLineDash([2,3]);x.beginPath();x.moveTo(X(b),m.t);x.lineTo(X(b),H-m.b);x.stroke();x.setLineDash([]);
+ x.beginPath();x.arc(X(b),Y(rho),5,0,7);x.fillStyle=css('--text');x.fill();
+}
+
+document.querySelectorAll('#preset button').forEach(b=>b.addEventListener('click',()=>{
+ const p=b.dataset.p;
+ if(p==='custom'){press('#preset','p','custom');mode='custom';return;}
+ $('hpx').value=PRE[p].h;$('dmin').value=PRE[p].d;$('fy').value=721;$('S').value=1.83;$('k').value=1;
+ mode=p;cues();
+}));
+['hpx','dmin','fy','S','k'].forEach(id=>$(id).addEventListener('input',()=>{mode='custom';press('#preset','p','custom');cues();}));
+$('b').addEventListener('input',offset);
+
+function all(){cues();aucChart();offset();}
+let rt;addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(all,120);});
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',all);
+all();
+</script>
+</body></html>
