@@ -1,0 +1,359 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="light dark">
+<title>Life expectancy as a mix of simpler lives — Research Explorer, 7 Nov 2026</title>
+<link rel="stylesheet" href="../assets/style.css">
+<style>
+canvas#haz{height:260px} canvas#pois{height:220px} canvas#lex{height:240px}
+.seg{display:inline-flex;flex-wrap:wrap;gap:2px;padding:2px;border-radius:10px;background:var(--accent-soft);margin:4px 12px 14px 0}
+.seg button{font:500 14px var(--font);color:var(--text);background:transparent;border:0;border-radius:8px;padding:6px 14px;cursor:pointer;min-height:32px}
+.seg button[aria-pressed=true]{background:var(--card-solid);box-shadow:0 1px 3px rgba(0,0,0,.18);font-weight:600}
+.stat .v small{font-size:15px;font-weight:500;color:var(--muted);margin-left:4px}
+label output{white-space:nowrap}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+@media (max-width:720px){.grid2{grid-template-columns:1fr}}
+</style></head><body><main>
+<a class="back" href="../">‹ All demos</a>
+<div class="eyebrow">7 Nov 2026 · Medicine</div>
+<h1>Life expectancy as a mix of simpler lives</h1>
+<p class="lede">The Siler model describes mortality from birth to old age as three risks stacked together — falling infant/child risk, a flat background, and rising senescence. Its remaining life expectancy has no ordinary closed form. This paper shows it is exactly a Poisson-weighted mix of simpler Gompertz–Makeham life expectancies, with a closed-form bound on how many years early-life mortality still steals.</p>
+<p class="authors">Silvio C. Patricio</p>
+
+<section class="card why" aria-labelledby="why-h">
+<h2 id="why-h">Why it matters</h2>
+<p>Public-health and demography teams can now compute — and bound — how many years of remaining life expectancy infant and child mortality still steal, without opaque numerical integration as the only answer. Fitted to Swedish female mortality, that loss at birth collapsed from 4.28 years in 1900 to 0.49 in 1950 and 0.004 in 2020, explaining about 15% of the 27.9-year gain in life expectancy at birth.</p>
+</section>
+
+<section class="card" aria-labelledby="paper-h">
+<h2 id="paper-h">The paper</h2>
+<p style="margin:0 0 6px"><strong>An Exact Poisson Mixture Representation of Siler Remaining Life Expectancy</strong></p>
+<p class="cite" style="margin:0">Silvio C. Patricio (Interdisciplinary Center on Population Dynamics, University of Southern Denmark). arXiv:2611.06376 [stat.AP], submitted 4 Nov 2026. <a href="https://arxiv.org/abs/2611.06376">Read on arXiv</a> · <a href="https://arxiv.org/pdf/2611.06376">PDF</a></p>
+<p style="margin-top:14px">In plain language: Siler’s hazard is the sum of three pieces</p>
+<div class="eq" aria-label="Siler hazard">μ(t) = a<sub>1</sub>·e<sup>−b<sub>1</sub>·t</sup> + a<sub>2</sub> + a<sub>3</sub>·e<sup>b<sub>3</sub>·t</sup></div>
+<p>At age <em>x</em>, the remaining immaturity mass <code>A<sub>x</sub> = a<sub>1</sub>·e<sup>−b<sub>1</sub>·x</sup> / b<sub>1</sub></code> is the mean of a Poisson random variable <code>K<sub>x</sub></code>. Corollary 1 says remaining life expectancy is the Poisson mixture</p>
+<div class="eq" aria-label="Poisson mixture of Gompertz-Makeham LE">e<sub>x</sub> = E[ e<sup>GM</sup><sub>x</sub>(a<sub>2</sub> + b<sub>1</sub>·K<sub>x</sub>) ] = Σ<sub>n</sub> w<sub>n</sub>(x)·Q<sub>n</sub>(x)</div>
+<p>where <code>w<sub>n</sub> = e<sup>−A<sub>x</sub></sup>·A<sub>x</sub><sup>n</sup> / n!</code> and each <code>Q<sub>n</sub></code> is Gompertz–Makeham remaining LE with background <code>c = a<sub>2</sub> + n·b<sub>1</sub></code> and the same senescence hazard. The leading term <code>e<sup>−A<sub>x</sub></sup>·e<sup>GM</sup><sub>x</sub>(a<sub>2</sub>)</code> is the life expectancy with immaturity removed, times the chance of escaping it. The loss <code>Δ<sub>x</sub> = e<sup>GM</sup><sub>x</sub>(a<sub>2</sub>) − e<sub>x</sub></code> is years stolen by immaturity risk. Proposition 2 bounds the truncation error of the partial sum by <code>Pr(K<sub>x</sub> &gt; m) / (a<sub>2</sub> + (m+1)·b<sub>1</sub>)</code>.</p>
+<ul>
+<li><strong>Swedish female fits (HMD, 1900–2020).</strong> Loss at birth Δ<sub>0</sub> fell from <strong>4.28</strong> years (1900) to <strong>0.49</strong> (1950) and <strong>0.004</strong> (2020). Over that span e<sub>0</sub> rose <strong>27.9</strong> years and e<sup>GM</sup><sub>0</sub>(a<sub>2</sub>) rose <strong>23.6</strong> years, so immaturity decline accounts for <strong>15%</strong> of the gain.</li>
+<li><strong>Tight bound.</strong> In every year, Δ<sub>0</sub> sits between <strong>98.6%</strong> and <strong>99.99%</strong> of its upper bound <code>(1 − e<sup>−A<sub>0</sub></sup>)·e<sup>GM</sup><sub>0</sub>(a<sub>2</sub>)</code>, differing by at most 0.060 years.</li>
+<li><strong>Series accuracy.</strong> Stopping when the Prop. 2 bound is below 10<sup>−12</sup> years, the series and adaptive quadrature of the survival integral differ by at most 1.08×10<sup>−12</sup> years on the checked years/ages.</li>
+</ul>
+<p class="note">Limits noted in the paper: the application concerns the Siler series, not how well Siler fits HMD tables (the fitted model overstates e<sub>0</sub> by up to 2.6 years before 1940 and understates e<sub>60</sub> by about 2–3%); K<sub>x</sub> is an auxiliary expansion device, not a count of deaths; year-by-year MLE parameter tables are not published in the paper — the demo presets below are illustrative schedules in the same qualitative regime.</p>
+</section>
+
+<section class="card" aria-labelledby="demo-h">
+<h2 id="demo-h">Try it: Siler schedule → Poisson mixture</h2>
+<p class="note" style="margin-top:0">Presets are <strong>illustrative</strong> Siler schedules tuned so Δ<sub>0</sub> is roughly ~4 years (1900-like high infant mortality) or near zero (2020-like), with e<sub>0</sub> in a plausible human range. They are <em>not</em> the paper’s exact Swedish MLE point estimates. Drag age and the five hazard parameters to explore.</p>
+<div class="seg" role="group" aria-label="Illustrative presets" id="preset">
+ <button type="button" data-p="y1900" aria-pressed="true">1900-like</button>
+ <button type="button" data-p="y2020" aria-pressed="false">2020-like</button>
+ <button type="button" data-p="custom" aria-pressed="false">Custom</button>
+</div>
+<div class="controls">
+ <div><label for="age"><span>Age x</span> <output id="ageO"></output></label><input type="range" id="age" min="0" max="90" step="1" value="0"></div>
+ <div><label for="a1"><span>a<sub>1</sub> (immaturity level)</span> <output id="a1O"></output></label><input type="range" id="a1" min="0" max="0.5" step="0.00001" value="0.112"></div>
+ <div><label for="b1"><span>b<sub>1</sub> (immaturity decline /yr)</span> <output id="b1O"></output></label><input type="range" id="b1" min="0.3" max="2.5" step="0.01" value="1.50"></div>
+ <div><label for="a2"><span>a<sub>2</sub> (background /yr)</span> <output id="a2O"></output></label><input type="range" id="a2" min="0.00005" max="0.003" step="0.00005" value="0.00100"></div>
+ <div><label for="a3"><span>a<sub>3</sub> (senescence level)</span> <output id="a3O"></output></label><input type="range" id="a3" min="0.00001" max="0.001" step="0.00001" value="0.00012"></div>
+ <div><label for="b3"><span>b<sub>3</sub> (senescence rise /yr)</span> <output id="b3O"></output></label><input type="range" id="b3" min="0.06" max="0.14" step="0.001" value="0.100"></div>
+</div>
+<div class="stats">
+ <div class="stat"><div class="v" id="exV"></div><div class="l">Remaining LE e<sub>x</sub> (mixture)</div></div>
+ <div class="stat"><div class="v" id="egmV"></div><div class="l">e<sup>GM</sup><sub>x</sub>(a<sub>2</sub>) — no immaturity</div></div>
+ <div class="stat"><div class="v" id="dxV"></div><div class="l">Loss Δ<sub>x</sub> = e<sup>GM</sup> − e<sub>x</sub></div></div>
+ <div class="stat"><div class="v" id="axV"></div><div class="l">Immaturity mass A<sub>x</sub></div></div>
+ <div class="stat"><div class="v" id="prV"></div><div class="l">Pr(immaturity death) = 1−e<sup>−A<sub>x</sub></sup></div></div>
+ <div class="stat"><div class="v" id="termsV"></div><div class="l">Poisson terms used</div></div>
+ <div class="stat"><div class="v" id="bndV"></div><div class="l">Truncation bound (Prop. 2)</div></div>
+ <div class="stat"><div class="v" id="leadV"></div><div class="l">Leading term e<sup>−A<sub>x</sub></sup>·e<sup>GM</sup></div></div>
+</div>
+<p class="note" id="demonote" aria-live="polite"></p>
+</section>
+
+<section class="card" aria-labelledby="plot-h">
+<h2 id="plot-h">Hazard, Poisson weights, and remaining LE</h2>
+<div class="plot-title">Siler hazard μ(t) and its three components</div>
+<canvas id="haz" role="img" aria-label="Hazard rate versus age showing immaturity, background, senescence, and total"></canvas>
+<div class="legend"><span style="--k:var(--c1)">Total μ(t)</span><span style="--k:var(--c2)">Immaturity μ<sub>1</sub></span><span style="--k:var(--c3)">Background a<sub>2</sub></span><span style="--k:var(--c4)">Senescence μ<sub>3</sub></span><span style="--k:var(--cx)">Age x marker</span></div>
+
+<div class="grid2" style="margin-top:22px">
+<div>
+<div class="plot-title">Poisson weights w<sub>n</sub>(x) for remaining A<sub>x</sub></div>
+<canvas id="pois" role="img" aria-label="Bar chart of Poisson mixture weights"></canvas>
+<div class="legend"><span style="--k:var(--c1)">w<sub>n</sub> = Pr(K<sub>x</sub>=n)</span></div>
+</div>
+<div>
+<div class="plot-title">Remaining life expectancy vs age</div>
+<canvas id="lex" role="img" aria-label="Remaining life expectancy versus age for Siler and Gompertz-Makeham"></canvas>
+<div class="legend"><span style="--k:var(--c1)">Siler e<sub>x</sub></span><span style="--k:var(--c2)">e<sup>GM</sup><sub>x</sub>(a<sub>2</sub>)</span><span style="--k:var(--cx)">Current age</span></div>
+</div>
+</div>
+</section>
+
+<section class="card" aria-labelledby="how-h">
+<h2 id="how-h">How to use it</h2>
+<ul>
+<li><strong>Match the paper’s story:</strong> tap <em>1900-like</em>, then <em>2020-like</em>, with age at 0. Watch Δ<sub>0</sub> drop from roughly four years toward near zero — the qualitative collapse the Swedish fits quantify as 4.28 → 0.004 years.</li>
+<li><strong>Raise age:</strong> drag age upward. A<sub>x</sub> decays at rate b<sub>1</sub>, the Poisson mass piles onto n=0, and e<sub>x</sub> approaches the Gompertz–Makeham curve.</li>
+<li><strong>Turn immaturity up:</strong> increase a<sub>1</sub> (or lower b<sub>1</sub>). A<sub>x</sub> and Pr(immaturity death) rise, more mixture terms matter, and the loss Δ<sub>x</sub> grows toward its upper bound <code>(1−e<sup>−A<sub>x</sub></sup>)·e<sup>GM</sup></code>.</li>
+<li><strong>Read the bound:</strong> the truncation-bound stat is Prop. 2’s analytic ceiling on the omitted Poisson tail, in years — the reason the series is practical for demography software.</li>
+</ul>
+</section>
+
+<p class="note" style="margin-top:24px">Demo by Grok Bot for the Daily Research Explorer. Hazard form, Corollary 1 mixture, Proposition 2 truncation bound, Eq. (4) Gompertz–Makeham LE, and the Swedish numbers (Δ<sub>0</sub> = 4.28 / 0.49 / 0.004 years; +27.9 / +23.6 years; 15%; 98.6%–99.99% of the upper bound) come from arXiv:2611.06376. The 1900-like and 2020-like presets, browser quadrature of the GM survival integral, and chart styling are choices made for this page, not results from the paper.</p>
+</main>
+<script>
+"use strict";
+const $=id=>document.getElementById(id);
+const css=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+function press(sel,attr,val){document.querySelectorAll(sel+' button').forEach(b=>b.setAttribute('aria-pressed',b.dataset[attr]===String(val)));}
+function setup(cv){const r=cv.getBoundingClientRect(),d=devicePixelRatio||1;cv.width=Math.round(r.width*d);cv.height=Math.round(r.height*d);const x=cv.getContext('2d');x.setTransform(d,0,0,d,0,0);x.font='12px '+css('--font');return [x,r.width,r.height];}
+
+/* Illustrative presets — NOT the paper's Swedish MLE point estimates.
+   Tuned so Δ0 ≈ 4.2 y (1900-like) or ≈ 0.02 y (2020-like) with human-scale e0. */
+const PRE={
+  y1900:{age:0,a1:0.112,b1:1.50,a2:0.00100,a3:0.00012,b3:0.100},
+  y2020:{age:0,a1:0.00030,b1:1.00,a2:0.00020,a3:0.000030,b3:0.090}
+};
+let mode='y1900';
+let cache={};
+
+function fmtSci(v){
+  if(v===0)return '0';
+  const a=Math.abs(v);
+  if(a>=0.01 && a<100) return v.toPrecision(3).replace(/\.?0+$/,'')||String(v);
+  return v.toExponential(2);
+}
+function fmtYears(v){
+  if(!isFinite(v))return '—';
+  if(Math.abs(v)<0.001) return v.toExponential(2)+' y';
+  if(Math.abs(v)<1) return v.toFixed(3)+' y';
+  return v.toFixed(2)+' y';
+}
+
+/* Trapezoid integral of f on [0,tmax] */
+function trap(f,tmax,n){
+  const h=tmax/n; let s=0.5*(f(0)+f(tmax));
+  for(let i=1;i<n;i++) s+=f(i*h);
+  return s*h;
+}
+
+/* Gompertz–Makeham remaining LE via survival quadrature:
+   e^GM_x(c) = ∫_0^∞ exp(−c t − Gx (e^{b3 t} − 1)) dt */
+function eGM(c,a3,b3,x){
+  const Gx=a3*Math.exp(b3*x)/b3;
+  // Adaptive tmax: when senescence dominates, survival dies by t~ (ln(20/Gx))/b3 or so
+  let tmax=Math.min(160, Math.max(40, (Math.log(Math.max(1e-12,40/Math.max(Gx,1e-12)))/b3)+20));
+  if(!isFinite(tmax)||tmax<30) tmax=120;
+  const n=Math.min(8000, Math.max(2000, Math.ceil(tmax*40)));
+  return trap(t=>{
+    const u=Math.exp(b3*t);
+    const arg=-c*t - Gx*(u-1);
+    return arg<-700?0:Math.exp(arg);
+  }, tmax, n);
+}
+
+/* Poisson mixture of GM LEs with Prop. 2 truncation */
+function mixture(a1,b1,a2,a3,b3,x,tol){
+  tol=tol||1e-4;
+  const Ax=a1*Math.exp(-b1*x)/b1;
+  const egm=eGM(a2,a3,b3,x);
+  const weights=[];
+  let logw=-Ax, cdf=0, ex=0, nUsed=0, bound=1, leading=0;
+  const mmax=Ax>20?Math.ceil(Ax+12*Math.sqrt(Ax)):80;
+  for(let n=0;n<=mmax;n++){
+    const w=logw<-700?0:Math.exp(logw);
+    const q=eGM(a2+n*b1,a3,b3,x);
+    ex+=w*q; cdf+=w; weights.push(w);
+    if(n===0) leading=w*q;
+    nUsed=n+1;
+    const prTail=Math.max(0,1-cdf);
+    const den=a2+(n+1)*b1;
+    bound=den>0?prTail/den:1e9;
+    if(n>=1 && bound<tol) break;
+    if(Ax<=0) break;
+    logw+=Math.log(Ax)-Math.log(n+1);
+  }
+  return {ex, egm, Delta:egm-ex, Ax, Pr:1-Math.exp(-Ax), terms:nUsed, bound, leading, weights};
+}
+
+function readParams(){
+  return {
+    age:+$('age').value,
+    a1:+$('a1').value,
+    b1:+$('b1').value,
+    a2:+$('a2').value,
+    a3:+$('a3').value,
+    b3:+$('b3').value
+  };
+}
+function writeParams(p){
+  $('age').value=p.age; $('a1').value=p.a1; $('b1').value=p.b1;
+  $('a2').value=p.a2; $('a3').value=p.a3; $('b3').value=p.b3;
+}
+function matchPreset(p){
+  for(const k of Object.keys(PRE)){
+    const q=PRE[k];
+    if(Math.abs(p.age-q.age)<0.5 && Math.abs(p.a1-q.a1)<1e-4 && Math.abs(p.b1-q.b1)<0.02
+      && Math.abs(p.a2-q.a2)<2e-5 && Math.abs(p.a3-q.a3)<2e-6 && Math.abs(p.b3-q.b3)<0.002)
+      return k;
+  }
+  return 'custom';
+}
+
+function drawHazard(p){
+  const cv=$('haz'); const [ctx,W,H]=setup(cv);
+  const pad={l:48,r:16,t:16,b:36};
+  const ages=[]; const mu=[],m1=[],m2=[],m3=[];
+  const tmax=100;
+  for(let i=0;i<=200;i++){
+    const t=i*(tmax/200);
+    ages.push(t);
+    const u1=p.a1*Math.exp(-p.b1*t);
+    const u3=p.a3*Math.exp(p.b3*t);
+    m1.push(u1); m2.push(p.a2); m3.push(u3); mu.push(u1+p.a2+u3);
+  }
+  const ymax=Math.max(...mu.slice(0,180))*1.15 || 0.01;
+  const X=t=>pad.l+(t/tmax)*(W-pad.l-pad.r);
+  const Y=v=>pad.t+(1-v/ymax)*(H-pad.t-pad.b);
+  ctx.clearRect(0,0,W,H);
+  // grid
+  ctx.strokeStyle=css('--grid'); ctx.lineWidth=1;
+  for(let g=0;g<=4;g++){const y=pad.t+g*(H-pad.t-pad.b)/4;ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(W-pad.r,y);ctx.stroke();}
+  function stroke(arr,col,w){
+    ctx.beginPath(); ctx.strokeStyle=col; ctx.lineWidth=w||2;
+    arr.forEach((v,i)=>{const x=X(ages[i]),y=Y(Math.min(v,ymax*1.05)); i?ctx.lineTo(x,y):ctx.moveTo(x,y);});
+    ctx.stroke();
+  }
+  stroke(m1,css('--c2'),1.5);
+  stroke(m2,css('--c3'),1.5);
+  stroke(m3,css('--c4'),1.5);
+  stroke(mu,css('--c1'),2.5);
+  // age marker
+  ctx.strokeStyle=css('--cx'); ctx.setLineDash([4,4]); ctx.beginPath();
+  ctx.moveTo(X(p.age),pad.t); ctx.lineTo(X(p.age),H-pad.b); ctx.stroke(); ctx.setLineDash([]);
+  ctx.fillStyle=css('--muted'); ctx.font='12px '+css('--font');
+  ctx.fillText('age', W/2-10, H-8);
+  ctx.save(); ctx.translate(14,H/2); ctx.rotate(-Math.PI/2); ctx.fillText('μ(t) /yr',0,0); ctx.restore();
+  ctx.fillText('0', pad.l-4, H-pad.b+14);
+  ctx.fillText(String(tmax), W-pad.r-18, H-pad.b+14);
+  ctx.fillText(ymax.toExponential(1), pad.l+4, pad.t+12);
+}
+
+function drawPoisson(m){
+  const cv=$('pois'); const [ctx,W,H]=setup(cv);
+  const pad={l:40,r:12,t:16,b:36};
+  const ws=m.weights; const N=Math.min(ws.length, Math.max(8, ws.length));
+  const ymax=Math.max(...ws, 0.05)*1.15;
+  ctx.clearRect(0,0,W,H);
+  ctx.strokeStyle=css('--grid'); ctx.lineWidth=1;
+  for(let g=0;g<=3;g++){const y=pad.t+g*(H-pad.t-pad.b)/3;ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(W-pad.r,y);ctx.stroke();}
+  const bw=(W-pad.l-pad.r)/N;
+  ctx.fillStyle=css('--c1');
+  for(let n=0;n<N;n++){
+    const h=(ws[n]/ymax)*(H-pad.t-pad.b);
+    const x=pad.l+n*bw+2, y=H-pad.b-h;
+    ctx.globalAlpha=n===0?1:0.75;
+    ctx.fillRect(x,y,Math.max(2,bw-4),h);
+  }
+  ctx.globalAlpha=1;
+  ctx.fillStyle=css('--muted'); ctx.font='12px '+css('--font');
+  ctx.fillText('n', W/2-4, H-8);
+  for(let n=0;n<N;n+=Math.max(1,Math.floor(N/6))){
+    ctx.fillText(String(n), pad.l+n*bw+bw/2-4, H-pad.b+14);
+  }
+  ctx.fillText('1', pad.l-16, pad.t+10);
+  ctx.fillText('0', pad.l-12, H-pad.b);
+}
+
+function drawLex(p){
+  const cv=$('lex'); const [ctx,W,H]=setup(cv);
+  const pad={l:44,r:12,t:16,b:36};
+  const ages=[], es=[], egms=[];
+  // Sample every 5 years; reuse cache keyed by params sans age
+  const key=[p.a1,p.b1,p.a2,p.a3,p.b3].map(v=>v.toPrecision(6)).join('|');
+  if(!cache[key]){
+    const pts=[];
+    for(let a=0;a<=90;a+=5){
+      const m=mixture(p.a1,p.b1,p.a2,p.a3,p.b3,a,1e-3);
+      pts.push({a,ex:m.ex,egm:m.egm});
+    }
+    cache[key]=pts;
+  }
+  const pts=cache[key];
+  pts.forEach(pt=>{ages.push(pt.a);es.push(pt.ex);egms.push(pt.egm);});
+  const ymax=Math.max(...egms,...es,1)*1.08;
+  const X=t=>pad.l+(t/90)*(W-pad.l-pad.r);
+  const Y=v=>pad.t+(1-v/ymax)*(H-pad.t-pad.b);
+  ctx.clearRect(0,0,W,H);
+  ctx.strokeStyle=css('--grid'); ctx.lineWidth=1;
+  for(let g=0;g<=4;g++){const y=pad.t+g*(H-pad.t-pad.b)/4;ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(W-pad.r,y);ctx.stroke();}
+  function stroke(arr,col,w){
+    ctx.beginPath(); ctx.strokeStyle=col; ctx.lineWidth=w||2;
+    arr.forEach((v,i)=>{const x=X(ages[i]),y=Y(v); i?ctx.lineTo(x,y):ctx.moveTo(x,y);});
+    ctx.stroke();
+  }
+  stroke(egms,css('--c2'),2);
+  stroke(es,css('--c1'),2.5);
+  ctx.strokeStyle=css('--cx'); ctx.setLineDash([4,4]);
+  ctx.beginPath(); ctx.moveTo(X(p.age),pad.t); ctx.lineTo(X(p.age),H-pad.b); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle=css('--muted'); ctx.font='12px '+css('--font');
+  ctx.fillText('age', W/2-10, H-8);
+  ctx.fillText('0', pad.l-2, H-pad.b+14);
+  ctx.fillText('90', W-pad.r-16, H-pad.b+14);
+  ctx.fillText(ymax.toFixed(0)+' y', pad.l+4, pad.t+12);
+}
+
+function update(){
+  const p=readParams();
+  $('ageO').textContent=Math.round(p.age)+' y';
+  $('a1O').textContent=fmtSci(p.a1);
+  $('b1O').textContent=p.b1.toFixed(2)+' /yr';
+  $('a2O').textContent=fmtSci(p.a2)+' /yr';
+  $('a3O').textContent=fmtSci(p.a3);
+  $('b3O').textContent=p.b3.toFixed(3)+' /yr';
+
+  mode=matchPreset(p); press('#preset','p',mode);
+
+  const m=mixture(p.a1,p.b1,p.a2,p.a3,p.b3,p.age,1e-4);
+  $('exV').innerHTML=m.ex.toFixed(2)+'<small>y</small>';
+  $('egmV').innerHTML=m.egm.toFixed(2)+'<small>y</small>';
+  $('dxV').innerHTML=fmtYears(m.Delta).replace(' y','')+'<small>y</small>';
+  $('axV').textContent=m.Ax<0.001?m.Ax.toExponential(2):m.Ax.toFixed(4);
+  $('prV').innerHTML=(100*m.Pr).toFixed(m.Pr<0.01?3:2)+'<small>%</small>';
+  $('termsV').textContent=String(m.terms);
+  $('bndV').textContent=m.bound<1e-6?m.bound.toExponential(1)+' y':m.bound.toFixed(5)+' y';
+  $('leadV').innerHTML=m.leading.toFixed(2)+'<small>y</small>';
+
+  let note;
+  if(mode==='y1900' && p.age===0)
+    note='Illustrative 1900-like schedule: high remaining immaturity mass at birth, so Δ₀ is about four years — the same qualitative regime as the paper’s Swedish 1900 figure of 4.28 years.';
+  else if(mode==='y2020' && p.age===0)
+    note='Illustrative 2020-like schedule: almost no immaturity hazard left, so Δ₀ is near zero — matching the paper’s Swedish 2020 figure of 0.004 years.';
+  else if(p.age>=30 && m.Ax<0.01)
+    note='At this age little immaturity hazard remains (Aₓ small). The Poisson law concentrates on n=0 and eₓ hugs the Gompertz–Makeham value.';
+  else if(m.Delta>2)
+    note='Immaturity risk is still stealing several years of remaining life expectancy. The loss sits close to (1−e^{−Aₓ})·eᴳᴹ — the paper’s upper-bound story.';
+  else
+    note='eₓ is the Poisson-weighted average of Gompertz–Makeham life expectancies with backgrounds a₂, a₂+b₁, a₂+2b₁, …. The truncation bound is Prop. 2’s analytic ceiling on the omitted tail.';
+  $('demonote').textContent=note;
+
+  drawHazard(p);
+  drawPoisson(m);
+  drawLex(p);
+}
+
+document.querySelectorAll('#preset button').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    const k=btn.dataset.p;
+    if(k==='custom'){mode='custom';press('#preset','p','custom');return;}
+    writeParams(PRE[k]); update();
+  });
+});
+['age','a1','b1','a2','a3','b3'].forEach(id=>{
+  $(id).addEventListener('input',()=>{cache={};update();});
+});
+window.addEventListener('resize',()=>{update();});
+update();
+</script>
+</body></html>
