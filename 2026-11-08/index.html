@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="light dark">
+<title>How good is a forecast really? Fixing the small-ensemble penalty — Research Explorer, 8 Nov 2026</title>
+<link rel="stylesheet" href="../assets/style.css">
+<style>
+canvas#corr{height:280px} canvas#rpc{height:250px} canvas#scat{height:250px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+@media (max-width:720px){.grid2{grid-template-columns:1fr}}
+label output{white-space:nowrap}
+.btnrow{display:flex;flex-wrap:wrap;gap:8px;margin:4px 0 14px}
+.btnrow button{font:500 14px var(--font);color:var(--text);background:var(--accent-soft);border:0;border-radius:8px;padding:7px 14px;min-height:32px;cursor:pointer}
+.btnrow button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+</style></head><body><main>
+<a class="back" href="../">‹ All demos</a>
+<div class="eyebrow">8 Nov 2026 · Climate</div>
+<h1>How good is a forecast really? Fixing the small-ensemble penalty</h1>
+<p class="lede">Seasonal and weather forecasts are run as ensembles: many slightly different runs whose average is compared with what really happened. With only a handful of runs, random noise in that average makes the forecast look less skilful than it is. This ECMWF note gathers the fix into one estimator, r<sub>∞</sub>, that predicts the skill of an infinitely large ensemble, and argues that when it comes out impossible (below −1, above 1, or undefined), that is a useful warning rather than something to hide.</p>
+<p class="authors">Christopher David Roberts</p>
+
+<section class="card why" aria-labelledby="why-h">
+<h2 id="why-h">Why it matters</h2>
+<p>Forecast centres decide which models to trust, and how many ensemble members to pay for, by comparing correlation skill, yet the plain correlation unfairly punishes small ensembles and so muddies those comparisons. Using one unbiased signal estimate for both skill and the “ratio of predictable components” lets forecasters judge models fairly, regardless of ensemble size, and say honestly when the data are too few to tell whether a real signal exists.</p>
+</section>
+
+<section class="card" aria-labelledby="paper-h">
+<h2 id="paper-h">The paper</h2>
+<p style="margin:0 0 6px"><strong>Estimating ensemble-mean anomaly correlations and the ratio of predictable components using an unbiased estimate of the predictable signal variance</strong></p>
+<p class="cite" style="margin:0">Christopher David Roberts (ECMWF, Reading, UK). arXiv:2611.07878 [physics.ao-ph], submitted 5 Nov 2026. <a href="https://arxiv.org/abs/2611.07878">Read on arXiv</a> · <a href="https://arxiv.org/pdf/2611.07878">PDF</a></p>
+<p style="margin-top:14px">In plain language: each forecast member is a shared predictable signal plus its own random noise, <code>z<sub>k,j</sub> = s<sub>j</sub> + n<sub>k,j</sub></code>, for member <em>k</em> and case <em>j</em> (for example, one start date). Averaging <em>N</em> members leaves some noise behind, so the ensemble mean’s variance is too big and the usual correlation with observations, <em>r</em>, is pulled towards zero. Because noise in different members doesn’t correlate, the true signal variance can be recovered without bias (Eq. 8):</p>
+<div class="eq" aria-label="Unbiased signal variance">E[s²] = ( N·E[⟨z⟩<sub>N</sub>²] − E[z<sub>k</sub>²] ) / (N − 1)</div>
+<p>Swapping it into the denominator of the correlation gives the ensemble-size-adjusted skill (Eq. 11), which targets the correlation between the predictable signal and the truth:</p>
+<div class="eq" aria-label="r infinity">r<sub>∞</sub> = E[⟨z⟩<sub>N</sub>·z<sub>T</sub>] / √( E[s²]·E[z<sub>T</sub>²] )</div>
+<p>The same signal variance gives the model-to-model correlation of an infinite ensemble, <code>r<sub>mm,∞</sub> = √(E[s²]/E[z<sub>k</sub>²])</code>, and the size-free ratio of predictable components <code>RPC<sub>∞</sub> = |r<sub>∞</sub>| / r<sub>mm,∞</sub></code> (Eqs. 18–19). RPC above 1 means the real world looks more predictable than the model’s own members, the so-called signal-to-noise paradox. The older variance-based estimates are biased low by an exact factor (Eqs. 20–21):</p>
+<div class="eq" aria-label="Bias factor">RPC<sub>E14</sub> = γ<sub>N</sub>·RPC<sub>∞</sub>, &nbsp; RPC<sub>H22</sub> = √γ<sub>N</sub>·RPC<sub>∞</sub>, &nbsp; γ<sub>N</sub> = N·r<sub>mm,∞</sub>² / (1 + (N−1)·r<sub>mm,∞</sub>²)</div>
+<p class="note">The author is clear that this is a technical note that brings together established results (Murphy 1990; Rowell et al. 1995; the SpecsVerification EnsCorr routine), not a brand-new method. What’s new is the emphasis on reporting inadmissible values instead of clipping them, and applying the unbiased signal variance consistently to both parts of the RPC. The paper’s examples use idealised Gaussian data, as this demo does.</p>
+</section>
+
+<section class="card" aria-labelledby="demo-h">
+<h2 id="demo-h">Try it: a signal-plus-noise forecast</h2>
+<p class="note" style="margin-top:0">This uses the paper’s idealised model (Eqs. 22–23): members <code>x<sub>k,j</sub> = s<sub>j</sub> + n<sub>k,j</sub></code>, observations <code>y<sub>j</sub> = s<sub>j</sub> + e<sub>j</sub></code>, with signal spread σ<sub>s</sub>, member noise α and observation noise β. When α = β the forecast is reliable; α &gt; β is overdispersive and α &lt; β underdispersive. Charts repeat the experiment 300 times for every ensemble size from 2 to 50.</p>
+<div class="btnrow" role="group" aria-label="Presets">
+ <button type="button" data-p="rel">Reliable, strong signal</button>
+ <button type="button" data-p="over">Overdispersive, weak signal</button>
+ <button type="button" data-p="small">Reliable, small sample, weak signal</button>
+ <button type="button" id="reroll">New random draw</button>
+</div>
+<div class="controls">
+ <div><label for="ss"><span>Signal spread σ<sub>s</sub></span> <output id="ssO"></output></label><input type="range" id="ss" min="0.05" max="2" step="0.05" value="1"></div>
+ <div><label for="al"><span>Member noise α</span> <output id="alO"></output></label><input type="range" id="al" min="0.1" max="4" step="0.05" value="1"></div>
+ <div><label for="be"><span>Observation noise β</span> <output id="beO"></output></label><input type="range" id="be" min="0.1" max="4" step="0.05" value="1"></div>
+ <div><label for="M"><span>Cases M (e.g. years)</span> <output id="MO"></output></label><input type="range" id="M" min="10" max="200" step="5" value="100"></div>
+ <div><label for="N"><span>Ensemble size N (single draw)</span> <output id="NO"></output></label><input type="range" id="N" min="2" max="50" step="1" value="5"></div>
+</div>
+<div class="stats">
+ <div class="stat"><div class="v" id="rhoV"></div><div class="l">True skill ρ = Corr(s, y)</div></div>
+ <div class="stat"><div class="v" id="rV"></div><div class="l">Plain r, this draw</div></div>
+ <div class="stat"><div class="v" id="riV"></div><div class="l">Adjusted r<sub>∞</sub>, this draw</div></div>
+ <div class="stat"><div class="v" id="svV"></div><div class="l">Estimated signal variance E[s²]</div></div>
+ <div class="stat"><div class="v" id="rpcPopV"></div><div class="l">True RPC</div></div>
+ <div class="stat"><div class="v" id="rpcV"></div><div class="l">RPC<sub>∞</sub>, this draw</div></div>
+ <div class="stat"><div class="v" id="gV"></div><div class="l">Bias factor γ<sub>N</sub> (expected)</div></div>
+ <div class="stat"><div class="v" id="badV"></div><div class="l">Inadmissible r<sub>∞</sub> at this N</div></div>
+</div>
+<p class="note" id="demonote" aria-live="polite"></p>
+</section>
+
+<section class="card" aria-labelledby="plot-h">
+<h2 id="plot-h">Skill against ensemble size</h2>
+<div class="plot-title">Median and 10th–90th percentile of r and r<sub>∞</sub> over 300 repeats</div>
+<canvas id="corr" role="img" aria-label="Correlation estimates versus ensemble size"></canvas>
+<div class="legend"><span style="--k:var(--c2)">Plain r</span><span style="--k:var(--c1)">Adjusted r<sub>∞</sub></span><span style="--k:var(--c3)">True ρ</span><span style="--k:var(--muted)">% inadmissible r<sub>∞</sub> (right axis)</span><span style="--k:var(--cx)">Selected N</span></div>
+<div class="grid2" style="margin-top:22px">
+<div>
+<div class="plot-title">Ratio of predictable components (medians)</div>
+<canvas id="rpc" role="img" aria-label="RPC estimators versus ensemble size"></canvas>
+<div class="legend"><span style="--k:var(--c4)">RPC<sub>E14</sub></span><span style="--k:var(--c2)">RPC<sub>H22</sub></span><span style="--k:var(--c1)">RPC<sub>∞</sub></span><span style="--k:var(--c3)">True RPC</span><span style="--k:var(--muted)">Eq. 20 expected (dashed)</span></div>
+</div>
+<div>
+<div class="plot-title">One draw: ensemble mean vs observation</div>
+<canvas id="scat" role="img" aria-label="Scatter of ensemble mean anomalies against observed anomalies"></canvas>
+<div class="legend"><span style="--k:var(--c1)">Each case j</span></div>
+</div>
+</div>
+</section>
+
+<section class="card" aria-labelledby="how-h">
+<h2 id="how-h">How to use it</h2>
+<ul>
+<li><strong>See the penalty:</strong> start with <em>Reliable, strong signal</em>. The orange band (plain r) rises with N, so a 3-member ensemble looks worse than a 50-member one even though the model is identical. The blue band (r<sub>∞</sub>) stays flat on the green true value.</li>
+<li><strong>Make the model too noisy:</strong> pick <em>Overdispersive, weak signal</em>, or raise α above β. Plain r sinks further, but r<sub>∞</sub> still recovers ρ. True RPC climbs above 1, the signal-to-noise paradox, and the variance-based RPCs stay stuck below it, following the dashed Eq. 20 curves.</li>
+<li><strong>Run out of data:</strong> pick <em>Reliable, small sample, weak signal</em> or slide M down. The grey line shows how often r<sub>∞</sub> becomes undefined or falls outside [−1, 1]. The paper’s point is to report that rate as a sign the signal can’t be pinned down yet, not to clip it away.</li>
+<li><strong>Check one experiment:</strong> move the N slider to see a single draw’s numbers and scatter plot. Press <em>New random draw</em> to see how much they jump around.</li>
+</ul>
+</section>
+
+<p class="note" style="margin-top:24px">Demo by Grok Bot for the Daily Research Explorer. The decomposition, Eqs. 8, 11, 12, 13, 18–21 and the idealised Gaussian model (Eqs. 22–23) come from arXiv:2611.07878. Presets, the 300-repeat Monte Carlo, the random seed and chart styling are choices made for this page; the presets are in the spirit of the paper’s examples but its exact parameter values aren’t reproduced here.</p>
+</main>
+<script>
+"use strict";
+const $=id=>document.getElementById(id);
+const css=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const NMAX=50, REPS=300;
+let seed=12345;
+function rng(s){let a=s>>>0;return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+function gauss(r){let u=0,v=0;while(u===0)u=r();v=r();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+const PRE={rel:{ss:1,al:1,be:1,M:100},over:{ss:0.4,al:1.6,be:1,M:150},small:{ss:0.4,al:1,be:1,M:20}};
+
+/* One realisation: returns per-N stats for N=2..NMAX using member prefixes. */
+function realise(r,ss,al,be,M){
+  const s=new Float64Array(M),y=new Float64Array(M),x=new Float64Array(M*NMAX);
+  for(let j=0;j<M;j++){s[j]=ss*gauss(r);y[j]=s[j]+be*gauss(r);for(let k=0;k<NMAX;k++)x[j*NMAX+k]=s[j]+al*gauss(r);}
+  // by-member climatology anomalies
+  let ym=0;for(let j=0;j<M;j++)ym+=y[j];ym/=M;
+  const zT=new Float64Array(M);let vT=0;for(let j=0;j<M;j++){zT[j]=y[j]-ym;vT+=zT[j]*zT[j];}vT/=M;
+  for(let k=0;k<NMAX;k++){let m=0;for(let j=0;j<M;j++)m+=x[j*NMAX+k];m/=M;for(let j=0;j<M;j++)x[j*NMAX+k]-=m;}
+  const out=[];const sum=new Float64Array(M);let sq=0;
+  for(let n=1;n<=NMAX;n++){
+    for(let j=0;j<M;j++){const v=x[j*NMAX+n-1];sum[j]+=v;sq+=v*v;}
+    if(n<2)continue;
+    let cov=0,vm=0;for(let j=0;j<M;j++){const em=sum[j]/n;cov+=em*zT[j];vm+=em*em;}
+    cov/=M;vm/=M;const vk=sq/(n*M);
+    const sv=(n*vm-vk)/(n-1);
+    const rr=cov/Math.sqrt(vm*vT);
+    const ri=sv>0?cov/Math.sqrt(sv*vT):NaN;
+    const bad=!(sv>0)||Math.abs(ri)>1;
+    const e14=Math.abs(rr)/Math.sqrt(vm/vk);
+    const h22=sv>0?Math.abs(rr)/Math.sqrt(sv/vk):NaN;
+    const rinf=sv>0?Math.abs(ri)/Math.sqrt(sv/vk):NaN;
+    out[n]={r:rr,ri,sv,bad,e14,h22,rinf};
+  }
+  return {out,ens:x,zT,M};
+}
+function q(a,p){if(!a.length)return NaN;const b=a.slice().sort((u,v)=>u-v);const i=(b.length-1)*p,lo=Math.floor(i),hi=Math.ceil(i);return b[lo]+(b[hi]-b[lo])*(i-lo);}
+
+let MC=null,single=null;
+function params(){return{ss:+$('ss').value,al:+$('al').value,be:+$('be').value,M:+$('M').value,N:+$('N').value};}
+function runMC(){
+  const p=params();const r=rng(seed);
+  const acc=[];for(let n=2;n<=NMAX;n++)acc[n]={r:[],ri:[],bad:0,e14:[],h22:[],rinf:[]};
+  for(let t=0;t<REPS;t++){const o=realise(r,p.ss,p.al,p.be,p.M).out;
+    for(let n=2;n<=NMAX;n++){const z=o[n],a=acc[n];a.r.push(z.r);a.e14.push(z.e14);if(z.bad)a.bad++;if(!isNaN(z.ri))a.ri.push(z.ri);if(z.sv>0){a.h22.push(z.h22);a.rinf.push(z.rinf);}}}
+  MC=acc;
+  single=realise(rng(seed^0x9e3779b9),p.ss,p.al,p.be,p.M);
+}
+function setup(cv){const rc=cv.getBoundingClientRect(),d=devicePixelRatio||1;cv.width=Math.round(rc.width*d);cv.height=Math.round(rc.height*d);const x=cv.getContext('2d');x.setTransform(d,0,0,d,0,0);x.font='12px '+css('--font');return[x,rc.width,rc.height];}
+function axes(x,W,H,pad,y0,y1,yt,xt,rightAxis){
+  x.strokeStyle=css('--grid');x.fillStyle=css('--muted');x.lineWidth=1;x.textAlign='right';x.textBaseline='middle';
+  const Y=v=>pad.t+(H-pad.t-pad.b)*(1-(v-y0)/(y1-y0));
+  yt.forEach(v=>{x.beginPath();x.moveTo(pad.l,Y(v));x.lineTo(W-pad.r,Y(v));x.stroke();x.fillText(v.toFixed(v%1?1:0),pad.l-6,Y(v));});
+  x.textAlign='center';x.textBaseline='top';
+  const X=n=>pad.l+(W-pad.l-pad.r)*(n-2)/(NMAX-2);
+  xt.forEach(n=>x.fillText(n,X(n),H-pad.b+6));
+  x.fillText('Ensemble size N',(pad.l+W-pad.r)/2,H-16);
+  return[X,Y];
+}
+function line(x,X,Y,arr,col,w,dash){x.strokeStyle=col;x.lineWidth=w||2;x.setLineDash(dash||[]);x.beginPath();let st=false;for(let n=2;n<=NMAX;n++){const v=arr[n];if(!isFinite(v)){st=false;continue;}const px=X(n),py=Y(v);st?x.lineTo(px,py):x.moveTo(px,py);st=true;}x.stroke();x.setLineDash([]);}
+function band(x,X,Y,lo,hi,col){x.fillStyle=col;x.globalAlpha=.18;x.beginPath();let pts=[];for(let n=2;n<=NMAX;n++)if(isFinite(lo[n])&&isFinite(hi[n]))pts.push(n);if(!pts.length)return;pts.forEach((n,i)=>{const px=X(n),py=Y(hi[n]);i?x.lineTo(px,py):x.moveTo(px,py);});pts.slice().reverse().forEach(n=>x.lineTo(X(n),Y(lo[n])));x.closePath();x.fill();x.globalAlpha=1;}
+const clampv=(v,a,b)=>Math.max(a,Math.min(b,v));
+
+function draw(){
+  const p=params();
+  const rho=p.ss/Math.sqrt(p.ss**2+p.be**2), rpcPop=Math.sqrt(p.ss**2+p.al**2)/Math.sqrt(p.ss**2+p.be**2);
+  const rmm2=p.ss**2/(p.ss**2+p.al**2);
+  const gam=n=>n*rmm2/(1+(n-1)*rmm2);
+  ['ss','al','be'].forEach(k=>$(k+'O').textContent=(+$(k).value).toFixed(2));$('MO').textContent=p.M;$('NO').textContent=p.N;
+  // correlation chart
+  {const[x,W,H]=setup($('corr'));const pad={l:42,r:46,t:10,b:44};
+   const med={r:[],ri:[]},lo={r:[],ri:[]},hi={r:[],ri:[]},bad=[];
+   for(let n=2;n<=NMAX;n++){['r','ri'].forEach(k=>{med[k][n]=q(MC[n][k],.5);lo[k][n]=q(MC[n][k],.1);hi[k][n]=q(MC[n][k],.9);});bad[n]=100*MC[n].bad/REPS;}
+   let y0=-0.2,y1=1.2;
+   for(let n=2;n<=NMAX;n++){[lo.r[n],lo.ri[n]].forEach(v=>{if(isFinite(v))y0=Math.min(y0,Math.floor(v*5)/5);});[hi.r[n],hi.ri[n]].forEach(v=>{if(isFinite(v))y1=Math.max(y1,Math.ceil(v*5)/5);});}
+   y0=Math.max(y0,-1.6);y1=Math.min(y1,2);
+   const yt=[];for(let v=Math.ceil(y0*5)/5;v<=y1+1e-9;v+=y1-y0>2?0.4:0.2)yt.push(+v.toFixed(1));
+   const[X,Y]=axes(x,W,H,pad,y0,y1,yt,[2,10,20,30,40,50]);
+   const clip=a=>a.map(v=>v===undefined?v:clampv(v,y0,y1));
+   x.save();x.beginPath();x.rect(pad.l,pad.t,W-pad.l-pad.r,H-pad.t-pad.b);x.clip();
+   x.strokeStyle=css('--grid');x.setLineDash([3,3]);[-1,1].forEach(v=>{if(v>=y0&&v<=y1){x.beginPath();x.moveTo(pad.l,Y(v));x.lineTo(W-pad.r,Y(v));x.stroke();}});x.setLineDash([]);
+   band(x,X,Y,clip(lo.r),clip(hi.r),css('--c2'));band(x,X,Y,clip(lo.ri),clip(hi.ri),css('--c1'));
+   const rhoA=[];for(let n=2;n<=NMAX;n++)rhoA[n]=rho;line(x,X,Y,rhoA,css('--c3'),2,[6,4]);
+   line(x,X,Y,clip(med.r),css('--c2'),2.5);line(x,X,Y,clip(med.ri),css('--c1'),2.5);
+   const Yb=v=>pad.t+(H-pad.t-pad.b)*(1-v/100);
+   x.strokeStyle=css('--muted');x.lineWidth=1.5;x.beginPath();for(let n=2;n<=NMAX;n++){const px=X(n),py=Yb(bad[n]);n===2?x.moveTo(px,py):x.lineTo(px,py);}x.stroke();
+   x.strokeStyle=css('--cx');x.globalAlpha=.5;x.beginPath();x.moveTo(X(p.N),pad.t);x.lineTo(X(p.N),H-pad.b);x.stroke();x.globalAlpha=1;
+   x.restore();
+   x.fillStyle=css('--muted');x.textAlign='left';x.textBaseline='middle';[0,50,100].forEach(v=>x.fillText(v+'%',W-pad.r+6,Yb(v)));
+   $('badV').textContent=bad[p.N].toFixed(0)+'%';
+  }
+  // RPC chart
+  {const[x,W,H]=setup($('rpc'));const pad={l:42,r:14,t:10,b:44};
+   const m={e14:[],h22:[],rinf:[]},pop=[],ee=[],eh=[];
+   for(let n=2;n<=NMAX;n++){['e14','h22','rinf'].forEach(k=>m[k][n]=q(MC[n][k],.5));pop[n]=rpcPop;ee[n]=gam(n)*rpcPop;eh[n]=Math.sqrt(gam(n))*rpcPop;}
+   let y1=0.5;for(let n=2;n<=NMAX;n++)[m.e14[n],m.h22[n],m.rinf[n],pop[n]].forEach(v=>{if(isFinite(v))y1=Math.max(y1,v);});y1=Math.min(4,Math.ceil(y1*1.15*2)/2);
+   const yt=[];const st=y1>2?1:0.5;for(let v=0;v<=y1+1e-9;v+=st)yt.push(v);
+   const[X,Y]=axes(x,W,H,pad,0,y1,yt,[2,10,20,30,40,50]);
+   x.save();x.beginPath();x.rect(pad.l,pad.t,W-pad.l-pad.r,H-pad.t-pad.b);x.clip();
+   line(x,X,Y,pop,css('--c3'),2,[6,4]);line(x,X,Y,ee,css('--muted'),1.2,[3,3]);line(x,X,Y,eh,css('--muted'),1.2,[3,3]);
+   line(x,X,Y,m.e14,css('--c4'),2.2);line(x,X,Y,m.h22,css('--c2'),2.2);line(x,X,Y,m.rinf,css('--c1'),2.5);
+   x.restore();
+  }
+  // single draw stats + scatter
+  const o=single.out[p.N];
+  const f=v=>isFinite(v)?v.toFixed(2):'undefined';
+  $('rhoV').textContent=rho.toFixed(2);$('rV').textContent=f(o.r);$('riV').textContent=f(o.ri);
+  $('svV').textContent=o.sv.toFixed(3);$('rpcPopV').textContent=rpcPop.toFixed(2);$('rpcV').textContent=f(o.rinf);$('gV').textContent=gam(p.N).toFixed(2);
+  let note='';
+  if(!(o.sv>0))note='In this draw the estimated signal variance is not positive, so r∞ is undefined: the predictable signal can’t be told apart from zero with these N and M.';
+  else if(Math.abs(o.ri)>1)note='In this draw r∞ falls outside [−1, 1]. The paper reads this as evidence that the signal can’t be resolved with this ensemble size and number of cases, not as a value to clip.';
+  else note=`Plain r understates the true skill by ${(rho-o.r).toFixed(2)} in this draw; r∞ is off by ${(o.ri-rho).toFixed(2)}.`;
+  $('demonote').textContent=note;
+  {const[x,W,H]=setup($('scat'));const pad={l:42,r:14,t:10,b:44};
+   const M=single.M,em=[],zT=single.zT;for(let j=0;j<M;j++){let s=0;for(let k=0;k<p.N;k++)s+=single.ens[j*NMAX+k];em.push(s/p.N);}
+   let L=0;for(let j=0;j<M;j++)L=Math.max(L,Math.abs(em[j]),Math.abs(zT[j]));L=Math.ceil(L);
+   const X=v=>pad.l+(W-pad.l-pad.r)*(v+L)/(2*L),Y=v=>pad.t+(H-pad.t-pad.b)*(1-(v+L)/(2*L));
+   x.strokeStyle=css('--grid');x.fillStyle=css('--muted');x.textAlign='right';x.textBaseline='middle';
+   const tk=[-L,-L/2,0,L/2,L];tk.forEach(v=>{x.beginPath();x.moveTo(pad.l,Y(v));x.lineTo(W-pad.r,Y(v));x.stroke();x.fillText(+v.toFixed(1),pad.l-6,Y(v));});
+   x.textAlign='center';x.textBaseline='top';tk.forEach(v=>x.fillText(+v.toFixed(1),X(v),H-pad.b+6));
+   x.fillText('Ensemble-mean anomaly',(pad.l+W-pad.r)/2,H-16);
+   x.save();x.translate(12,(pad.t+H-pad.b)/2);x.rotate(-Math.PI/2);x.fillText('Observed anomaly',0,-6);x.restore();
+   x.fillStyle=css('--c1');x.globalAlpha=.7;for(let j=0;j<M;j++){x.beginPath();x.arc(X(em[j]),Y(zT[j]),3,0,7);x.fill();}x.globalAlpha=1;
+  }
+}
+function update(){runMC();draw();}
+let tmr=null;function deb(){clearTimeout(tmr);tmr=setTimeout(update,60);}
+['ss','al','be','M'].forEach(k=>$(k).addEventListener('input',()=>{['ss','al','be'].forEach(k=>$(k+'O').textContent=(+$(k).value).toFixed(2));$('MO').textContent=$('M').value;deb();}));
+$('N').addEventListener('input',draw);
+document.querySelectorAll('[data-p]').forEach(b=>b.addEventListener('click',()=>{const P=PRE[b.dataset.p];Object.keys(P).forEach(k=>$(k).value=P[k]);update();}));
+$('reroll').addEventListener('click',()=>{seed=(seed*1103515245+12345)>>>0;update();});
+addEventListener('resize',()=>{clearTimeout(tmr);tmr=setTimeout(draw,100);});
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',draw);
+{const qp=new URLSearchParams(location.search).get('p');if(PRE[qp])Object.keys(PRE[qp]).forEach(k=>$(k).value=PRE[qp][k]);}
+update();
+</script>
+</body></html>
