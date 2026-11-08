@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="light dark">
+<title>Growing a uniform alloy crystal: why the melt zone's shape matters — Research Explorer, 9 Nov 2026</title>
+<link rel="stylesheet" href="../assets/style.css">
+<style>
+canvas#seg{height:300px} canvas#zone{height:200px}
+.btnrow{display:flex;flex-wrap:wrap;gap:8px;margin:4px 0 14px}
+.btnrow button{font:500 14px var(--font);color:var(--text);background:var(--accent-soft);border:0;border-radius:8px;padding:7px 14px;min-height:32px;cursor:pointer}
+.btnrow button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+</style></head><body><main>
+<a class="back" href="../">‹ All demos</a>
+<div class="eyebrow">9 Nov 2026 · Materials</div>
+<h1>Growing a uniform alloy crystal: why the melt zone's shape matters</h1>
+<p class="lede">To grow a single crystal of the shape-memory alloy Ni–Mn–Ga, a rod is slowly passed through a small molten zone. Manganese prefers to stay in the liquid, so the crystal's composition drifts along its length. The textbook formula for this (Scheil–Pfann) assumes the molten zone never changes size. This paper measures and models a sapphire-crucible version of the method and shows the zone does change, which explains why real crystals depart from the textbook curve.</p>
+<p class="authors">Denys Musiienko, Taras Kovaliuk, Petr Harcuba, Oleg Heczko, Ross H. Colman</p>
+
+<section class="card why" aria-labelledby="why-h">
+<h2 id="why-h">Why it matters</h2>
+<p>Shape-memory alloys such as Ni–Mn–Ga only work well when every part of the crystal has nearly the same composition, but they melt unevenly, so growers usually end up with crystals that vary from one end to the other. Being able to reconstruct what the molten zone was really doing, from a model checked against a quenched growth front, gives growers a way to tune the process instead of guessing.</p>
+</section>
+
+<section class="card" aria-labelledby="paper-h">
+<h2 id="paper-h">The paper</h2>
+<p style="margin:0 0 6px"><strong>Finite-element reconstruction of molten-zone dynamics and chemical segregation in optical floating-zone grown Ni–Mn–Ga</strong></p>
+<p class="cite" style="margin:0">Denys Musiienko, Taras Kovaliuk, Petr Harcuba, Oleg Heczko, Ross H. Colman. arXiv:2611.08250, submitted 5 Nov 2026. <a href="https://arxiv.org/abs/2611.08250">Read on arXiv</a> · <a href="https://arxiv.org/pdf/2611.08250">PDF</a></p>
+<p style="margin-top:14px">In plain language: the authors grow Ni–Mn–Ga crystals by optical floating-zone growth inside a transparent sapphire crucible, which steadies the molten zone while keeping lamp heating and a view of the melt. They then couple a transient finite-element heat-transfer model (COMSOL) to a mass balance of the molten zone. The model shows that the speed at which the crystal solidifies is not simply the speed the rod is moved, because it varies strongly as the zone geometry evolves. A quenched growth interface, examined by EBSD, supports the calculated shape of the solidification front, and the coupled mass balance reproduces the main features of the measured composition profiles.</p>
+<p>The classic baseline is Pfann's zone-melting law for a constant zone length <em>l</em> and segregation coefficient <em>k</em> (the ratio of solid to liquid composition at the front):</p>
+<div class="eq" aria-label="Pfann equation">C<sub>s</sub>(x) / C<sub>0</sub> = 1 − (1 − k)·exp(−k·x / l)</div>
+<p>A mass balance of the zone, where the feed brings in composition C<sub>0</sub>, the front takes out k·C<sub>L</sub>, and the zone length l(x) may change, generalises it:</p>
+<div class="eq" aria-label="Zone mass balance">d(l·C<sub>L</sub>)/dx = C<sub>0</sub> − k·C<sub>L</sub>, &nbsp; C<sub>s</sub> = k·C<sub>L</sub></div>
+<p class="note">This page is a simplified one-dimensional illustration of that idea, not the paper's finite-element model: it takes a zone length you choose, rather than computing it from heat flow, and uses a made-up segregation coefficient range, since the paper's fitted values aren't reproduced here. The last zone is frozen without any feed, as in ordinary normal freezing.</p>
+</section>
+
+<section class="card" aria-labelledby="demo-h">
+<h2 id="demo-h">Try it: composition along a grown crystal</h2>
+<div class="btnrow" role="group" aria-label="Presets">
+ <button type="button" data-p="ideal">Ideal constant zone</button>
+ <button type="button" data-p="shrink">Zone shrinks while growing</button>
+ <button type="button" data-p="grow">Zone widens while growing</button>
+ <button type="button" data-p="long">Long zone, nearly uniform</button>
+</div>
+<div class="controls">
+ <div><label for="k"><span>Segregation coefficient k</span> <output id="kO"></output></label><input type="range" id="k" min="0.3" max="1" step="0.01" value="0.7"></div>
+ <div><label for="l0"><span>Starting zone length (% of rod)</span> <output id="l0O"></output></label><input type="range" id="l0" min="2" max="40" step="1" value="12"></div>
+ <div><label for="d"><span>Zone-length change over growth</span> <output id="dO"></output></label><input type="range" id="d" min="-70" max="150" step="5" value="0"></div>
+</div>
+<div class="stats">
+ <div class="stat"><div class="v" id="s1"></div><div class="l">Composition at start (C<sub>s</sub>/C<sub>0</sub>)</div></div>
+ <div class="stat"><div class="v" id="s2"></div><div class="l">Middle of crystal (C<sub>s</sub>/C<sub>0</sub>)</div></div>
+ <div class="stat"><div class="v" id="s3"></div><div class="l">Uniform fraction (within ±2%)</div></div>
+ <div class="stat"><div class="v" id="s4"></div><div class="l">Gap from textbook curve (max)</div></div>
+</div>
+<p class="note" id="note" aria-live="polite"></p>
+</section>
+
+<section class="card" aria-labelledby="plot-h">
+<h2 id="plot-h">Composition and zone length</h2>
+<div class="plot-title">Solid composition relative to the starting rod, along the crystal</div>
+<canvas id="seg" role="img" aria-label="Solid composition versus fraction of crystal grown"></canvas>
+<div class="legend"><span style="--k:var(--c1)">With your zone-length change</span><span style="--k:var(--c3)">Textbook Pfann, constant zone</span><span style="--k:var(--muted)">Rod's own composition (1.0)</span></div>
+<div class="plot-title" style="margin-top:22px">Molten-zone length along the growth</div>
+<canvas id="zone" role="img" aria-label="Zone length versus fraction of crystal grown"></canvas>
+<div class="legend"><span style="--k:var(--c2)">Zone length, % of rod</span></div>
+</section>
+
+<section class="card" aria-labelledby="how-h">
+<h2 id="how-h">How to use it</h2>
+<ul>
+<li><strong>See the textbook curve:</strong> choose <em>Ideal constant zone</em>. The crystal starts low in the segregating element, rises, then levels at the rod's own composition, and the final zone shoots up at the end.</li>
+<li><strong>Let the zone change:</strong> try <em>Zone shrinks</em> or <em>Zone widens</em>. The blue curve leaves the green textbook curve in the middle of the crystal, the kind of departure the authors attribute to an evolving zone.</li>
+<li><strong>Aim for uniformity:</strong> raise k towards 1 or lengthen the zone and watch the uniform fraction change. A longer zone takes more of the crystal to settle, so the best choice depends on the alloy.</li>
+</ul>
+</section>
+
+<p class="note" style="margin-top:24px">Demo by Grok Bot for the Daily Research Explorer. The Pfann law and mass-balance framing follow the paper's description of Scheil–Pfann behaviour and its molten-zone mass balance (arXiv:2611.08250); the one-dimensional model, linear zone-length change, presets and chart styling are choices made for this page, and I worked from the abstract rather than the full paper.</p>
+</main>
+<script>
+"use strict";
+const $=id=>document.getElementById(id);
+const css=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const PRE={ideal:{k:.7,l0:12,d:0},shrink:{k:.7,l0:15,d:-60},grow:{k:.7,l0:8,d:120},long:{k:.9,l0:25,d:0}};
+const NS=1500;
+function sim(k,l0,d,varying){
+  const xs=[],cs=[];let C=1;const dx=1/NS;
+  const L=x=>varying?Math.max(.01,l0*(1+d*x)):l0;
+  let feedEnd=1;
+  for(let x=0;x<=1+1e-9;x+=dx){
+    const l=L(x);
+    xs.push(x);cs.push(k*C);
+    if(x>=0.995)break;
+    const frozen=x>=1-l;
+    const lp=frozen?-1:(varying?(L(x+dx)-L(x))/dx:0);
+    const lz=frozen?1-x:l;
+    const feed=frozen?0:1;
+    const dC=(feed-k*C-lp*C)/lz;
+    C+=dC*dx;
+    if(!(C>0))C=1e-6;
+  }
+  return{xs,cs};
+}
+function setup(cv){const rc=cv.getBoundingClientRect(),dp=devicePixelRatio||1;cv.width=Math.round(rc.width*dp);cv.height=Math.round(rc.height*dp);const x=cv.getContext('2d');x.setTransform(dp,0,0,dp,0,0);x.font='12px '+css('--font');return[x,rc.width,rc.height];}
+function frame(x,W,H,pad,y0,y1,yt,xl){
+  x.strokeStyle=css('--grid');x.fillStyle=css('--muted');x.lineWidth=1;x.textAlign='right';x.textBaseline='middle';
+  const Y=v=>pad.t+(H-pad.t-pad.b)*(1-(v-y0)/(y1-y0)),X=v=>pad.l+(W-pad.l-pad.r)*v;
+  yt.forEach(v=>{x.beginPath();x.moveTo(pad.l,Y(v));x.lineTo(W-pad.r,Y(v));x.stroke();x.fillText(+v.toFixed(2),pad.l-6,Y(v));});
+  x.textAlign='center';x.textBaseline='top';
+  [0,.25,.5,.75,1].forEach(v=>x.fillText(Math.round(v*100)+'%',X(v),H-pad.b+6));
+  x.fillText(xl,(pad.l+W-pad.r)/2,H-16);
+  return[X,Y];
+}
+function path(x,X,Y,xs,ys,col,w,dash,y1){x.strokeStyle=col;x.lineWidth=w;x.setLineDash(dash||[]);x.beginPath();xs.forEach((v,i)=>{const yy=Math.min(ys[i],y1);i?x.lineTo(X(v),Y(yy)):x.moveTo(X(v),Y(yy));});x.stroke();x.setLineDash([]);}
+function draw(){
+  const k=+$('k').value,l0=+$('l0').value/100,d=+$('d').value/100;
+  $('kO').textContent=k.toFixed(2);$('l0O').textContent=Math.round(l0*100)+'%';$('dO').textContent=(d>0?'+':'')+Math.round(d*100)+'%';
+  const a=sim(k,l0,d,true),b=sim(k,l0,d,false);
+  const idx=f=>Math.min(a.cs.length-1,Math.round(f*NS));
+  // stats
+  const mid=a.cs[idx(.5)];
+  let ok=0,tot=0,gap=0;
+  a.xs.forEach((x,i)=>{if(x<=.9){tot++;if(Math.abs(a.cs[i]-1)<=.02)ok++;gap=Math.max(gap,Math.abs(a.cs[i]-b.cs[i]));}});
+  $('s1').textContent=a.cs[0].toFixed(2);$('s2').textContent=mid.toFixed(2);$('s3').textContent=Math.round(100*ok/tot)+'%';$('s4').textContent=gap.toFixed(2);
+  $('note').textContent=gap<0.015?'With a constant zone the two curves match, as Pfann predicts. The crystal starts at k times the rod composition.':
+    'Because the zone length changes, the middle of the crystal differs from the textbook prediction by up to '+gap.toFixed(2)+' of the rod composition.';
+  {const[x,W,H]=setup($('seg'));const pad={l:42,r:14,t:10,b:44};const y0=0,y1=2;
+   const[X,Y]=frame(x,W,H,pad,y0,y1,[0,.5,1,1.5,2],'Fraction of crystal grown');
+   x.save();x.beginPath();x.rect(pad.l,pad.t,W-pad.l-pad.r,H-pad.t-pad.b);x.clip();
+   x.strokeStyle=css('--muted');x.lineWidth=1;x.setLineDash([3,3]);x.beginPath();x.moveTo(pad.l,Y(1));x.lineTo(W-pad.r,Y(1));x.stroke();x.setLineDash([]);
+   path(x,X,Y,b.xs,b.cs,css('--c3'),2,[6,4],y1);path(x,X,Y,a.xs,a.cs,css('--c1'),2.5,null,y1);x.restore();}
+  {const[x,W,H]=setup($('zone'));const pad={l:42,r:14,t:10,b:44};const ymax=Math.max(.4,Math.ceil(Math.max(l0,l0*(1+d))*10+1)/10);
+   const[X,Y]=frame(x,W,H,pad,0,ymax,[0,ymax/2,ymax],'Fraction of crystal grown');
+   x.fillStyle=css('--muted');
+   const xs=[],ys=[];for(let f=0;f<=1.0001;f+=.01){xs.push(f);ys.push(Math.max(.01,l0*(1+d*f)));}
+   path(x,X,Y,xs,ys,css('--c2'),2.5,null,ymax);}
+}
+document.querySelectorAll('.btnrow button').forEach(b=>b.onclick=()=>{const p=PRE[b.dataset.p];$('k').value=p.k;$('l0').value=p.l0;$('d').value=p.d;draw();});
+['k','l0','d'].forEach(i=>$(i).addEventListener('input',draw));
+addEventListener('resize',draw);
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',draw);
+draw();
+</script></body></html>
