@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="light dark">
+<title>Seeing heart arteries clearly through a beating chest — Research Explorer, 10 Nov 2026</title>
+<link rel="stylesheet" href="../assets/style.css">
+<style>
+.imgs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.imgs canvas{height:auto;aspect-ratio:1/1;background:#000}
+.imgs figure{margin:0}
+.imgs figcaption{font-size:13px;color:var(--muted);margin-top:6px;line-height:1.35}
+canvas#prof{height:260px}
+.btnrow{display:flex;flex-wrap:wrap;gap:8px;margin:4px 0 14px}
+.btnrow button{font:500 14px var(--font);color:var(--text);background:var(--accent-soft);border:0;border-radius:8px;padding:7px 14px;min-height:32px;cursor:pointer}
+.btnrow button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+</style></head><body><main>
+<a class="back" href="../">‹ All demos</a>
+<div class="eyebrow">10 Nov 2026 · Medicine</div>
+<h1>Seeing heart arteries clearly through a beating chest</h1>
+<p class="lede">Digital subtraction angiography takes an X-ray before and after dye is injected and subtracts the two, so only the dye-filled vessels remain. That works for the still brain, but the heart beats and the chest breathes between frames, so the subtraction leaves ghosts of the heart's edges. This paper takes both frames with a two-layer detector that records a low-energy and a high-energy image at the same instant, then uses the difference in how iodine and soft tissue absorb the two energies to pull the iodine out on its own.</p>
+<p class="authors">Yuhang Tan, Jiongtao Zhu, Xin Zhang, Haodi Wu, Xiao Xuan, Mang Feng, Mingzhi Cui, Hairong Zheng, Dong Liang, Yongshuai Ge</p>
+
+<section class="card why" aria-labelledby="why-h">
+<h2 id="why-h">Why it matters</h2>
+<p>Because the heart never sits still, cardiologists can't use ordinary subtraction on coronary arteries, so they inject more dye and tilt the view to dodge the spine and ribs, and small blockages can still hide behind bone. Splitting each frame by X-ray energy removes the moving background without asking the heart to hold still, and in a live pig it brought out small vessels and the faint dye haze in heart muscle (the "myocardial blush") that shows whether blood is actually reaching the tissue.</p>
+</section>
+
+<section class="card" aria-labelledby="paper-h">
+<h2 id="paper-h">The paper</h2>
+<p style="margin:0 0 6px"><strong>Dual-energy cardiac DSA imaging using a dual-layer flat-panel detector: in vivo validation study</strong></p>
+<p class="cite" style="margin:0">Yuhang Tan, Jiongtao Zhu, Xin Zhang, Haodi Wu, Xiao Xuan, Mang Feng, Mingzhi Cui, Hairong Zheng, Dong Liang, Yongshuai Ge (Shenzhen Institutes of Advanced Technology and Wandong Medical). arXiv:2611.08820, November 2026. <a href="https://arxiv.org/abs/2611.08820">Read on arXiv</a> · <a href="https://arxiv.org/pdf/2611.08820">PDF</a></p>
+<p style="margin-top:14px">In plain language: the team subtracts the pre-dye frames from the post-dye frames separately in each energy channel. Bone is lined up by image registration, so what's left in each channel is a little soft tissue that moved, plus the iodine. Because soft tissue and iodine absorb low- and high-energy X-rays in different proportions, two measurements are enough to solve for both at every pixel:</p>
+<div class="eq" aria-label="Dual-energy residual model">ΔP<sub>LE</sub> = μ<sub>T,LE</sub>·ΔL<sub>T</sub> + μ<sub>I,LE</sub>·L<sub>I</sub> + n<sub>LE</sub> &nbsp;&nbsp; ΔP<sub>HE</sub> = μ<sub>T,HE</sub>·ΔL<sub>T</sub> + μ<sub>I,HE</sub>·L<sub>I</sub> + n<sub>HE</sub></div>
+<p>Solving that 2×2 system directly blows up the noise, because the two energies see the materials only slightly differently. So they minimise a penalised least-squares cost with a total-variation term that favours piecewise-smooth maps, using the ADMM algorithm:</p>
+<div class="eq" aria-label="Penalised objective">L̂ = argmin ½‖U·L − ΔP‖² + β<sub>T</sub>·TV(ΔL<sub>T</sub>) + β<sub>I</sub>·TV(L<sub>I</sub>)</div>
+<p>Subtracting also cancels most of the scattered X-rays, since scatter is nearly the same before and after the dye: in their Monte Carlo simulations the scatter error dropped by more than 80%. In a phantom, the measured iodine signal was linear in iodine amount (R² = 0.96), and on a clinical DSA system with a live pig the penalised method showed small vessel branches that the direct solution and simple weighted subtraction lost in noise.</p>
+<p class="note">This demo runs the paper's residual model and an ADMM solver of the same objective live in your browser, on a made-up 128 × 128 chest. The attenuation values, noise levels, anatomy and motion are illustrative choices for this page, not the paper's calibrated numbers, and the TV step uses Chambolle's exact-TV projection instead of the paper's smoothed TV.</p>
+</section>
+
+<section class="card" aria-labelledby="demo-h">
+<h2 id="demo-h">Try it: pull the dye out of a moving chest</h2>
+<div class="btnrow" role="group" aria-label="Presets">
+ <button type="button" data-p="still">Still heart</button>
+ <button type="button" data-p="beat">Beating heart</button>
+ <button type="button" data-p="low">Low dose</button>
+ <button type="button" data-p="blush">Faint blush only</button>
+</div>
+<div class="controls">
+ <div><label for="mot"><span>Heart and breathing motion between frames (mm)</span> <output id="motO"></output></label><input type="range" id="mot" min="0" max="8" step="0.5" value="4"></div>
+ <div><label for="conc"><span>Dye in the arteries (mg iodine/ml)</span> <output id="concO"></output></label><input type="range" id="conc" min="10" max="100" step="5" value="50"></div>
+ <div><label for="blush"><span>Dye soaked into heart muscle (mg/cm²)</span> <output id="blushO"></output></label><input type="range" id="blush" min="0" max="4" step="0.1" value="2"></div>
+ <div><label for="dose"><span>X-ray dose per frame (relative)</span> <output id="doseO"></output></label><input type="range" id="dose" min="0.25" max="4" step="0.25" value="1"></div>
+ <div><label for="npre"><span>Pre-dye frames averaged</span> <output id="npreO"></output></label><input type="range" id="npre" min="1" max="50" step="1" value="10"></div>
+ <div><label for="beta"><span>Smoothing strength (TV weight)</span> <output id="betaO"></output></label><input type="range" id="beta" min="0" max="3" step="0.1" value="1.2"></div>
+</div>
+<div class="stats">
+ <div class="stat"><div class="v" id="s1"></div><div class="l">Heart-edge clutter in plain DSA, as % of artery signal</div></div>
+ <div class="stat"><div class="v" id="s2"></div><div class="l">Blush contrast-to-noise, direct 2×2 solve</div></div>
+ <div class="stat"><div class="v" id="s3"></div><div class="l">Blush contrast-to-noise, penalised (ADMM)</div></div>
+ <div class="stat"><div class="v" id="s4"></div><div class="l">Iodine error, penalised (RMS, mg/cm²)</div></div>
+</div>
+<p class="note" id="note" aria-live="polite"></p>
+</section>
+
+<section class="card" aria-labelledby="img-h">
+<h2 id="img-h">Four ways to look at the same frame</h2>
+<div class="imgs">
+ <figure><canvas id="c0" width="256" height="256" role="img" aria-label="Post-dye low-energy X-ray"></canvas><figcaption>1. Raw post-dye X-ray (what a cine run shows): ribs, spine and heart all overlap the arteries.</figcaption></figure>
+ <figure><canvas id="c1" width="256" height="256" role="img" aria-label="Plain single-energy subtraction"></canvas><figcaption>2. Plain subtraction (low energy, post minus pre): bone is gone, but the moved heart and lung edges remain.</figcaption></figure>
+ <figure><canvas id="c2" width="256" height="256" role="img" aria-label="Iodine map from direct dual-energy solve"></canvas><figcaption>3. Iodine from the direct 2×2 solve: no heart ghost, but very noisy.</figcaption></figure>
+ <figure><canvas id="c3" width="256" height="256" role="img" aria-label="Iodine map from penalised ADMM decomposition"></canvas><figcaption>4. Iodine from the penalised (ADMM) solve: arteries and the blush stand out.</figcaption></figure>
+</div>
+<p class="note">Dye shows dark, as on an angiogram. The dashed line marks the row plotted below.</p>
+<div class="plot-title" style="margin-top:18px">Iodine along the dashed row (mg/cm²)</div>
+<canvas id="prof" role="img" aria-label="Iodine profile along one row: truth, direct solve and penalised solve"></canvas>
+<div class="legend"><span style="--k:var(--muted)">True iodine</span><span style="--k:var(--c2)">Direct 2×2 solve</span><span style="--k:var(--c1)">Penalised (ADMM)</span></div>
+</section>
+
+<section class="card" aria-labelledby="how-h">
+<h2 id="how-h">How to use it</h2>
+<ul>
+<li><strong>See why plain DSA fails on the heart:</strong> press <em>Still heart</em>, and panel 2 is clean. Then press <em>Beating heart</em> and bright and dark crescents appear at the heart and lung edges, often stronger than the arteries themselves.</li>
+<li><strong>See what two energies buy you:</strong> in panels 3 and 4 the crescents vanish at any motion, because the solve assigns the moved tissue to its own map and keeps only iodine.</li>
+<li><strong>See why the penalty matters:</strong> set smoothing to 0, and panel 4 becomes as noisy as panel 3. Raise it, and the faint blush in the left heart wall appears. Too much smoothing starts to flatten the thinnest artery.</li>
+<li><strong>Trade dose for frames:</strong> lower the dose, then average more pre-dye frames. Averaging only cleans the "before" half of the subtraction, so it helps, but less than more dose would.</li>
+</ul>
+</section>
+
+<p class="note" style="margin-top:24px">Demo by Grok Bot for the Daily Research Explorer. The residual model, the 2×2 solve and the penalised objective follow the paper (arXiv:2611.08820, Eqs. 19–25); the phantom, attenuation values, noise model and display windows are choices made for this page.</p>
+</main>
+<script>
+"use strict";
+const $=id=>document.getElementById(id);
+const css=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const N=128, NN=N*N, PROW=74;
+// Illustrative effective attenuation: soft tissue (/cm), bone (/cm), iodine (per mg/cm²)
+const muT=[0.25,0.227], muB=[0.60,0.42], muI=[0.020,0.011];
+const U=[[muT[0],muI[0]],[muT[1],muI[1]]];
+const det=U[0][0]*U[1][1]-U[0][1]*U[1][0];
+const Ui=[[U[1][1]/det,-U[0][1]/det],[-U[1][0]/det,U[0][0]/det]];
+// Fixed noise fields so the picture is stable while you drag
+function rng(s){return()=>{s|=0;s=s+0x6D2B79F5|0;let t=Math.imul(s^s>>>15,1|s);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+const R=rng(20261110);
+function gauss(){const a=new Float32Array(NN);for(let i=0;i<NN;i+=2){const u=Math.max(R(),1e-12),v=R(),r=Math.sqrt(-2*Math.log(u));a[i]=r*Math.cos(2*Math.PI*v);if(i+1<NN)a[i+1]=r*Math.sin(2*Math.PI*v)}return a}
+const nLpost=gauss(),nHpost=gauss(),nLpre=gauss(),nHpre=gauss();
+const sm=(e0,e1,x)=>{const t=Math.min(1,Math.max(0,(x-e0)/(e1-e0)));return t*t*(3-2*t)};
+function ell(x,y,cx,cy,rx,ry){const d=Math.hypot((x-cx)/rx,(y-cy)/ry);return 1-sm(0.9,1.1,d)}
+// Anatomy at a given motion m (pixels = mm)
+function tissue(m){const a=new Float32Array(NN);const hx=0.6*m,hy=0.8*m,by=0.7*m;
+ for(let y=0;y<N;y++)for(let x=0;x<N;x++){let t=20;
+  t-=8*ell(x,y,34,58+by,22,38);t-=8*ell(x,y,94,58+by,22,38);
+  t+=6*ell(x,y,72+hx,74+hy,30,26);t+=2*ell(x,y,64,124+by,60,14);
+  a[y*N+x]=t}return a}
+function bone(){const a=new Float32Array(NN);
+ for(let y=0;y<N;y++)for(let x=0;x<N;x++){let b=2.5*(1-sm(4,7,Math.abs(x-64)));
+  for(let k=0;k<7;k++){const yc=14+k*16+0.006*(x-64)*(x-64);b+=0.9*(1-sm(1.5,3,Math.abs(y-yc)))*(1-sm(55,62,Math.abs(x-64)))}
+  a[y*N+x]=b}return a}
+// Coronary-like vessels drawn relative to the heart centre
+const vessels=[{r:1.6,pts:[[-6,-24],[-14,-10],[-22,4],[-26,18]]},{r:1.2,pts:[[2,-24],[12,-12],[16,4],[12,20]]},{r:0.8,pts:[[-14,-10],[-4,0],[2,10],[0,22]]},{r:0.6,pts:[[12,-12],[22,-6],[28,4]]}];
+function polyline(p){const out=[];for(let i=0;i<p.length-1;i++)for(let s=0;s<20;s++){const t=s/20;out.push([p[i][0]+(p[i+1][0]-p[i][0])*t,p[i][1]+(p[i+1][1]-p[i][1])*t])}out.push(p[p.length-1]);return out}
+const vpts=vessels.map(v=>({r:v.r,pts:polyline(v.pts)}));
+function iodine(conc,blush){const a=new Float32Array(NN),vm=new Uint8Array(NN),bm=new Uint8Array(NN);const cx=72,cy=74;
+ for(let y=0;y<N;y++)for(let x=0;x<N;x++){let I=0;
+  for(const v of vpts){let d=1e9;for(const p of v.pts){const dd=Math.hypot(x-cx-p[0],y-cy-p[1]);if(dd<d)d=dd}
+   if(d<v.r){I+=conc*2*Math.sqrt(v.r*v.r-d*d)/10;vm[y*N+x]=1}else if(d<v.r+0.7){I+=conc*0.05*(v.r+0.7-d)}}
+  const dn=Math.hypot((x-cx)/30,(y-cy)/26);const wall=(1-sm(0.85,1.0,dn))*sm(0.45,0.6,dn)*(x<cx-4?1:0);
+  if(wall>0.5)bm[y*N+x]=1;I+=blush*wall;a[y*N+x]=I}
+ return{a,vm,bm}}
+const B=bone(),T0=tissue(0);
+// Chambolle TV denoising, warm-started dual field p
+function tvDenoise(v,w,p,iters,out){if(w<=0){out.set(v);return}const tau=0.2;const px=p[0],py=p[1];const div=new Float32Array(NN),g=new Float32Array(NN);
+ for(let it=0;it<iters;it++){
+  for(let y=0;y<N;y++)for(let x=0;x<N;x++){const i=y*N+x;div[i]=(x<N-1?px[i]:0)-(x>0?px[i-1]:0)+(y<N-1?py[i]:0)-(y>0?py[i-N]:0)}
+  for(let i=0;i<NN;i++)g[i]=div[i]-v[i]/w;
+  for(let y=0;y<N;y++)for(let x=0;x<N;x++){const i=y*N+x;const gx=x<N-1?g[i+1]-g[i]:0,gy=y<N-1?g[i+N]-g[i]:0;const n=1+tau*Math.hypot(gx,gy);px[i]=(px[i]+tau*gx)/n;py[i]=(py[i]+tau*gy)/n}}
+ for(let y=0;y<N;y++)for(let x=0;x<N;x++){const i=y*N+x;const d=(x<N-1?px[i]:0)-(x>0?px[i-1]:0)+(y<N-1?py[i]:0)-(y>0?py[i-N]:0);out[i]=v[i]-w*d}}
+function admm(dL,dH,s,LT0,LI0){const rho=[6e-3,3e-5];const wT=0.05*s,wI=s;
+ const A=[[U[0][0]*U[0][0]+U[1][0]*U[1][0]+rho[0],U[0][0]*U[0][1]+U[1][0]*U[1][1]],[0,U[0][1]*U[0][1]+U[1][1]*U[1][1]+rho[1]]];A[1][0]=A[0][1];
+ const ad=A[0][0]*A[1][1]-A[0][1]*A[1][0];
+ const LT=Float32Array.from(LT0),LI=Float32Array.from(LI0),zT=Float32Array.from(LT0),zI=Float32Array.from(LI0),lT=new Float32Array(NN),lI=new Float32Array(NN),vT=new Float32Array(NN),vI=new Float32Array(NN);
+ const pT=[new Float32Array(NN),new Float32Array(NN)],pI=[new Float32Array(NN),new Float32Array(NN)];
+ for(let k=0;k<30;k++){
+  for(let i=0;i<NN;i++){vT[i]=LT[i]+lT[i];vI[i]=LI[i]+lI[i]}
+  tvDenoise(vT,wT,pT,6,zT);tvDenoise(vI,wI,pI,6,zI);
+  for(let i=0;i<NN;i++){const b0=U[0][0]*dL[i]+U[1][0]*dH[i]+rho[0]*(zT[i]-lT[i]),b1=U[0][1]*dL[i]+U[1][1]*dH[i]+rho[1]*(zI[i]-lI[i]);
+   LT[i]=(A[1][1]*b0-A[0][1]*b1)/ad;LI[i]=(A[0][0]*b1-A[1][0]*b0)/ad;lT[i]+=LT[i]-zT[i];lI[i]+=LI[i]-zI[i]}}
+ return LI}
+const ctx=[0,1,2,3].map(i=>$("c"+i).getContext("2d"));const off=document.createElement("canvas");off.width=off.height=N;const octx=off.getContext("2d");
+function show(k,arr,lo,hi,invert){const im=octx.createImageData(N,N);for(let i=0;i<NN;i++){let t=(arr[i]-lo)/(hi-lo);t=Math.min(1,Math.max(0,t));if(invert)t=1-t;const g=Math.round(255*t);im.data[4*i]=im.data[4*i+1]=im.data[4*i+2]=g;im.data[4*i+3]=255}
+ octx.putImageData(im,0,0);const c=ctx[k];c.imageSmoothingEnabled=true;c.drawImage(off,0,0,256,256);c.save();c.strokeStyle="rgba(255,200,0,.85)";c.setLineDash([6,5]);c.lineWidth=1.5;c.beginPath();c.moveTo(0,PROW*2+1);c.lineTo(256,PROW*2+1);c.stroke();c.restore()}
+function stats(a,m1,m0){let s1=0,n1=0,s0=0,n0=0,q=0;for(let i=0;i<NN;i++){if(m1[i]){s1+=a[i];n1++}else if(m0[i]){s0+=a[i];n0++}}const mu0=s0/n0;for(let i=0;i<NN;i++)if(!m1[i]&&m0[i])q+=(a[i]-mu0)**2;return(s1/n1-mu0)/Math.sqrt(q/n0)}
+function plot(truth,an,pen){const c=$("prof"),d=devicePixelRatio||1,W=c.clientWidth,H=c.clientHeight;c.width=W*d;c.height=H*d;const g=c.getContext("2d");g.scale(d,d);
+ const L=44,Rm=12,Tp=12,Bt=28,lo=-6,hi=Math.max(14,Math.max(...Array.from(truth.subarray(PROW*N,PROW*N+N)))*1.1);
+ const X=i=>L+(W-L-Rm)*i/(N-1),Y=v=>Tp+(H-Tp-Bt)*(1-(Math.min(hi,Math.max(lo,v))-lo)/(hi-lo));
+ g.font="12px "+css("--font");g.fillStyle=css("--muted");g.strokeStyle=css("--grid");g.lineWidth=1;
+ const step=hi>40?10:5;for(let v=Math.ceil(lo/step)*step;v<=hi;v+=step){g.beginPath();g.moveTo(L,Y(v));g.lineTo(W-Rm,Y(v));g.stroke();g.fillText(v,8,Y(v)+4)}
+ g.fillText("position across the image (mm) →",L,H-8);
+ const line=(arr,col,w,dash)=>{g.strokeStyle=col;g.lineWidth=w;g.setLineDash(dash||[]);g.beginPath();for(let i=0;i<N;i++){const v=arr[PROW*N+i];i?g.lineTo(X(i),Y(v)):g.moveTo(X(i),Y(v))}g.stroke();g.setLineDash([])};
+ line(an,css("--c2"),1.2);line(pen,css("--c1"),2.2);line(truth,css("--muted"),1.6,[5,4])}
+let pending=false;
+function run(){pending=false;
+ const m=+$("mot").value,conc=+$("conc").value,blush=+$("blush").value,dose=+$("dose").value,npre=+$("npre").value,s=+$("beta").value;
+ $("motO").textContent=m.toFixed(1);$("concO").textContent=conc;$("blushO").textContent=blush.toFixed(1);$("doseO").textContent=dose.toFixed(2)+"×";$("npreO").textContent=npre;$("betaO").textContent=s.toFixed(1);
+ const Tpost=tissue(m),io=iodine(conc,blush);const sL=0.008/Math.sqrt(dose),sH=0.012/Math.sqrt(dose),pf=1/Math.sqrt(npre);
+ const PLpost=new Float32Array(NN),dL=new Float32Array(NN),dH=new Float32Array(NN),aT=new Float32Array(NN),aI=new Float32Array(NN),cl=new Float32Array(NN);
+ for(let i=0;i<NN;i++){const dT=Tpost[i]-T0[i];
+  const postL=muT[0]*Tpost[i]+muB[0]*B[i]+muI[0]*io.a[i]+sL*nLpost[i];
+  const postH=muT[1]*Tpost[i]+muB[1]*B[i]+muI[1]*io.a[i]+sH*nHpost[i];
+  const preL=muT[0]*T0[i]+muB[0]*B[i]+sL*pf*nLpre[i],preH=muT[1]*T0[i]+muB[1]*B[i]+sH*pf*nHpre[i];
+  PLpost[i]=postL;dL[i]=postL-preL;dH[i]=postH-preH;cl[i]=muT[0]*dT;
+  aT[i]=Ui[0][0]*dL[i]+Ui[0][1]*dH[i];aI[i]=Ui[1][0]*dL[i]+Ui[1][1]*dH[i]}
+ const pen=admm(dL,dH,s,aT,aI);
+ show(0,PLpost,3.0,7.2,false);show(1,dL,-0.35,0.35,true);show(2,aI,-4,12,true);show(3,pen,-4,12,true);
+ // clutter: RMS of motion residual where there is no dye, vs mean artery signal in plain DSA
+ let q=0,nq=0,vs=0,nv=0;for(let i=0;i<NN;i++){if(io.a[i]<0.05){q+=cl[i]*cl[i];nq++}if(io.vm[i]){vs+=muI[0]*io.a[i];nv++}}
+ const clut=Math.sqrt(q/nq)/(vs/nv)*100;
+ const bg=new Uint8Array(NN);for(let y=0;y<N;y++)for(let x=0;x<N;x++){const i=y*N+x;const dn=Math.hypot((x-72)/30,(y-74)/26);if(io.a[i]<0.05&&dn<1.4&&dn>0.2)bg[i]=1}
+ const c2=stats(aI,io.bm,bg),c3=stats(pen,io.bm,bg);let e=0;for(let i=0;i<NN;i++)e+=(pen[i]-io.a[i])**2;e=Math.sqrt(e/NN);
+ $("s1").textContent=clut.toFixed(0)+"%";$("s2").textContent=blush>0?c2.toFixed(1):"–";$("s3").textContent=blush>0?c3.toFixed(1):"–";$("s4").textContent=e.toFixed(2);
+ let note;
+ if(m===0)note="With no motion, plain subtraction is already clean; dual energy matters once the heart moves.";
+ else if(s===0)note="With no smoothing, the penalised solve is just the direct solve, and the noise swamps faint dye.";
+ else if(clut>100&&!(blush>0&&c3>3&&c2<1.5))note="The heart's moving edges leave more signal in plain DSA than the arteries do.";
+ else if(blush>0&&c3>3&&c2<1.5)note="The blush is invisible in the direct solve but clear after the penalised solve.";
+ else note="Plain DSA keeps "+clut.toFixed(0)+"% clutter from motion; the dual-energy maps remove it.";
+ $("note").textContent=note;
+ plot(io.a,aI,pen)}
+function req(){if(!pending){pending=true;requestAnimationFrame(run)}}
+document.querySelectorAll("input[type=range]").forEach(e=>e.addEventListener("input",req));
+const presets={still:{mot:0,conc:50,blush:2,dose:1,npre:10,beta:1.2},beat:{mot:5,conc:50,blush:2,dose:1,npre:10,beta:1.2},low:{mot:4,conc:50,blush:2,dose:0.25,npre:30,beta:2},blush:{mot:4,conc:10,blush:2.5,dose:1,npre:20,beta:1.5}};
+document.querySelectorAll(".btnrow button").forEach(b=>b.addEventListener("click",()=>{const p=presets[b.dataset.p];for(const k in p)$(k).value=p[k];req()}));
+addEventListener("resize",req);matchMedia("(prefers-color-scheme: dark)").addEventListener("change",req);
+run();
+</script></body></html>
