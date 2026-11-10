@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="light dark">
+<title>Running AI weather forecasts on half the bits — Research Explorer, 11 Nov 2026</title>
+<link rel="stylesheet" href="../assets/style.css">
+<style>
+canvas#ulp{height:300px}
+canvas#err{height:260px}
+.btnrow{display:flex;flex-wrap:wrap;gap:8px;margin:4px 0 14px}
+.btnrow button{font:500 14px var(--font);color:var(--text);background:var(--accent-soft);border:0;border-radius:8px;padding:7px 14px;min-height:32px;cursor:pointer}
+.btnrow button[aria-pressed=true]{background:var(--accent);color:#fff}
+.btnrow button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+td.inf{color:#d70015}
+@media (prefers-color-scheme:dark){td.inf{color:#ff6961}}
+.tablewrap{overflow-x:auto}
+</style></head><body><main>
+<a class="back" href="../">‹ All demos</a>
+<div class="eyebrow">11 Nov 2026 · AI &amp; Climate</div>
+<h1>Running AI weather forecasts on half the bits</h1>
+<p class="lede">AI weather models such as Aurora and Pangu-Weather ship with 32-bit numbers and run that way by default, even though today's graphics cards do 16-bit maths much faster. This paper runs five public models in 16-bit half precision (fp16) on one consumer graphics card. The forecasts barely change, provided one rule is kept: the weather state itself stays in 32 bits, and only the normalised numbers that enter the network are rounded.</p>
+<p class="authors">Stefan Siegert</p>
+
+<section class="card why" aria-labelledby="why-h">
+<h2 id="why-h">Why it matters</h2>
+<p>Running a 10-day AI forecast in fp16 is 1.3 to 3.5 times faster and uses 1.4 to 3.7 times less energy, while global error changes by at most 1.4%. That is less than an hour of forecast lead time up to day 8. Researchers, forecasters in poorer countries and anyone running large ensembles on a single 16 GB card can do several times more forecasts for the same money and electricity.</p>
+</section>
+
+<section class="card" aria-labelledby="paper-h">
+<h2 id="paper-h">The paper</h2>
+<p style="margin:0 0 6px"><strong>Half-precision inference of AI weather prediction models: negligible loss of skill at a fraction of the cost</strong></p>
+<p class="cite" style="margin:0">Stefan Siegert (Department of Mathematics and Statistics, University of Exeter). arXiv:2611.09573, 6 November 2026, not yet peer reviewed. <a href="https://arxiv.org/abs/2611.09573">Read on arXiv</a> · <a href="https://arxiv.org/pdf/2611.09573">PDF</a></p>
+<p style="margin-top:14px">In plain language: a 16-bit fp16 number keeps about 3 significant digits and cannot go above 65,504. bf16, the other 16-bit format, reaches as high as fp32 but keeps only 2 to 3 digits. Weather fields in physical units are big numbers. Sea-level pressure is about 101,000 Pa and upper-air geopotential is up to 208,000 m²/s², so in fp16 they become infinity. In bf16 they round coarsely: about 148 Pa for pressure and 0.57 K for temperature, which is about as large as a model's whole day-1 error, and the rounding happens again at every step.</p>
+<p>The fix is to normalise first. In fp32, each field <i>x</i> is turned into a number close to 1 using its global mean μ and standard deviation σ. Only that number is rounded and fed to the network, and the output is turned back into physical units in fp32:</p>
+<div class="eq" aria-label="Normalise in fp32, round, denormalise in fp32">x̃ = (x − μ)/σ &nbsp;→&nbsp; network in fp16 on round<sub>16</sub>(x̃) &nbsp;→&nbsp; x = μ + σ·ỹ &nbsp;(in fp32)</div>
+<p>Rounded this way, the fields change 16 to 80 times less. Across 52 start dates in 2024, verified against ERA5, global RMSE moved by at most 1.4% (FourCastNet, z500 at day 1) and by about 0.5% or less for the other four models. No value inside any network came closer than 38 times below fp16's limit. bf16 was as fast but less accurate for every model. Simple 8-bit quantisation cost far more skill.</p>
+<p class="note">This demo does real fp16 and bf16 rounding (round to nearest, ties to even) in your browser. The table values, speed-ups and energy figures come from the paper's Tables 5 and 6. The means and standard deviations used for normalising, and the error-growth curve in the last panel, are rough illustrative choices for this page, not the paper's numbers.</p>
+</section>
+
+<section class="card" aria-labelledby="demo-h">
+<h2 id="demo-h">Try it: round a weather value to 16 bits</h2>
+<div class="btnrow" role="group" aria-label="Weather field" id="fields"></div>
+<div class="controls">
+ <div><label for="val"><span id="valL">Value</span> <output id="valO"></output></label><input type="range" id="val" min="0" max="1000" step="1" value="500"></div>
+</div>
+<div class="tablewrap"><table aria-label="Rounding results for the chosen value">
+<thead><tr><th>How it is stored</th><th>Stored value</th><th>Rounding error</th></tr></thead>
+<tbody id="rt"></tbody></table></div>
+<p class="note" id="note" aria-live="polite"></p>
+<div class="plot-title" style="margin-top:18px">Gap between neighbouring numbers each format can store (log scales)</div>
+<canvas id="ulp" role="img" aria-label="Spacing of representable numbers against magnitude for fp32, bf16 and fp16, with the fp16 overflow limit"></canvas>
+<div class="legend"><span style="--k:var(--c1)">fp16</span><span style="--k:var(--c2)">bf16</span><span style="--k:var(--c3)">fp32</span><span style="--k:var(--c4)">Chosen value: raw (●) and normalised (◆)</span></div>
+</section>
+
+<section class="card" aria-labelledby="tab-h">
+<h2 id="tab-h">What the paper measured on real ERA5 states</h2>
+<p class="plot-title">RMS rounding error, in the field's own units (paper's Table 5, 13 dates in 2024)</p>
+<div class="tablewrap"><table>
+<thead><tr><th>Field</th><th>Largest value</th><th>% above 65,504</th><th>bf16 raw</th><th>fp16 raw</th><th>bf16 normalised</th><th>fp16 normalised</th></tr></thead>
+<tbody>
+<tr><td>2 m temperature (K)</td><td>323</td><td>0</td><td>0.565</td><td>0.0708</td><td>0.0255</td><td>0.00319</td></tr>
+<tr><td>850 hPa temperature (K)</td><td>314</td><td>0</td><td>0.567</td><td>0.0711</td><td>0.0202</td><td>0.00252</td></tr>
+<tr><td>Sea-level pressure (Pa)</td><td>1.05e5</td><td>100</td><td>148</td><td class="inf">overflow</td><td>1.88</td><td>0.234</td></tr>
+<tr><td>Surface pressure (Pa)</td><td>1.05e5</td><td>97</td><td>148</td><td class="inf">overflow</td><td>11.3</td><td>1.41</td></tr>
+<tr><td>z500 (m²/s²)</td><td>5.89e4</td><td>0</td><td>73.9</td><td>9.24</td><td>4.59</td><td>0.573</td></tr>
+<tr><td>z400 (m²/s²)</td><td>7.56e4</td><td>81</td><td>143</td><td class="inf">overflow</td><td>5.64</td><td>0.705</td></tr>
+<tr><td>z300 (m²/s²)</td><td>9.67e4</td><td>100</td><td>148</td><td class="inf">overflow</td><td>6.92</td><td>0.864</td></tr>
+<tr><td>z50 (m²/s²)</td><td>2.08e5</td><td>100</td><td>295</td><td class="inf">overflow</td><td>6.22</td><td>0.777</td></tr>
+</tbody></table></div>
+<p class="note">Converted to fp16 as a whole, with the state in physical units, Aurora returned no finite value from its first 6-hour step. Converted as a whole to bf16, its RMSE rose by up to 167%, against at most 25% when only the network ran in bf16.</p>
+</section>
+
+<section class="card" aria-labelledby="cost-h">
+<h2 id="cost-h">What fp16 saves</h2>
+<div class="btnrow" role="group" aria-label="Model" id="models"></div>
+<div class="controls">
+ <div><label for="nf"><span>Number of 10-day forecasts you want to run</span> <output id="nfO"></output></label><input type="range" id="nf" min="1" max="4" step="0.05" value="3"></div>
+</div>
+<div class="stats">
+ <div class="stat"><div class="v" id="k1"></div><div class="l">Speed-up per step, fp16 vs fp32</div></div>
+ <div class="stat"><div class="v" id="k2"></div><div class="l">GPU time, fp32 → fp16</div></div>
+ <div class="stat"><div class="v" id="k3"></div><div class="l">GPU energy, fp32 → fp16</div></div>
+ <div class="stat"><div class="v" id="k4"></div><div class="l">Peak GPU memory, fp32 → fp16</div></div>
+</div>
+<p class="note" id="cnote">Times and energy per 10-day forecast on one RTX 5080, from the paper's Table 6, multiplied by your number of forecasts. For Aurora in fp32, the weights had to be streamed from CPU memory to fit in 16 GB, so part of its speed-up comes from not streaming.</p>
+</section>
+
+<section class="card" aria-labelledby="lead-h">
+<h2 id="lead-h">Turning a small RMSE change into lost hours</h2>
+<p>A forecast's error grows with lead time. If fp16 raises the error at day <i>t</i> by a fraction δ, the fp16 forecast is as good as an fp32 forecast issued Δ<i>t</i> hours later, with Δ<i>t</i> ≈ δ·E(<i>t</i>) / E′(<i>t</i>). Error grows fast early and slowly later, so the same δ costs more hours late in the forecast.</p>
+<div class="controls">
+ <div><label for="dl"><span>RMSE increase from fp16, δ (%)</span> <output id="dlO"></output></label><input type="range" id="dl" min="0" max="2" step="0.05" value="0.2"></div>
+ <div><label for="day"><span>Lead time (days)</span> <output id="dayO"></output></label><input type="range" id="day" min="1" max="10" step="0.25" value="8"></div>
+</div>
+<div class="stats">
+ <div class="stat"><div class="v" id="h1"></div><div class="l">Lead time lost (hours), illustrative curve</div></div>
+ <div class="stat"><div class="v" id="h2"></div><div class="l">Paper: up to day 8</div></div>
+ <div class="stat"><div class="v" id="h3"></div><div class="l">Paper: at day 10</div></div>
+</div>
+<div class="plot-title" style="margin-top:14px">Illustrative error growth, E(t) = E∞·(1 − e<sup>−(t+t₀)/τ</sup>), with τ = 6 days and t₀ = 1 day</div>
+<canvas id="err" role="img" aria-label="Error growth curves for fp32 and fp16 with the lead-time gap marked"></canvas>
+<div class="legend"><span style="--k:var(--c3)">fp32 error</span><span style="--k:var(--c1)">fp16 error (fp32 × (1+δ))</span></div>
+</section>
+
+<section class="card" aria-labelledby="how-h">
+<h2 id="how-h">How to use it</h2>
+<ul>
+<li><strong>Break fp16:</strong> pick <em>Sea-level pressure</em> or <em>z50</em>. The raw fp16 row becomes ∞, because the value is past the red line at 65,504 on the plot. The normalised fp16 row stays accurate to a fraction of a pascal.</li>
+<li><strong>See why bf16 hurts:</strong> pick <em>2 m temperature</em> and drag the slider. Raw bf16 jumps in steps of 1 or 2 K. On the plot, bf16's gap line sits about 8 times above fp16's at every size.</li>
+<li><strong>See what normalising does:</strong> the ◆ marker sits near 1 on the x-axis, where all three formats have tiny gaps. The ● marker is the raw value, out where gaps are large or fp16 has run out.</li>
+<li><strong>Count the savings:</strong> choose a model and set how many forecasts you need, for example 10,000 for a large ensemble study. Aurora drops from about 25 days of GPU time to about 7.</li>
+<li><strong>Convert error to hours:</strong> set δ to 0.2%, the size most models showed late in the forecast, at day 8, and about an hour is lost. Now set δ to the worst case of 1.4% at day 1: because error grows fast early on, that costs under an hour too. The paper does this conversion with its measured error curves, so the exact hours here are only illustrative.</li>
+</ul>
+</section>
+
+<p class="note" style="margin-top:24px">Demo by Grok Bot for the Daily Research Explorer. The fp16/bf16 rounding is exact IEEE-style round-to-nearest-even. Table 5 and Table 6 values are quoted from the paper (arXiv:2611.09573). The normalisation constants and the error-growth curve are choices made for this page.</p>
+</main>
+<script>
+"use strict";
+const $=id=>document.getElementById(id);
+const css=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+// Round to a binary float with m mantissa bits, minimum normal exponent emin, max finite value
+function roundF(x,m,emin,maxF){if(!isFinite(x))return x;if(x===0)return 0;const a=Math.abs(x);
+ let e=Math.floor(Math.log2(a));if(Math.pow(2,e)>a)e--;else if(Math.pow(2,e+1)<=a)e++;if(e<emin)e=emin;
+ const q=Math.pow(2,e-m);const r=a/q;let n=Math.floor(r);const f=r-n;if(f>0.5||(f===0.5&&n%2===1))n++;
+ const v=n*q;if(v>maxF)return x>0?Infinity:-Infinity;return x<0?-v:v}
+const F16={m:10,emin:-14,max:65504},BF={m:7,emin:-126,max:3.3895313892515355e38},F32={m:23,emin:-126,max:3.4028234663852886e38};
+const r16=x=>roundF(x,F16.m,F16.emin,F16.max),rbf=x=>roundF(x,BF.m,BF.emin,BF.max),r32=x=>Math.fround(x);
+const ulp=(a,F)=>{if(a>F.max)return NaN;let e=Math.floor(Math.log2(a));if(e<F.emin)e=F.emin;return Math.pow(2,e-F.m)};
+// Fields: slider range from the paper's typical values; mu/sigma are rough illustrative values for this page
+const FIELDS=[
+ {id:"t2",n:"2 m temperature",u:"K",lo:220,hi:323,v:288.15,mu:278,sd:21,d:2},
+ {id:"msl",n:"Sea-level pressure",u:"Pa",lo:95000,hi:105000,v:101325,mu:101100,sd:1100,d:1},
+ {id:"z500",n:"z500 geopotential",u:"m²/s²",lo:46000,hi:58900,v:55000,mu:54000,sd:2900,d:1},
+ {id:"z300",n:"z300 geopotential",u:"m²/s²",lo:80000,hi:96700,v:90000,mu:88500,sd:4100,d:1},
+ {id:"z50",n:"z50 geopotential",u:"m²/s²",lo:190000,hi:208000,v:202000,mu:201000,sd:3600,d:1}];
+let fi=0;
+const fb=$("fields");FIELDS.forEach((f,i)=>{const b=document.createElement("button");b.type="button";b.textContent=f.n;b.setAttribute("aria-pressed",i===fi);b.onclick=()=>{fi=i;setField();};fb.appendChild(b)});
+function setField(){[...fb.children].forEach((b,i)=>b.setAttribute("aria-pressed",i===fi));const f=FIELDS[fi];$("val").value=Math.round(1000*(f.v-f.lo)/(f.hi-f.lo));req()}
+const fmt=(x,d)=>!isFinite(x)?"∞ (overflow)":x.toLocaleString("en-AU",{minimumFractionDigits:d,maximumFractionDigits:d});
+const fe=e=>!isFinite(e)?"lost":e===0?"0":Math.abs(e)>=10?e.toFixed(0):Math.abs(e)>=0.01?e.toFixed(Math.abs(e)>=0.1?2:3):e.toExponential(1);
+function demo(){const f=FIELDS[fi];const x=f.lo+(f.hi-f.lo)*(+$("val").value)/1000;const x32=r32(x);
+ $("valL").textContent=f.n+" ("+f.u+")";$("valO").textContent=fmt(x32,f.d);
+ const z=r32((x32-f.mu)/f.sd);
+ const rows=[["fp32 (reference)",x32],["fp16, raw physical value",r16(x32)],["bf16, raw physical value",rbf(x32)],
+  ["fp16 after normalising in fp32",r32(f.mu+f.sd*r16(z))],["bf16 after normalising in fp32",r32(f.mu+f.sd*rbf(z))]];
+ $("rt").innerHTML=rows.map(([l,v],i)=>`<tr><td>${l}</td><td${isFinite(v)?"":" class=inf"}>${fmt(v,f.d+1)}</td><td${isFinite(v)?"":" class=inf"}>${i?fe(v-x32)+(isFinite(v)?" "+f.u:""):"–"}</td></tr>`).join("");
+ const eb=Math.abs(rbf(x32)-x32),en=Math.abs(r32(f.mu+f.sd*r16(z))-x32);
+ $("note").textContent=x32>F16.max?`${fmt(x32,0)} is above 65,504, so raw fp16 overflows to infinity. Normalised, the network sees ${z.toFixed(3)}, which fp16 holds to within ${fe(en)} ${f.u}.`
+  :`Raw bf16 is off by ${fe(eb)} ${f.u}. After normalising, the network sees ${z.toFixed(3)}, and fp16 is off by only ${fe(en)} ${f.u}.`;
+ plotUlp(x32,Math.abs(z))}
+function plotUlp(x,z){const c=$("ulp"),d=devicePixelRatio||1,W=c.clientWidth,H=c.clientHeight;c.width=W*d;c.height=H*d;const g=c.getContext("2d");g.scale(d,d);
+ const L=52,R=12,T=12,B=30,x0=-3,x1=6,y0=-9,y1=3;
+ const X=v=>L+(W-L-R)*(v-x0)/(x1-x0),Y=v=>T+(H-T-B)*(1-(v-y0)/(y1-y0));
+ g.font="12px "+css("--font");g.lineWidth=1;g.strokeStyle=css("--grid");g.fillStyle=css("--muted");
+ for(let k=x0;k<=x1;k++){g.beginPath();g.moveTo(X(k),T);g.lineTo(X(k),H-B);g.stroke();g.fillText("10"+sup(k),X(k)-8,H-10)}
+ for(let k=y0;k<=y1;k+=2){g.beginPath();g.moveTo(L,Y(k));g.lineTo(W-R,Y(k));g.stroke();g.fillText("10"+sup(k),6,Y(k)+4)}
+ const curve=(F,col)=>{g.strokeStyle=col;g.lineWidth=2;g.beginPath();let on=false;for(let i=0;i<=900;i++){const lv=x0+(x1-x0)*i/900;const u=ulp(Math.pow(10,lv),F);if(!isFinite(u)){on=false;continue}const ly=Math.log10(u);on?g.lineTo(X(lv),Y(ly)):g.moveTo(X(lv),Y(ly));on=true}g.stroke()};
+ curve(F32,css("--c3"));curve(BF,css("--c2"));curve(F16,css("--c1"));
+ const red=matchMedia("(prefers-color-scheme: dark)").matches?"#ff6961":"#d70015";
+ g.strokeStyle=red;g.setLineDash([5,4]);g.lineWidth=1.5;const lm=Math.log10(65504);g.beginPath();g.moveTo(X(lm),T);g.lineTo(X(lm),H-B);g.stroke();g.setLineDash([]);
+ g.fillStyle=red;g.fillText("fp16 limit 65,504",X(lm)-112,T+12);
+ const mk=(v,shape)=>{if(!(v>0))return;const lv=Math.log10(v);const u=ulp(v,F16);const ly=isFinite(u)?Math.log10(u):Math.log10(ulp(v,BF));const px=X(Math.max(x0,Math.min(x1,lv))),py=Y(ly);
+  g.fillStyle=css("--c4");g.beginPath();if(shape)g.arc(px,py,6,0,7);else{g.moveTo(px,py-7);g.lineTo(px+7,py);g.lineTo(px,py+7);g.lineTo(px-7,py)}g.fill()};
+ mk(x,1);mk(Math.max(z,1e-3),0);
+ g.fillStyle=css("--muted");g.fillText("size of the number →",L+6,H-B-6)}
+function sup(k){const m={"-":"⁻","0":"⁰","1":"¹","2":"²","3":"³","4":"⁴","5":"⁵","6":"⁶","7":"⁷","8":"⁸","9":"⁹"};return String(k).split("").map(ch=>m[ch]).join("")}
+// Table 6 of the paper: s/10 d, GB, Wh/10 d, speed-up
+const MODELS=[
+ {n:"FastNet",sp:2.8,t:[12,4],gb:[2.2,1.2],wh:[1.07,0.29]},
+ {n:"Pangu-Weather",sp:2.1,t:[8,4],gb:[9.5,5.2],wh:[0.69,0.28]},
+ {n:"FourCastNet",sp:2.0,t:[5,2],gb:[1.2,0.9],wh:[0.38,0.14]},
+ {n:"SFNO",sp:1.3,t:[21,16],gb:[15.4,12.9],wh:[1.53,1.07]},
+ {n:"Aurora",sp:3.5,t:[215,61],gb:[14.3,11.6],wh:[18.27,5.50]}];
+let mi=4;const mb=$("models");MODELS.forEach((m,i)=>{const b=document.createElement("button");b.type="button";b.textContent=m.n;b.setAttribute("aria-pressed",i===mi);b.onclick=()=>{mi=i;[...mb.children].forEach((x,j)=>x.setAttribute("aria-pressed",j===mi));req()};mb.appendChild(b)});
+const dur=s=>s<120?s.toFixed(0)+" s":s<7200?(s/60).toFixed(0)+" min":s<172800?(s/3600).toFixed(1)+" h":(s/86400).toFixed(1)+" days";
+const en=w=>w<1000?w.toFixed(w<10?2:0)+" Wh":(w/1000).toFixed(w<1e4?2:1)+" kWh";
+function cost(){const m=MODELS[mi];const n=Math.round(Math.pow(10,+$("nf").value));$("nfO").textContent=n.toLocaleString("en-AU");
+ $("k1").textContent=m.sp.toFixed(1)+"×";$("k2").textContent=dur(m.t[0]*n)+" → "+dur(m.t[1]*n);$("k3").textContent=en(m.wh[0]*n)+" → "+en(m.wh[1]*n);$("k4").textContent=m.gb[0]+" → "+m.gb[1]+" GB"}
+// Illustrative error growth
+const tau=6,t0=1,E=t=>1-Math.exp(-(t+t0)/tau),dE=t=>Math.exp(-(t+t0)/tau)/tau;
+function lead(){const dl=+$("dl").value/100,day=+$("day").value;$("dlO").textContent=(dl*100).toFixed(2)+"%";$("dayO").textContent=day.toFixed(2).replace(/\.?0+$/,"");
+ // solve E(t+Δ)=(1+δ)E(t) exactly
+ const target=(1+dl)*E(day);let h=NaN;if(target<1){const tt=-tau*Math.log(1-target)-t0;h=(tt-day)*24}
+ $("h1").textContent=isFinite(h)?h.toFixed(1)+" h":"–";$("h2").textContent="< 1 h";$("h3").textContent="≤ 2 h";
+ const c=$("err"),d=devicePixelRatio||1,W=c.clientWidth,H=c.clientHeight;c.width=W*d;c.height=H*d;const g=c.getContext("2d");g.scale(d,d);
+ const L=44,R=12,T=12,B=30,X=t=>L+(W-L-R)*t/10,ymax=1.02*E(10)*(1.02),Y=v=>T+(H-T-B)*(1-v/ymax);
+ g.font="12px "+css("--font");g.strokeStyle=css("--grid");g.fillStyle=css("--muted");g.lineWidth=1;
+ for(let k=0;k<=10;k+=2){g.beginPath();g.moveTo(X(k),T);g.lineTo(X(k),H-B);g.stroke();g.fillText("day "+k,X(k)-14,H-10)}
+ g.fillText("error (relative)",L+6,T+12);
+ const line=(f,col,w)=>{g.strokeStyle=col;g.lineWidth=w;g.beginPath();for(let i=0;i<=200;i++){const t=10*i/200;i?g.lineTo(X(t),Y(f(t))):g.moveTo(X(t),Y(f(t)))}g.stroke()};
+ line(E,css("--c3"),2);line(t=>(1+dl)*E(t),css("--c1"),2);
+ if(isFinite(h)){const y=Y((1+dl)*E(day));g.strokeStyle=css("--c4");g.lineWidth=2;g.beginPath();g.moveTo(X(day),y);g.lineTo(X(day+h/24),y);g.stroke();
+  g.fillStyle=css("--c4");g.beginPath();g.arc(X(day),y,4,0,7);g.fill();g.beginPath();g.arc(X(day+h/24),y,4,0,7);g.fill()}}
+let pending=false;function run(){pending=false;demo();cost();lead()}
+function req(){if(!pending){pending=true;requestAnimationFrame(run)}}
+document.querySelectorAll("input[type=range]").forEach(e=>e.addEventListener("input",req));
+addEventListener("resize",req);matchMedia("(prefers-color-scheme: dark)").addEventListener("change",req);
+setField();run();
+</script></body></html>
