@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="light dark">
+<title>Measuring brain myelin more steadily by refitting the noise — Research Explorer, 12 Nov 2026</title>
+<link rel="stylesheet" href="../assets/style.css">
+<style>
+canvas#spec{height:300px}
+canvas#dec,canvas#hist{height:260px}
+.btnrow{display:flex;flex-wrap:wrap;gap:8px;margin:4px 0 14px}
+.btnrow button{font:500 14px var(--font);color:var(--text);background:var(--accent-soft);border:0;border-radius:8px;padding:7px 14px;min-height:32px;cursor:pointer}
+.btnrow button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.btnrow button:disabled{opacity:.5;cursor:default}
+</style></head><body><main>
+<a class="back" href="../">‹ All demos</a>
+<div class="eyebrow">12 Nov 2026 · Medicine</div>
+<h1>Measuring brain myelin more steadily by refitting the noise</h1>
+<p class="lede">Myelin, the fatty wrapping on nerve fibres, traps a little water between its layers, and that water loses its MRI signal much faster than the water elsewhere in the brain. Splitting a measured signal decay into its fast and slow parts gives the myelin water fraction, but the split is so sensitive to noise that the answer jumps around from scan to scan. This paper fits the decay, reshuffles the leftover noise hundreds of times, refits each copy and averages the results, which makes the number both more accurate and more repeatable, and gives an error bar for every voxel.</p>
+<p class="authors">Erick J. Canales-Rodríguez, Thomas Yu, Juan Manuel Górriz, Santiago Galdo-Álvarez, Tobias Kober, Tom Hilbert, Gian Franco Piredda, Miguel Ángel Rivas-Fernández</p>
+
+<section class="card why" aria-labelledby="why-h">
+<h2 id="why-h">Why it matters</h2>
+<p>Myelin water fraction is one of the most direct MRI measures of myelin, which is what multiple sclerosis and many other brain and nerve diseases damage, but noisy estimates make it hard to trust a change in one patient between scans. Averaging bootstrap refits cut the error by 36 to 41% compared with the standard fit in simulations and gave the most repeatable scan-rescan values in two groups of healthy volunteers, without any training data or extra scan time.</p>
+</section>
+
+<section class="card" aria-labelledby="paper-h">
+<h2 id="paper-h">The paper</h2>
+<p style="margin:0 0 6px"><strong>Improved Myelin Water Fraction Estimation and Uncertainty Mapping in Multicomponent T2 Relaxometry via NNLS Bootstrap Aggregation</strong></p>
+<p class="cite" style="margin:0">Erick J. Canales-Rodríguez, Thomas Yu, Juan Manuel Górriz, Santiago Galdo-Álvarez, Tobias Kober, Tom Hilbert, Gian Franco Piredda, Miguel Ángel Rivas-Fernández (University of Granada, Siemens Healthineers and others). arXiv:2611.14395, November 2026. <a href="https://arxiv.org/abs/2611.14395">Read on arXiv</a> · <a href="https://arxiv.org/pdf/2611.14395">PDF</a> · <a href="https://github.com/ejcanalesr/multicomponent-T2-toolbox">Code</a></p>
+<p style="margin-top:14px">In plain language: a multi-echo MRI scan samples the signal at N echo times. Each tissue water pool decays with its own relaxation time T<sub>2</sub>, so the signal is a sum of decaying exponentials, written as a non-negative spectrum x over a grid of P relaxation times:</p>
+<div class="eq" aria-label="Signal model">y = A·x<sub>0</sub> + ε, &nbsp; x<sub>0</sub> ≥ 0, &nbsp; A<sub>ij</sub> = e<sup>−TE<sub>i</sub>/T<sub>2,j</sub></sup></div>
+<p>The usual fit is non-negative least squares (NNLS): find x ≥ 0 that minimises ‖A·x − y‖². Nearby relaxation times give almost identical decays, so small noise moves weight between them, and the myelin water fraction (the share of the spectrum below 40 ms) wobbles. NNLS-BB keeps NNLS but runs it many times. It takes the residuals r = y − A·x̂, centres them and scales each by 1/√(1 − h<sub>ii</sub>) using the leverage of the fitted columns, draws B new noise vectors by resampling those residuals with replacement, refits each y* = A·x̂ + r*, drops the most extreme 1% of replicates, and averages:</p>
+<div class="eq" aria-label="Bootstrap barycenter">x̂<sub>BB</sub> = (1/K) Σ<sub>b</sub> x̂*<sup>(b)</sup>, &nbsp; MWF<sub>BB</sub> = (1/K) Σ<sub>b</sub> MWF(x̂*<sup>(b)</sup>), &nbsp; error bar = SD over b</div>
+<p class="note">This page runs a Lawson–Hanson NNLS and the residual bootstrap live in your browser on the paper's grid of 60 log-spaced T<sub>2</sub> values from 10 to 2000 ms and the 40 ms cutoff. To keep it fast and simple, the decay uses plain exponentials instead of the paper's stimulated-echo (EPG) model with flip-angle correction, there are 32 echoes 10 ms apart, the noise is Gaussian with SNR measured against the first-echo signal, and the two water pools are made-up log-normal peaks.</p>
+</section>
+
+<section class="card" aria-labelledby="demo-h">
+<h2 id="demo-h">Try it: estimate myelin water from one noisy voxel</h2>
+<div class="btnrow" role="group" aria-label="Presets">
+ <button type="button" data-p="healthy">Healthy white matter</button>
+ <button type="button" data-p="lesion">Demyelinated lesion</button>
+ <button type="button" data-p="noisy">Low SNR</button>
+ <button type="button" data-p="clean">High SNR</button>
+</div>
+<div class="controls">
+ <div><label for="mwf"><span>True myelin water fraction (%)</span> <output id="mwfO"></output></label><input type="range" id="mwf" min="0" max="30" step="1" value="15"></div>
+ <div><label for="t2m"><span>Myelin water T<sub>2</sub> (ms)</span> <output id="t2mO"></output></label><input type="range" id="t2m" min="12" max="35" step="1" value="20"></div>
+ <div><label for="t2i"><span>Other water T<sub>2</sub> (ms)</span> <output id="t2iO"></output></label><input type="range" id="t2i" min="50" max="120" step="5" value="80"></div>
+ <div><label for="snr"><span>Signal-to-noise ratio</span> <output id="snrO"></output></label><input type="range" id="snr" min="50" max="1000" step="10" value="150"></div>
+ <div><label for="nb"><span>Bootstrap refits B</span> <output id="nbO"></output></label><input type="range" id="nb" min="20" max="400" step="10" value="200"></div>
+</div>
+<div class="btnrow"><button type="button" id="redraw">New noise draw</button></div>
+<div class="stats" aria-live="polite">
+ <div class="stat"><div class="v" id="sT"></div><div class="l">True MWF</div></div>
+ <div class="stat"><div class="v" id="sN"></div><div class="l">Single NNLS fit</div></div>
+ <div class="stat"><div class="v" id="sB"></div><div class="l">NNLS-BB average ± SD</div></div>
+</div>
+<p class="note" id="note"></p>
+<div class="plot-title" style="margin-top:18px">T<sub>2</sub> spectrum: share of water at each relaxation time (ms, log scale)</div>
+<canvas id="spec" role="img" aria-label="True, single NNLS and bootstrap-averaged T2 spectra with the 40 ms cutoff"></canvas>
+<div class="legend"><span style="--k:var(--muted)">True spectrum</span><span style="--k:var(--c2)">Single NNLS</span><span style="--k:var(--c1)">NNLS-BB average</span><span style="--k:var(--c3)">40 ms myelin cutoff</span></div>
+<div class="grid" style="margin-top:18px">
+ <div><div class="plot-title">Measured decay and NNLS fit (echo time, ms)</div><canvas id="dec" role="img" aria-label="Noisy multi-echo decay with fitted curve"></canvas>
+ <div class="legend"><span style="--k:var(--c2)">Noisy echoes</span><span style="--k:var(--c1)">NNLS fit</span></div></div>
+ <div><div class="plot-title">MWF from each bootstrap refit</div><canvas id="hist" role="img" aria-label="Histogram of myelin water fraction across bootstrap refits"></canvas>
+ <div class="legend"><span style="--k:var(--muted)">True</span><span style="--k:var(--c2)">Single NNLS</span><span style="--k:var(--c1)">NNLS-BB average</span></div></div>
+</div>
+</section>
+
+<section class="card" aria-labelledby="test-h">
+<h2 id="test-h">Test it over many voxels</h2>
+<p>One voxel can be lucky or unlucky. This runs 200 independent noisy voxels with the settings above (using up to 100 refits each, to keep it quick) and compares the mean absolute error of the two methods.</p>
+<div class="btnrow"><button type="button" id="run">Run 200 voxels</button></div>
+<div class="stats" aria-live="polite">
+ <div class="stat"><div class="v" id="mN">–</div><div class="l">Single NNLS error (MWF points)</div></div>
+ <div class="stat"><div class="v" id="mB">–</div><div class="l">NNLS-BB error (MWF points)</div></div>
+ <div class="stat"><div class="v" id="mR">–</div><div class="l">Error reduction</div></div>
+</div>
+<p class="note" id="tnote">Press the button to run the test.</p>
+</section>
+
+<section class="card" aria-labelledby="how-h">
+<h2 id="how-h">How to use it</h2>
+<ul>
+<li><strong>See the wobble:</strong> press <em>New noise draw</em> a few times. The orange single-fit spectrum hops between spiky shapes and its MWF jumps, while the blue average stays close to the grey truth.</li>
+<li><strong>Read the error bar:</strong> the ± value is the spread of the refits, shown as the histogram. It grows when you lower the SNR or bring the two T<sub>2</sub> peaks closer, which is exactly when a doctor should trust the number less.</li>
+<li><strong>Mimic disease:</strong> press <em>Demyelinated lesion</em> to drop the myelin water to a few percent and see how hard a small fast peak is to pin down.</li>
+<li><strong>Check the claim:</strong> run the 200-voxel test at different SNRs. The paper reports 36 to 41% lower error than plain NNLS across SNR 50 to 1000 with its full model; this simplified demo shows the same direction, and the exact size depends on the settings.</li>
+</ul>
+</section>
+
+<p class="note" style="margin-top:24px">Demo by Grok Bot for the Daily Research Explorer. The NNLS problem, T<sub>2</sub> grid, 40 ms cutoff, leverage-adjusted residual bootstrap and 1% trimming follow the paper (arXiv:2611.14395, Section 2); the exponential forward model, echo train, noise model and simulated tissue are choices made for this page.</p>
+</main>
+<script>
+"use strict";
+const $=id=>document.getElementById(id);
+const css=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const NE=32, DTE=10, P=60, CUT=40;
+const TE=Float64Array.from({length:NE},(_,i)=>(i+1)*DTE);
+const T2=Float64Array.from({length:P},(_,j)=>10*Math.pow(200,j/(P-1)));
+const A=Array.from({length:P},(_,j)=>Float64Array.from(TE,t=>Math.exp(-t/T2[j]))); // columns
+const isMW=Array.from(T2,t=>t<CUT);
+// fine grid for making the "true" signal, so the fit is not handed its own grid
+const PF=480, T2F=Float64Array.from({length:PF},(_,j)=>5*Math.pow(600,j/(PF-1)));
+function rng(s){return()=>{s|=0;s=s+0x6D2B79F5|0;let t=Math.imul(s^s>>>15,1|s);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function gaussR(R){const u=Math.max(R(),1e-12),v=R();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v)}
+
+// ---- least squares on a subset of columns via modified Gram-Schmidt (with re-orthogonalisation)
+function qr(cols){const Q=[],R=cols.map(()=>new Float64Array(cols.length));
+ for(let k=0;k<cols.length;k++){const v=Float64Array.from(A[cols[k]]);
+  for(let pass=0;pass<2;pass++)for(let i=0;i<k;i++){let d=0;for(let n=0;n<NE;n++)d+=Q[i][n]*v[n];R[i][k]+=d;for(let n=0;n<NE;n++)v[n]-=d*Q[i][n]}
+  let nr=0;for(let n=0;n<NE;n++)nr+=v[n]*v[n];nr=Math.sqrt(nr)||1e-300;R[k][k]=nr;for(let n=0;n<NE;n++)v[n]/=nr;Q.push(v)}
+ return{Q,R}}
+function lsq(cols,y){const{Q,R}=qr(cols),k=cols.length,b=new Float64Array(k),z=new Float64Array(k);
+ for(let i=0;i<k;i++){let d=0;for(let n=0;n<NE;n++)d+=Q[i][n]*y[n];b[i]=d}
+ for(let i=k-1;i>=0;i--){let s=b[i];for(let j=i+1;j<k;j++)s-=R[i][j]*z[j];z[i]=s/R[i][i]}
+ return z}
+// ---- Lawson–Hanson NNLS
+function nnls(y){const x=new Float64Array(P),inP=new Uint8Array(P);let Pset=[];const tol=1e-12;
+ const grad=()=>{const r=Float64Array.from(y);for(let j=0;j<P;j++)if(x[j])for(let n=0;n<NE;n++)r[n]-=A[j][n]*x[j];
+  return Array.from({length:P},(_,j)=>{let d=0;for(let n=0;n<NE;n++)d+=A[j][n]*r[n];return d})};
+ for(let it=0;it<3*P;it++){const w=grad();let jm=-1,wm=tol;for(let j=0;j<P;j++)if(!inP[j]&&w[j]>wm){wm=w[j];jm=j}
+  if(jm<0)break;inP[jm]=1;Pset.push(jm);
+  for(let inner=0;inner<3*P;inner++){const z=lsq(Pset,y);
+   if(z.every(v=>v>0)){Pset.forEach((j,i)=>x[j]=z[i]);break}
+   let al=Infinity;Pset.forEach((j,i)=>{if(z[i]<=0){const a=x[j]/(x[j]-z[i]);if(a<al)al=a}});
+   Pset.forEach((j,i)=>{x[j]+=al*(z[i]-x[j])});
+   Pset=Pset.filter(j=>{if(x[j]<=1e-14){x[j]=0;inP[j]=0;return false}return true});
+   if(!Pset.length)break}}
+ return{x,Pset}}
+const mwfOf=x=>{let a=0,s=0;for(let j=0;j<P;j++){s+=x[j];if(isMW[j])a+=x[j]}return s>0?a/s:0};
+const fwd=x=>{const s=new Float64Array(NE);for(let j=0;j<P;j++)if(x[j])for(let n=0;n<NE;n++)s[n]+=A[j][n]*x[j];return s};
+
+// ---- simulated tissue
+function truth(mwf,t2m,t2i){const sd=0.12;let sm=0,si=0;
+ const wm=new Float64Array(PF),wi=new Float64Array(PF);
+ for(let j=0;j<PF;j++){const l=Math.log(T2F[j]);wm[j]=Math.exp(-0.5*((l-Math.log(t2m))/sd)**2);wi[j]=Math.exp(-0.5*((l-Math.log(t2i))/sd)**2);}
+ for(let j=0;j<PF;j++){sm+=wm[j];si+=wi[j]}
+ const f=new Float64Array(PF);for(let j=0;j<PF;j++)f[j]=mwf*wm[j]/sm+(1-mwf)*wi[j]/si;
+ const s=new Float64Array(NE);for(let j=0;j<PF;j++)for(let n=0;n<NE;n++)s[n]+=f[j]*Math.exp(-TE[n]/T2F[j]);
+ // bin the fine truth onto the coarse grid for display, by nearest log value
+ const binned=new Float64Array(P);const step=Math.log(200)/(P-1);
+ for(let j=0;j<PF;j++){const k=Math.round(Math.log(T2F[j]/10)/step);if(k>=0&&k<P)binned[k]+=f[j]}
+ let m=0;for(let j=0;j<PF;j++)if(T2F[j]<CUT)m+=f[j];
+ return{s,binned,mwfTrue:m}}
+// noise sigma relative to the noiseless signal at TE=0 (sum of weights = 1)
+function noisy(s,snr,R){return Float64Array.from(s,v=>v+gaussR(R)/snr)}
+
+// ---- NNLS-BB (residual bootstrap with centring, leverage adjustment, 1% trimming)
+function bootstrap(y,B,R){const f0=nnls(y),yh=fwd(f0.x),r=Float64Array.from(y,(v,n)=>v-yh[n]);
+ const mean=r.reduce((a,b)=>a+b,0)/NE;
+ const h=new Float64Array(NE);if(f0.Pset.length){const{Q}=qr(f0.Pset);for(const q of Q)for(let n=0;n<NE;n++)h[n]+=q[n]*q[n]}
+ const ra=Float64Array.from(r,(v,n)=>(v-mean)/Math.sqrt(Math.max(1-h[n],0.01)));
+ const reps=[];for(let b=0;b<B;b++){const ys=Float64Array.from(yh,v=>v+ra[Math.floor(R()*NE)]);const x=nnls(ys).x;reps.push({x,m:mwfOf(x)})}
+ const ms=reps.map(o=>o.m).sort((a,b)=>a-b),q=p=>ms[Math.min(ms.length-1,Math.max(0,Math.floor(p*(ms.length-1))))];
+ const lo=q(0.005),hi=q(0.995),keep=reps.filter(o=>o.m>=lo&&o.m<=hi),K=keep.length;
+ const xb=new Float64Array(P);let mb=0;for(const o of keep){for(let j=0;j<P;j++)xb[j]+=o.x[j]/K;mb+=o.m/K}
+ let sd=0;for(const o of keep)sd+=(o.m-mb)**2;sd=Math.sqrt(sd/Math.max(1,K-1));
+ return{x0:f0.x,yh,m0:mwfOf(f0.x),xb,mb,sd,all:reps.map(o=>o.m)}}
+
+// ---- drawing
+function setup(id){const c=$(id),d=devicePixelRatio||1,W=c.clientWidth,H=c.clientHeight;c.width=W*d;c.height=H*d;const g=c.getContext("2d");g.scale(d,d);return{g,W,H}}
+function axes(g,W,H,m,xt,yt,fx,fy){g.font="12px "+css("--font");g.fillStyle=css("--muted");g.strokeStyle=css("--grid");g.lineWidth=1;
+ for(const [v,l] of yt){const y=fy(v);g.beginPath();g.moveTo(m.l,y);g.lineTo(W-m.r,y);g.stroke();g.textAlign="right";g.textBaseline="middle";g.fillText(l,m.l-6,y)}
+ for(const [v,l] of xt){const x=fx(v);g.beginPath();g.moveTo(x,m.t);g.lineTo(x,H-m.b);g.stroke();g.textAlign="center";g.textBaseline="top";g.fillText(l,x,H-m.b+6)}}
+function line(g,xs,ys,fx,fy,col,w,dash){g.strokeStyle=col;g.lineWidth=w;g.setLineDash(dash||[]);g.beginPath();xs.forEach((x,i)=>{const X=fx(x),Y=fy(ys[i]);i?g.lineTo(X,Y):g.moveTo(X,Y)});g.stroke();g.setLineDash([])}
+function drawSpec(tr,res){const{g,W,H}=setup("spec"),m={l:48,r:14,t:12,b:34};
+ const ymax=Math.ceil(Math.max(...tr.binned,...res.x0,...res.xb)*10.5)/10||1;
+ const fx=t=>m.l+(Math.log(t/10)/Math.log(200))*(W-m.l-m.r),fy=v=>H-m.b-v/ymax*(H-m.t-m.b);
+ const yt=[];for(let v=0;v<=ymax+1e-9;v+=ymax>0.5?0.2:0.1)yt.push([v,Math.round(v*100)+"%"]);
+ axes(g,W,H,m,[[10,"10"],[20,"20"],[50,"50"],[100,"100"],[200,"200"],[500,"500"],[1000,"1000"],[2000,"2000"]],yt,fx,fy);
+ const x=Array.from(T2);
+ g.strokeStyle=css("--c3");g.lineWidth=2;g.setLineDash([5,4]);g.beginPath();g.moveTo(fx(CUT),m.t);g.lineTo(fx(CUT),H-m.b);g.stroke();g.setLineDash([]);
+ g.globalAlpha=.5;g.fillStyle=css("--muted");const bw=(W-m.l-m.r)/(P-1)*.7;tr.binned.forEach((v,j)=>{if(v>0)g.fillRect(fx(T2[j])-bw/2,fy(v),bw,fy(0)-fy(v))});g.globalAlpha=1;
+ // single NNLS as stems
+ g.strokeStyle=css("--c2");g.lineWidth=2.5;res.x0.forEach((v,j)=>{if(v>0){g.beginPath();g.moveTo(fx(T2[j]),fy(0));g.lineTo(fx(T2[j]),fy(v));g.stroke();g.fillStyle=css("--c2");g.beginPath();g.arc(fx(T2[j]),fy(v),3,0,7);g.fill()}});
+ line(g,x,Array.from(res.xb),fx,fy,css("--c1"),2.5)}
+function drawDec(y,res){const{g,W,H}=setup("dec"),m={l:44,r:12,t:12,b:34};const ymax=1.05;
+ const fx=t=>m.l+t/(NE*DTE)*(W-m.l-m.r),fy=v=>H-m.b-v/ymax*(H-m.t-m.b);
+ axes(g,W,H,m,[[0,"0"],[80,"80"],[160,"160"],[240,"240"],[320,"320"]],[[0,"0"],[0.5,"0.5"],[1,"1"]],fx,fy);
+ line(g,[0,...TE],[res.x0.reduce((a,b)=>a+b,0),...res.yh],fx,fy,css("--c1"),2);
+ g.fillStyle=css("--c2");TE.forEach((t,i)=>{g.beginPath();g.arc(fx(t),fy(y[i]),3,0,7);g.fill()})}
+function drawHist(tr,res){const{g,W,H}=setup("hist"),m={l:40,r:12,t:12,b:34};
+ const vals=res.all.map(v=>v*100),all=[...vals,tr.mwfTrue*100,res.m0*100];let lo=Math.min(...all),hi=Math.max(...all);const pad=Math.max(1,(hi-lo)*0.1);lo=Math.max(0,lo-pad);hi=hi+pad;
+ const nb=24,cnt=new Array(nb).fill(0);vals.forEach(v=>{cnt[Math.min(nb-1,Math.floor((v-lo)/(hi-lo)*nb))]++});const cm=Math.max(...cnt)*1.1;
+ const fx=v=>m.l+(v-lo)/(hi-lo)*(W-m.l-m.r),fy=c=>H-m.b-c/cm*(H-m.t-m.b);
+ const xt=[];const st=(hi-lo)>20?10:(hi-lo)>8?5:(hi-lo)>3?2:1;for(let v=Math.ceil(lo/st)*st;v<=hi;v+=st)xt.push([v,v+"%"]);
+ axes(g,W,H,m,xt,[[0,"0"],[cm/1.1,String(Math.max(...cnt))]],fx,fy);
+ cnt.forEach((c,i)=>{const x0=fx(lo+i*(hi-lo)/nb),x1=fx(lo+(i+1)*(hi-lo)/nb);g.fillStyle=css("--c1");g.globalAlpha=.35;g.fillRect(x0+1,fy(c),x1-x0-2,fy(0)-fy(c))});g.globalAlpha=1;
+ const vl=(v,col,d)=>{g.strokeStyle=col;g.lineWidth=2.5;g.setLineDash(d);g.beginPath();g.moveTo(fx(v),m.t);g.lineTo(fx(v),H-m.b);g.stroke();g.setLineDash([])};
+ vl(tr.mwfTrue*100,css("--muted"),[5,4]);vl(res.m0*100,css("--c2"),[]);vl(res.mb*100,css("--c1"),[])}
+
+// ---- app
+let seed=20261112,last=null,pending=false;
+function params(){return{mwf:+$("mwf").value/100,t2m:+$("t2m").value,t2i:+$("t2i").value,snr:+$("snr").value,B:+$("nb").value}}
+function run(){pending=false;const p=params();
+ $("mwfO").textContent=$("mwf").value+"%";$("t2mO").textContent=p.t2m+" ms";$("t2iO").textContent=p.t2i+" ms";$("snrO").textContent=p.snr;$("nbO").textContent=p.B;
+ const tr=truth(p.mwf,p.t2m,p.t2i),R=rng(seed),y=noisy(tr.s,p.snr,R),res=bootstrap(y,p.B,rng(seed^0x9e37));last={tr,y,res};
+ $("sT").textContent=(tr.mwfTrue*100).toFixed(1)+"%";$("sN").textContent=(res.m0*100).toFixed(1)+"%";$("sB").textContent=(res.mb*100).toFixed(1)+"% ± "+(res.sd*100).toFixed(1);
+ const eN=Math.abs(res.m0-tr.mwfTrue)*100,eB=Math.abs(res.mb-tr.mwfTrue)*100;
+ $("note").textContent=eB<eN?`On this draw the average is ${(eN-eB).toFixed(1)} points closer to the truth than the single fit.`:`On this draw the single fit happened to land ${(eB-eN).toFixed(1)} points closer; averaging wins on average, not on every voxel. Try the 200-voxel test.`;
+ draw()}
+function draw(){if(!last)return;drawSpec(last.tr,last.res);drawDec(last.y,last.res);drawHist(last.tr,last.res)}
+function req(){if(!pending){pending=true;requestAnimationFrame(run)}}
+document.querySelectorAll(".controls input").forEach(e=>e.addEventListener("input",req));
+$("redraw").addEventListener("click",()=>{seed=(seed*1103515245+12345)>>>0;req()});
+const presets={healthy:{mwf:15,t2m:20,t2i:80,snr:150},lesion:{mwf:4,t2m:22,t2i:90,snr:150},noisy:{mwf:15,t2m:20,t2i:80,snr:60},clean:{mwf:15,t2m:20,t2i:80,snr:800}};
+document.querySelectorAll("[data-p]").forEach(b=>b.addEventListener("click",()=>{const p=presets[b.dataset.p];for(const k in p)$(k).value=p[k];req()}));
+$("run").addEventListener("click",()=>{const b=$("run");b.disabled=true;const p=params(),B=Math.min(100,p.B),tr=truth(p.mwf,p.t2m,p.t2i),R=rng(777+seed),Rb=rng(4242+seed);let i=0,sN=0,sB=0;const NV=200;
+ const step=()=>{const t0=performance.now();while(i<NV&&performance.now()-t0<30){const y=noisy(tr.s,p.snr,R),r=bootstrap(y,B,Rb);sN+=Math.abs(r.m0-tr.mwfTrue);sB+=Math.abs(r.mb-tr.mwfTrue);i++}
+  $("tnote").textContent=`Running… ${i} of ${NV} voxels`;
+  if(i<NV)setTimeout(step,0);else{const a=sN/NV*100,c=sB/NV*100;$("mN").textContent=a.toFixed(2);$("mB").textContent=c.toFixed(2);$("mR").textContent=((1-c/a)*100).toFixed(0)+"%";
+   $("tnote").textContent=`Done: 200 voxels at SNR ${p.snr}, true MWF ${(tr.mwfTrue*100).toFixed(1)}%, ${B} refits each. Error is the mean absolute difference from the true MWF, in percentage points.`;b.disabled=false}};
+ step()});
+addEventListener("resize",()=>draw());matchMedia("(prefers-color-scheme: dark)").addEventListener("change",()=>draw());
+run();
+</script></body></html>
