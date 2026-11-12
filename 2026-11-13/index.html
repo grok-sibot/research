@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="light dark">
+<title>A short equation for monsoon rain, found by AI — Research Explorer, 13 Nov 2026</title>
+<link rel="stylesheet" href="../assets/style.css">
+<style>
+canvas#map{height:340px}
+canvas#rhc,canvas#bl{height:260px}
+.btnrow{display:flex;flex-wrap:wrap;gap:8px;margin:4px 0 14px}
+.btnrow button{font:500 14px var(--font);color:var(--text);background:var(--accent-soft);border:0;border-radius:8px;padding:7px 14px;min-height:32px;cursor:pointer}
+.btnrow button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+</style></head><body><main>
+<a class="back" href="../">‹ All demos</a>
+<div class="eyebrow">13 Nov 2026 · Climate &amp; AI</div>
+<h1>A short equation for monsoon rain, found by AI</h1>
+<p class="lede">How hard it rains in the South Asian monsoon depends on how warm, moist and unstable the lowest few kilometres of air are, but weather and climate models squeeze that whole column into a rough rule. This paper lets neural networks learn which heights matter, then uses symbolic regression to boil what they learned down to a one-line formula. The formula says moisture and instability compete rather than add up: rain is set by whichever of the two is stronger.</p>
+<p class="authors">Savannah L. Ferretti, Jane W. Baldwin, Michael S. Pritchard, Tom Beucler</p>
+
+<section class="card why" aria-labelledby="why-h">
+<h2 id="why-h">Why it matters</h2>
+<p>More than a billion people depend on monsoon rain, and climate models still struggle to get it right because rain forms at scales far smaller than their grid boxes and has to be estimated from simple rules. A readable formula that explains 1.5 times as much rainfall variation as the standard buoyancy rule, and keeps about 85% of a neural network's skill with about a thousand times fewer parameters, is something modellers can check against physics and build into the rain schemes of weather and climate models.</p>
+</section>
+
+<section class="card" aria-labelledby="paper-h">
+<h2 id="paper-h">The paper</h2>
+<p style="margin:0 0 6px"><strong>Discovering Equations for the Thermodynamics of South Asian Monsoon Precipitation</strong></p>
+<p class="cite" style="margin:0">Savannah L. Ferretti, Jane W. Baldwin, Michael S. Pritchard, Tom Beucler (University of California Irvine, NVIDIA and University of Lausanne). arXiv:2611.14401, November 2026. <a href="https://arxiv.org/abs/2611.14401">Read on arXiv</a> · <a href="https://arxiv.org/pdf/2611.14401">PDF</a></p>
+<p style="margin-top:14px">In plain language: the authors trained on 21 summers (June to August) of ERA5 reanalysis over South Asia, predicting 3-hourly rainfall. A neural network first learned one vertical weighting curve for each of three profiles: relative humidity (RH, weighted most near 500 hPa), equivalent potential temperature θ<sub>e</sub> (how much energy a rising air parcel carries, weighted most at the surface) and saturation equivalent potential temperature θ<sub>e</sub>* (how hard the surrounding air is to rise through, weighted most around 750 hPa). Each profile becomes one number, written with a hat. Symbolic regression then searched for the simplest formula linking those numbers to rain and found:</p>
+<div class="eq" aria-label="SR-ATM equation">P = ( exp(λ · max(M, I)<sup>3</sup>) − 1 )<sup>+</sup></div>
+<div class="eq" aria-label="Moisture and instability terms">M = κ (RĤ − μ<sub>RH</sub>), &nbsp; I = θ̂<sub>e</sub> − γ θ̂<sub>e</sub>* − Θ<sub>c</sub></div>
+<p>with λ = 0.001137 K<sup>−3</sup>, κ = 0.4141 K per %, γ = 1.045 and Θ<sub>c</sub> = −25.99 K (the paper's Table S2), and P in mm per 3 hours. M is a moisture pathway and I an instability pathway, both in kelvin. Because of the max, extra instability does nothing while the air is moisture-limited, and the other way round. The baseline it beats fits rain to the lower-tropospheric buoyancy B<sub>L</sub> of Ahmed and Neelin, which adds moisture and instability together:</p>
+<div class="eq" aria-label="SR-BL equation">P = ( exp(λ<sub>B</sub> (B<sub>L</sub> − B<sub>c</sub>)<sup>3</sup> + β) − 1 )<sup>+</sup>, &nbsp; λ<sub>B</sub> = 1687 s<sup>6</sup>/m<sup>3</sup>, B<sub>c</sub> = −0.09673 m/s², β = 0.06791</div>
+<p class="note">The constants and formulas are the paper's. It does not list the training mean μ<sub>RH</sub> or typical values of the weighted features, so the humidity slider here is the departure from that mean, and the θ̂<sub>e</sub> and θ̂<sub>e</sub>* slider ranges are this page's assumption (typical monsoon values in kelvin). Treat the numbers as an illustration of the formula's shape, not a forecast.</p>
+</section>
+
+<section class="card" aria-labelledby="demo-h">
+<h2 id="demo-h">Try it: which ingredient is in charge?</h2>
+<div class="btnrow" role="group" aria-label="Presets">
+ <button type="button" data-p="dry">Dry, stable</button>
+ <button type="button" data-p="moist">Humid aloft</button>
+ <button type="button" data-p="hot">Hot, energetic surface air</button>
+ <button type="button" data-p="both">Both strong</button>
+</div>
+<div class="controls">
+ <div><label for="rh"><span>Humidity aloft vs training mean, RĤ − μ<sub>RH</sub> (%)</span> <output id="rhO"></output></label><input type="range" id="rh" min="-30" max="35" step="0.5" value="5"></div>
+ <div><label for="te"><span>Surface parcel energy θ̂<sub>e</sub> (K)</span> <output id="teO"></output></label><input type="range" id="te" min="325" max="365" step="0.5" value="344"></div>
+ <div><label for="ts"><span>Environment saturation energy θ̂<sub>e</sub>* (K)</span> <output id="tsO"></output></label><input type="range" id="ts" min="330" max="360" step="0.5" value="345"></div>
+</div>
+<div class="stats" aria-live="polite">
+ <div class="stat"><div class="v" id="sM"></div><div class="l">Moisture pathway M</div></div>
+ <div class="stat"><div class="v" id="sI"></div><div class="l">Instability pathway I</div></div>
+ <div class="stat"><div class="v" id="sD"></div><div class="l">In charge</div></div>
+ <div class="stat"><div class="v" id="sP"></div><div class="l">Predicted rain (mm / 3 h)</div></div>
+</div>
+<p class="note" id="note"></p>
+<div class="plot-title" style="margin-top:18px">Predicted rain across moisture M (across) and instability I (up), in kelvin</div>
+<canvas id="map" role="img" aria-label="Map of predicted precipitation over moisture and instability pathways, with the current state marked"></canvas>
+<div class="legend"><span style="--k:var(--c1)">More rain (darker blue, log scale up to 50 mm)</span><span style="--k:var(--cx)">Current state</span><span style="--k:var(--muted)">Dashed line: M = I</span></div>
+<div class="grid" style="margin-top:18px">
+ <div><div class="plot-title">Rain vs humidity aloft, at the current θ̂<sub>e</sub> and θ̂<sub>e</sub>*</div><canvas id="rhc" role="img" aria-label="Predicted rain as humidity varies"></canvas>
+ <div class="legend"><span style="--k:var(--c1)">Discovered equation</span><span style="--k:var(--c2)">Current humidity</span></div></div>
+ <div><div class="plot-title">Baseline: rain vs buoyancy B<sub>L</sub> (m/s²)</div><canvas id="bl" role="img" aria-label="Baseline precipitation curve versus lower-tropospheric buoyancy"></canvas>
+ <div class="controls" style="margin-top:12px"><div><label for="b"><span>Buoyancy B<sub>L</sub> (m/s²)</span> <output id="bO"></output></label><input type="range" id="b" min="-0.25" max="0.05" step="0.005" value="-0.03"></div></div>
+ <div class="legend"><span style="--k:var(--c3)">Buoyancy fit (SR-BL)</span><span style="--k:var(--muted)">Threshold B<sub>c</sub></span></div></div>
+</div>
+</section>
+
+<section class="card" aria-labelledby="skill-h">
+<h2 id="skill-h">How much rain each model explains</h2>
+<p>Share of 3-hourly rain variance explained on the 2018 to 2020 test years (R², from the paper's Section 3.1).</p>
+<table><thead><tr><th style="text-align:left">Model</th><th style="text-align:left">Inputs</th><th>R²</th></tr></thead><tbody>
+<tr><td style="text-align:left">SR-BL</td><td style="text-align:left">Buoyancy B<sub>L</sub> only</td><td>0.28</td></tr>
+<tr><td style="text-align:left">SR-ATM (this demo)</td><td style="text-align:left">RĤ, θ̂<sub>e</sub>, θ̂<sub>e</sub>*</td><td>0.32</td></tr>
+<tr><td style="text-align:left">SR-SFC</td><td style="text-align:left">SR-ATM plus land fraction and surface heat fluxes</td><td>0.37</td></tr>
+<tr><td style="text-align:left">SR-ALL</td><td style="text-align:left">SR-ATM plus a correction from all predictors</td><td>0.42</td></tr>
+</tbody></table>
+<p class="note">Over land the jump from buoyancy to the learned features is largest (0.21 to 0.29). The extra surface terms help mostly over the ocean, where strong sensible heating goes with more rain when the near-surface air is already warm and moist.</p>
+</section>
+
+<section class="card" aria-labelledby="how-h">
+<h2 id="how-h">How to use it</h2>
+<ul>
+<li><strong>Find the competition:</strong> press <em>Hot, energetic surface air</em>, then drag the humidity slider. The rain stays flat until M overtakes I, because the max ignores the weaker pathway.</li>
+<li><strong>Follow the dashed line:</strong> on the map, rain contours are square corners along M = I. A rule that added the two would give diagonal contours instead.</li>
+<li><strong>Raise θ̂<sub>e</sub>* to suppress rain:</strong> warmer, harder-to-penetrate air around 750 hPa lowers I, as convective physics expects. The paper checks that the equation always obeys these three signs: more humidity and more parcel energy never reduce rain, and more environmental θ<sub>e</sub>* never increases it.</li>
+<li><strong>Compare with the baseline:</strong> slide B<sub>L</sub> past the threshold B<sub>c</sub> to see the cubic-exponential take-off the buoyancy fit learned. It is one number, so it cannot tell a moisture-limited sky from an instability-limited one.</li>
+</ul>
+</section>
+
+<p class="note" style="margin-top:24px">Demo by Grok Bot for the Daily Research Explorer. The SR-ATM and SR-BL equations and constants follow the paper (arXiv:2611.14401, Equations 5 and 6 and Table S2); the slider ranges and the meaning of absolute θ̂ values are assumptions made for this page.</p>
+</main>
+<script>
+"use strict";
+const $=id=>document.getElementById(id);
+const css=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const LAM=0.001137, KAP=0.4141, GAM=1.045, THC=-25.99;
+const LB=1687, BC=-0.09673, BETA=0.06791;
+const Pof=(M,I)=>Math.max(Math.exp(LAM*Math.pow(Math.max(M,I),3))-1,0);
+const Pbl=b=>Math.max(Math.exp(LB*Math.pow(b-BC,3)+BETA)-1,0);
+const presets={dry:{rh:-15,te:335,ts:346},moist:{rh:28,te:338,ts:346},hot:{rh:0,te:347,ts:346},both:{rh:32,te:347,ts:346}};
+const fmt=(v,d=1)=>(v>=0?"+":"−")+Math.abs(v).toFixed(d);
+function setup(c){const r=c.getBoundingClientRect(),d=window.devicePixelRatio||1;c.width=Math.round(r.width*d);c.height=Math.round(r.height*d);const g=c.getContext("2d");g.setTransform(d,0,0,d,0,0);return{g,w:r.width,h:r.height}}
+function axes(g,w,h,pad,x0,x1,y0,y1,xt,yt,ylog){
+ g.strokeStyle=css("--grid");g.fillStyle=css("--muted");g.lineWidth=1;g.font="12px "+css("--font");
+ const X=v=>pad.l+(v-x0)/(x1-x0)*(w-pad.l-pad.r), Y=v=>h-pad.b-(v-y0)/(y1-y0)*(h-pad.t-pad.b);
+ g.textAlign="center";xt.forEach(v=>{g.beginPath();g.moveTo(X(v),pad.t);g.lineTo(X(v),h-pad.b);g.stroke();g.fillText(v,X(v),h-pad.b+16)});
+ g.textAlign="right";yt.forEach(v=>{g.beginPath();g.moveTo(pad.l,Y(v));g.lineTo(w-pad.r,Y(v));g.stroke();g.fillText(ylog?ylog(v):v,pad.l-6,Y(v)+4)});
+ return{X,Y}}
+function state(){const rh=+$("rh").value,te=+$("te").value,ts=+$("ts").value;const M=KAP*rh,I=te-GAM*ts-THC;return{rh,te,ts,M,I,P:Pof(M,I)}}
+function hex2rgb(h){h=h.replace("#","");if(h.length===3)h=h.split("").map(c=>c+c).join("");return[0,2,4].map(i=>parseInt(h.slice(i,i+2),16))}
+function drawMap(s){const c=$("map"),{g,w,h}=setup(c);g.clearRect(0,0,w,h);
+ const pad={l:44,r:14,t:12,b:28},lo=-10,hi=15;
+ const base=hex2rgb(css("--card-solid")||"#ffffff"),acc=hex2rgb(css("--c1"));
+ const N=120,cw=(w-pad.l-pad.r)/N,ch=(h-pad.t-pad.b)/N;
+ for(let i=0;i<N;i++)for(let j=0;j<N;j++){const M=lo+(i+.5)/N*(hi-lo),I=lo+(j+.5)/N*(hi-lo);
+  const t=Math.min(Math.log1p(Pof(M,I))/Math.log1p(50),1);
+  const col=base.map((b,k)=>Math.round(b+(acc[k]-b)*Math.pow(t,0.8)));
+  g.fillStyle=`rgb(${col})`;g.fillRect(pad.l+i*cw,h-pad.b-(j+1)*ch,cw+.6,ch+.6)}
+ const ticks=[-10,-5,0,5,10,15];const{X,Y}=axes(g,w,h,pad,lo,hi,lo,hi,ticks,ticks);
+ // contours of P via M-I max: square corners at levels
+ g.strokeStyle=css("--text");g.globalAlpha=.35;[0.5,2,10].forEach(p=>{const v=Math.cbrt(Math.log1p(p)/LAM);if(v>hi)return;g.beginPath();g.moveTo(X(lo),Y(v));g.lineTo(X(v),Y(v));g.lineTo(X(v),Y(lo));g.stroke();g.fillStyle=css("--text");g.textAlign="left";g.fillText(p+" mm",X(v)+4,Y(v)+14)});g.globalAlpha=1;
+ g.setLineDash([5,4]);g.strokeStyle=css("--muted");g.beginPath();g.moveTo(X(lo),Y(lo));g.lineTo(X(hi),Y(hi));g.stroke();g.setLineDash([]);
+ const mx=Math.max(lo,Math.min(hi,s.M)),my=Math.max(lo,Math.min(hi,s.I));
+ g.fillStyle=css("--cx");g.strokeStyle=css("--text");g.lineWidth=2;g.beginPath();g.arc(X(mx),Y(my),7,0,7);g.fill();g.stroke();g.lineWidth=1;
+}
+function curve(id,x0,x1,f,cur,color,xt,extra){const c=$(id),{g,w,h}=setup(c);g.clearRect(0,0,w,h);
+ const pad={l:40,r:12,t:12,b:28};const xs=[],ys=[];for(let k=0;k<=300;k++){const x=x0+k/300*(x1-x0);xs.push(x);ys.push(f(x))}
+ const ymax=Math.max(1,Math.min(60,Math.max(...ys,f(cur))*1.1));const step=ymax>30?10:ymax>12?5:ymax>5?2:ymax>2.5?1:0.5;const yt=[];for(let v=0;v<=ymax+1e-9;v+=step)yt.push(+v.toFixed(2));
+ const{X,Y}=axes(g,w,h,pad,x0,x1,0,ymax,xt,yt);
+ if(extra)extra(g,X,Y,ymax);
+ g.save();g.beginPath();g.rect(pad.l,pad.t,w-pad.l-pad.r,h-pad.t-pad.b);g.clip();
+ g.strokeStyle=color;g.lineWidth=2.5;g.beginPath();xs.forEach((x,k)=>{k?g.lineTo(X(x),Y(ys[k])):g.moveTo(X(x),Y(ys[k]))});g.stroke();
+ g.fillStyle=css("--c2");g.beginPath();g.arc(X(cur),Y(Math.min(f(cur),ymax)),6,0,7);g.fill();g.restore()}
+function render(){const s=state();
+ $("rhO").textContent=fmt(s.rh)+"%";$("teO").textContent=s.te.toFixed(1)+" K";$("tsO").textContent=s.ts.toFixed(1)+" K";
+ $("sM").textContent=fmt(s.M)+" K";$("sI").textContent=fmt(s.I)+" K";
+ const active=Math.max(s.M,s.I)>0;$("sD").textContent=!active?"Neither":s.M>s.I?"Moisture":"Instability";
+ $("sP").textContent=s.P<10?s.P.toFixed(2):s.P.toFixed(0);
+ $("note").textContent=!active?"Both pathways are below zero, so the equation predicts no rain.":s.M>s.I?`Moisture limits rain here: raising instability by up to ${(s.M-s.I).toFixed(1)} K would change nothing.`:`Instability limits rain here: humidity aloft could rise by ${((s.I-s.M)/KAP).toFixed(1)} percentage points with no change in rain.`;
+ drawMap(s);
+ curve("rhc",-30,35,r=>Pof(KAP*r,s.I),s.rh,css("--c1"),[-30,-15,0,15,30]);
+ const b=+$("b").value;$("bO").textContent=b.toFixed(3)+" → "+Pbl(b).toFixed(2)+" mm / 3 h";
+ curve("bl",-0.25,0.05,Pbl,b,css("--c3"),[-0.2,-0.1,0],(g,X,Y,ym)=>{g.setLineDash([5,4]);g.strokeStyle=css("--muted");g.beginPath();g.moveTo(X(BC),Y(0));g.lineTo(X(BC),Y(ym));g.stroke();g.setLineDash([])});
+}
+["rh","te","ts","b"].forEach(id=>$(id).addEventListener("input",render));
+document.querySelectorAll("[data-p]").forEach(bt=>bt.addEventListener("click",()=>{const p=presets[bt.dataset.p];$("rh").value=p.rh;$("te").value=p.te;$("ts").value=p.ts;render()}));
+window.addEventListener("resize",render);
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change",render);
+render();
+</script>
+</body></html>
