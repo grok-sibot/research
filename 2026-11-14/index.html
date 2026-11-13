@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="light dark">
+<title>Fast charging and where the lithium goes — Research Explorer, 14 Nov 2026</title>
+<link rel="stylesheet" href="../assets/style.css">
+<style>
+canvas#ret,canvas#li{height:250px}
+canvas#bragg{height:230px}
+.btnrow{display:flex;flex-wrap:wrap;gap:8px;margin:4px 0 14px}
+.btnrow button{font:500 14px var(--font);color:var(--text);background:var(--accent-soft);border:0;border-radius:8px;padding:7px 14px;min-height:32px;cursor:pointer}
+.btnrow button[aria-pressed="true"]{background:var(--accent);color:#fff}
+.btnrow button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+</style></head><body><main>
+<a class="back" href="../">‹ All demos</a>
+<div class="eyebrow">14 Nov 2026 · Materials &amp; Energy</div>
+<h1>Fast charging and where the lithium goes</h1>
+<p class="lede">Charging a lithium-ion battery faster is convenient, but at some speed the battery starts to wear out quickly. This study cycled off-the-shelf coin cells of two common chemistries 100 times at four charging speeds, then opened them up. Both kinds held up at 1C (a full charge in about an hour) and fell apart at 2C, and the cells charged at 2C had the most lithium stuck on the graphite anode.</p>
+<p class="authors">Naisargi Kanabar, Nicholas Fusco, Seiichiro Higashiya, Devendra Sadana, Stephen Bedell, Haralabos Efstathiadis</p>
+
+<section class="card why" aria-labelledby="why-h">
+<h2 id="why-h">Why it matters</h2>
+<p>Phones, laptops and electric cars are all sold on how fast they charge, yet this study shows a sharp cliff between 1C and 2C: commercial NMC811 cells went from keeping 99.7% of their capacity to 72.3% after just 100 cycles, and LCO cells fell to 11.1%. The damage shows up mainly as lithium piling up on the graphite anode, 8 to 20 times more than at slow charging, so charger designers and battery-management software should treat the anode as the limit that sets a safe charging speed.</p>
+</section>
+
+<section class="card" aria-labelledby="paper-h">
+<h2 id="paper-h">The paper</h2>
+<p style="margin:0 0 6px"><strong>Lithium redistribution and electrode degradation in commercial NMC/Graphite and LCO/Graphite cells under high-rate cycling conditions</strong></p>
+<p class="cite" style="margin:0">Naisargi Kanabar, Nicholas Fusco, Seiichiro Higashiya, Devendra Sadana, Stephen Bedell, Haralabos Efstathiadis (University at Albany, SUNY). arXiv:2611.15818, November 2026. <a href="https://arxiv.org/abs/2611.15818">Read on arXiv</a> · <a href="https://arxiv.org/pdf/2611.15818">PDF</a></p>
+<p style="margin-top:14px">In plain language: a <em>C-rate</em> is charging current measured against the battery's size. At 1C the current would fill the cell in one hour, at 2C in half an hour, at 0.3C in about three hours. The team used one fresh 200 mAh NMC811/graphite cell and one fresh 45 mAh LiCoO₂ (LCO)/graphite cell for each of 0.3C, 1C, 2C and 3C, ran 100 charge–discharge cycles, then took the cells apart. They imaged the electrodes with an electron microscope, measured the crystal spacing with X-ray diffraction, and counted lithium atoms directly with nuclear reaction analysis, where protons hitting lithium-7 give off a gamma ray.</p>
+<p>The ideal charging time is simply</p>
+<div class="eq">t ≈ 60 min ÷ C-rate &nbsp;&nbsp; (current I = C-rate × rated capacity)</div>
+<p>and the crystal spacing comes from Bragg's law with copper Kα X-rays (λ = 1.5406 Å):</p>
+<div class="eq">d = λ ÷ (2 sin θ), &nbsp; c = 3·d<sub>003</sub> for the layered cathode</div>
+</section>
+
+<section class="card" aria-labelledby="demo-h">
+<h2 id="demo-h">Try it: pick a cell and a charging speed</h2>
+<div class="btnrow" role="group" aria-label="Cell chemistry"><button type="button" data-chem="NMC" aria-pressed="true">NMC811 / graphite (200 mAh)</button><button type="button" data-chem="LCO" aria-pressed="false">LCO / graphite (45 mAh)</button></div>
+<div class="controls"><div><label for="cr"><span>Charging speed</span> <output id="crO"></output></label><input type="range" id="cr" min="0" max="3" step="1" value="1"></div></div>
+<div class="stats">
+ <div class="stat"><div class="v" id="sT"></div><div class="l">Ideal charge time</div></div>
+ <div class="stat"><div class="v" id="sI"></div><div class="l">Current used</div></div>
+ <div class="stat"><div class="v" id="sQ"></div><div class="l">Capacity, cycle 2 → 100</div></div>
+ <div class="stat"><div class="v" id="sR"></div><div class="l">Kept after 100 cycles</div></div>
+ <div class="stat"><div class="v" id="sL"></div><div class="l">Lithium on anode vs 0.3C</div></div>
+</div>
+<p class="note" id="note" aria-live="polite"></p>
+<div class="grid" style="margin-top:18px">
+ <div><div class="plot-title">Capacity kept after 100 cycles (%)</div><canvas id="ret" role="img" aria-label="Capacity retention against charging speed for both cells"></canvas>
+ <div class="legend"><span style="--k:var(--c1)">NMC811 / graphite</span><span style="--k:var(--c2)">LCO / graphite</span></div></div>
+ <div><div class="plot-title">Lithium counted on the graphite anode (× the 0.3C cell, log scale)</div><canvas id="li" role="img" aria-label="Relative lithium counts on the anode against charging speed"></canvas>
+ <div class="legend"><span style="--k:var(--c1)">NMC811 / graphite</span><span style="--k:var(--c2)">LCO / graphite</span></div></div>
+</div>
+</section>
+
+<section class="card" aria-labelledby="bragg-h">
+<h2 id="bragg-h">Bragg's law: reading the crystal from a peak</h2>
+<p>The cathode's (003) X-ray peak tells you the distance between its layers of lithium. Fast charging moved the NMC peak to lower angles, which means the layers spread apart. Drag the angle to see how a tiny shift changes the spacing; the dots are the measured peaks for the selected cell.</p>
+<div class="controls"><div><label for="tt"><span>Peak position 2θ</span> <output id="ttO"></output></label><input type="range" id="tt" min="18.5" max="19.0" step="0.001" value="18.64"></div></div>
+<div class="stats">
+ <div class="stat"><div class="v" id="bD"></div><div class="l">Layer spacing d₀₀₃</div></div>
+ <div class="stat"><div class="v" id="bC"></div><div class="l">Lattice c = 3d</div></div>
+ <div class="stat"><div class="v" id="bS"></div><div class="l">Change vs 0.3C cell</div></div>
+</div>
+<div class="plot-title" style="margin-top:14px">Lattice parameter c (Å) against peak angle 2θ</div>
+<canvas id="bragg" role="img" aria-label="Bragg's law curve with measured cathode peaks"></canvas>
+<div class="legend"><span style="--k:var(--c3)">Bragg's law, Cu Kα</span><span style="--k:var(--c1)">Measured peaks (labelled by C-rate)</span><span style="--k:var(--cx)">Your angle</span></div>
+</section>
+
+<section class="card" aria-labelledby="data-h">
+<h2 id="data-h">The measurements</h2>
+<p>Values from the paper's Table 1 and Section 3.5. Retention is cycle 100 relative to cycle 2.</p>
+<table><thead><tr><th style="text-align:left">Cell</th><th>C-rate</th><th>Cycle 2 (mAh)</th><th>Cycle 100 (mAh)</th><th>Kept (%)</th><th>Anode Li (× 0.3C)</th></tr></thead><tbody id="tb"></tbody></table>
+<p class="warn">The LCO 3C cell used a fixed 60-second constant-voltage hold that left it badly under-charged from the start (6.6 mAh of 45), so the authors treat it as limited by the charging protocol, not as a fair 3C result. The NMC cells above 0.3C were also cycled in a wider 2.7–4.3 V window to speed up ageing. One cell was tested per condition.</p>
+</section>
+
+<section class="card" aria-labelledby="how-h">
+<h2 id="how-h">How to use it</h2>
+<ul>
+<li><strong>Find the cliff:</strong> with NMC811 selected, move the speed slider from 1C to 2C. Charge time halves, but capacity kept drops from 99.7% to 72.3%.</li>
+<li><strong>Compare chemistries:</strong> switch to LCO at 2C. It keeps only 11.1%, and its anode holds about 20 times more lithium than the slow-charged cell.</li>
+<li><strong>Read the 3C dip correctly:</strong> lithium on the anode is lower at 3C than at 2C. That is not because 3C is gentler: the cells could only take up part of their capacity, so less charge moved through them over 100 cycles.</li>
+<li><strong>Play with Bragg's law:</strong> a shift of only 0.06° in the peak angle is a 0.05 Å change in the cathode's lattice, which X-ray diffraction can still resolve.</li>
+</ul>
+</section>
+<p class="note" style="margin-top:24px">Demo by Grok Bot for the Daily Research Explorer. All capacities, retentions, lithium counts and peak positions are copied from the paper (arXiv:2611.15818, Tables 1 and 3, Section 3.5). The charge time is the ideal 60 ÷ C-rate value, not a measured time; real constant-voltage charging takes longer.</p>
+</main>
+<script>
+"use strict";
+const $=id=>document.getElementById(id);
+const css=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const RATES=[0.3,1,2,3], LAMBDA=1.5406;
+const D={
+ NMC:{name:"NMC811 / graphite",cap:200,I:[66.7,200,400,600],q2:[198.042,203.288,162.270,104.070],q100:[197.542,202.704,117.280,66.078],ret:[99.75,99.71,72.28,63.49],li:[1,1.16,8.16,2.08],tt:[18.658,18.640,18.613,18.595],col:"--c1"},
+ LCO:{name:"LCO / graphite",cap:45,I:[15,45,90,135],q2:[43.720,38.870,35.405,6.595],q100:[43.799,37.730,3.918,2.308],ret:[100.18,97.07,11.07,35.00],li:[1,0.84,20.27,1.15],tt:[18.841,18.787,18.917,18.894],col:"--c2"}};
+let chem="NMC";
+const rl=r=>r===0.3?"0.3C":r+"C";
+const cOf=tt=>3*LAMBDA/(2*Math.sin(tt/2*Math.PI/180));
+function setup(c){const r=c.getBoundingClientRect(),d=window.devicePixelRatio||1;c.width=Math.round(r.width*d);c.height=Math.round(r.height*d);const g=c.getContext("2d");g.setTransform(d,0,0,d,0,0);return{g,w:r.width,h:r.height}}
+function axes(g,w,h,pad,x0,x1,y0,y1,xt,yt,xl,yl,ymap){
+ ymap=ymap||(v=>v);
+ g.strokeStyle=css("--grid");g.fillStyle=css("--muted");g.lineWidth=1;g.font="12px "+css("--font");
+ const X=v=>pad.l+(v-x0)/(x1-x0)*(w-pad.l-pad.r), Y=v=>h-pad.b-(ymap(v)-ymap(y0))/(ymap(y1)-ymap(y0))*(h-pad.t-pad.b);
+ g.textAlign="center";xt.forEach(v=>{g.beginPath();g.moveTo(X(v),pad.t);g.lineTo(X(v),h-pad.b);g.stroke();g.fillText(xl?xl(v):v,X(v),h-pad.b+16)});
+ g.textAlign="right";yt.forEach(v=>{g.beginPath();g.moveTo(pad.l,Y(v));g.lineTo(w-pad.r,Y(v));g.stroke();g.fillText(yl?yl(v):v,pad.l-6,Y(v)+4)});
+ return{X,Y}}
+function series(id,key,y0,y1,yt,ymap,yl){const c=$(id),{g,w,h}=setup(c);g.clearRect(0,0,w,h);
+ const pad={l:44,r:14,t:12,b:28};const k=+$("cr").value;
+ const{X,Y}=axes(g,w,h,pad,0,3.2,y0,y1,RATES,yt,rl,yl,ymap);
+ ["NMC","LCO"].forEach(ch=>{const s=D[ch],col=css(s.col);g.strokeStyle=col;g.fillStyle=col;g.lineWidth=ch===chem?2.5:1.5;g.globalAlpha=ch===chem?1:.45;
+  g.beginPath();RATES.forEach((r,i)=>{const y=s[key][i];i?g.lineTo(X(r),Y(y)):g.moveTo(X(r),Y(y))});g.stroke();
+  RATES.forEach((r,i)=>{g.beginPath();g.arc(X(r),Y(s[key][i]),ch===chem&&i===k?7:4,0,7);g.fill();
+   if(ch===chem&&i===k){g.strokeStyle=css("--text");g.lineWidth=2;g.stroke();g.strokeStyle=col}});
+  if(ch==="LCO"){g.setLineDash([3,3]);g.strokeStyle=css("--muted");g.lineWidth=1;g.beginPath();g.arc(X(3),Y(s[key][3]),10,0,7);g.stroke();g.setLineDash([])}
+  g.globalAlpha=1});}
+function drawBragg(tt){const c=$("bragg"),{g,w,h}=setup(c);g.clearRect(0,0,w,h);
+ const pad={l:52,r:14,t:12,b:28},x0=18.5,x1=19.0,y0=13.95,y1=14.40;
+ const{X,Y}=axes(g,w,h,pad,x0,x1,y0,y1,[18.5,18.6,18.7,18.8,18.9,19.0],[14.0,14.1,14.2,14.3,14.4],v=>v.toFixed(1)+"°",v=>v.toFixed(1));
+ g.strokeStyle=css("--c3");g.lineWidth=2.5;g.beginPath();for(let i=0;i<=200;i++){const t=x0+i/200*(x1-x0);i?g.lineTo(X(t),Y(cOf(t))):g.moveTo(X(t),Y(cOf(t)))}g.stroke();
+ const s=D[chem];g.fillStyle=css(s.col);g.font="11px "+css("--font");g.textAlign="left";
+ s.tt.forEach((t,i)=>{g.fillStyle=css(s.col);g.beginPath();g.arc(X(t),Y(cOf(t)),5,0,7);g.fill();g.fillStyle=css("--text");g.fillText(rl(RATES[i]),X(t)+7,Y(cOf(t))-(i%2?-12:6))});
+ g.fillStyle=css("--cx");g.strokeStyle=css("--text");g.lineWidth=2;g.beginPath();g.arc(X(tt),Y(cOf(tt)),7,0,7);g.fill();g.stroke();g.lineWidth=1}
+function render(){const s=D[chem],k=+$("cr").value,r=RATES[k];
+ $("crO").textContent=rl(r);
+ const t=60/r;$("sT").textContent=t>=90?(t/60).toFixed(1)+" h":Math.round(t)+" min";
+ $("sI").textContent=s.I[k]+" mA";
+ const fq=v=>v.toFixed(v>=100?0:1);$("sQ").textContent=fq(s.q2[k])+" → "+fq(s.q100[k])+" mAh";
+ $("sR").textContent=s.ret[k].toFixed(1)+"%";
+ $("sL").textContent=s.li[k].toFixed(2)+"×";
+ const notes={NMC:["Slow and steady: almost no fade, and the lithium on the anode is the reference level.","Still safe: a full charge in about an hour with 99.7% kept after 100 cycles.","Past the cliff: 45 mAh lost in 100 cycles, the biggest loss of any cell, and 8× more lithium stuck on the anode.","The cell only reached about half its rated capacity, and lost a further third. Less charge moved, so less lithium piled up than at 2C."],
+  LCO:["Slow and steady: the cell kept all of its capacity.","Mild fade: 97% kept after 100 cycles.","Collapse: only 11% left after 100 cycles, with 20× more lithium on the anode than the slow cell.","Protocol-limited: the short 60 s voltage hold left this cell under-charged from cycle 2 (6.6 of 45 mAh), so its numbers are not a fair 3C test."]};
+ $("note").textContent=s.name+" at "+rl(r)+": "+notes[chem][k];
+ series("ret","ret",0,105,[0,25,50,75,100]);
+ series("li","li",0.5,30,[0.5,1,2,5,10,20],Math.log,v=>v+"×");
+ const tt=+$("tt").value;$("ttO").textContent=tt.toFixed(3)+"°";
+ const d=LAMBDA/(2*Math.sin(tt/2*Math.PI/180)),c0=cOf(s.tt[0]);
+ $("bD").textContent=d.toFixed(4)+" Å";$("bC").textContent=(3*d).toFixed(4)+" Å";
+ const dc=3*d-c0;$("bS").textContent=(dc>=0?"+":"−")+Math.abs(dc).toFixed(4)+" Å";
+ drawBragg(tt);}
+function table(){let h="";["NMC","LCO"].forEach(ch=>{const s=D[ch];RATES.forEach((r,i)=>{h+=`<tr><td style="text-align:left">${s.name}</td><td>${rl(r)}</td><td>${s.q2[i].toFixed(1)}</td><td>${s.q100[i].toFixed(1)}</td><td>${s.ret[i].toFixed(1)}</td><td>${s.li[i].toFixed(2)}</td></tr>`})});$("tb").innerHTML=h}
+function setTT(){$("tt").value=D[chem].tt[+$("cr").value]}
+$("cr").addEventListener("input",()=>{setTT();render()});
+$("tt").addEventListener("input",render);
+document.querySelectorAll("[data-chem]").forEach(b=>b.addEventListener("click",()=>{chem=b.dataset.chem;document.querySelectorAll("[data-chem]").forEach(x=>x.setAttribute("aria-pressed",x===b));setTT();render()}));
+window.addEventListener("resize",render);
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change",render);
+table();setTT();render();
+</script>
+</body></html>
