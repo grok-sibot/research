@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="light dark">
+<title>A safe blood-pressure target for each surgery patient — Research Explorer, 15 Nov 2026</title>
+<link rel="stylesheet" href="../assets/style.css">
+<style>
+canvas#mapPlot{height:280px}
+canvas#nePlot{height:130px}
+canvas#riskPlot{height:230px}
+.btnrow{display:flex;flex-wrap:wrap;gap:8px;margin:4px 0 14px;align-items:center}
+.btnrow button{font:500 14px var(--font);color:var(--text);background:var(--accent-soft);border:0;border-radius:8px;padding:7px 14px;min-height:32px;cursor:pointer}
+.btnrow button.primary{background:var(--accent);color:#fff}
+.btnrow button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.verdict{font-weight:600}
+label.toggle{justify-content:flex-start}
+</style></head><body><main>
+<a class="back" href="../">‹ All demos</a>
+<div class="eyebrow">15 Nov 2026 · Medicine</div>
+<h1>A safe blood-pressure target for each surgery patient</h1>
+<p class="lede">Under general anaesthesia blood pressure often sags, and anaesthetists give the drug norepinephrine to lift it. The same dose lifts one patient a lot and another barely at all. This paper learns each patient's own response from about ten minutes of routine readings, works out how unsure that fit still is, and then picks the lowest pressure target, with a bolus and a steady drip, whose predicted chance of any reading below 65 mmHg stays under a chosen limit. If no target is safe enough, it says so and leaves the decision to the clinician.</p>
+<p class="authors">Simon Buré, Jona Joachim, Florent Di Meglio</p>
+
+<section class="card why" aria-labelledby="why-h">
+<h2 id="why-h">Why it matters</h2>
+<p>Low blood pressure is common during surgery, and even short dips of the mean arterial pressure below 65 mmHg are linked to kidney injury, heart injury and death, yet norepinephrine is still adjusted by hand although patients respond very differently to the same dose. This method fits each patient's response from about ten minutes of routine readings and chooses the lowest target it can reach safely, or hands the decision back: in 4,096 virtual patients, a fixed 70 mmHg target left 25% with a reading below 65 mmHg, while the personalised rule treated 74% of patients and only 6.9% of them dipped below.</p>
+</section>
+
+<section class="card" aria-labelledby="paper-h">
+<h2 id="paper-h">The paper</h2>
+<p style="margin:0 0 6px"><strong>A risk-aware individualized blood pressure target to avoid hypotension in surgery</strong></p>
+<p class="cite" style="margin:0">Simon Buré, Jona Joachim, Florent Di Meglio (Centre Automatique et Systèmes, Mines Paris – PSL; Université Paris Cité; St-Louis-Lariboisière-Fernand Widal University Hospitals, Paris). arXiv:2611.16757 [q-bio.QM], 12 November 2026. <a href="https://arxiv.org/abs/2611.16757">Read on arXiv</a> · <a href="https://arxiv.org/pdf/2611.16757">PDF</a> · <a href="https://github.com/SimonBure/risk-aware-bp-target">Code</a></p>
+<p style="margin-top:14px">In plain language: the drug moves through three "compartments" (a depot near the drip, the blood, and the tissues), and the blood pressure rises with the amount in the blood. The team simplified a published twelve-parameter model to seven parameters that can be estimated from blood pressure readings alone, with no blood samples. With the infusion rate <i>u</i> (nmol/s):</p>
+<div class="eq">Ȧ<sub>d</sub> = u − k<sub>a</sub>A<sub>d</sub>, &nbsp; Ȧ<sub>c</sub> = k<sub>a</sub>A<sub>d</sub> − (k<sub>12</sub>+k<sub>el</sub>)A<sub>c</sub> + k<sub>21</sub>A<sub>p</sub>, &nbsp; Ȧ<sub>p</sub> = k<sub>12</sub>A<sub>c</sub> − k<sub>21</sub>A<sub>p</sub></div>
+<div class="eq">MAP = h(A<sub>c</sub>) = E<sub>max</sub> − a ÷ (b + A<sub>c</sub>)</div>
+<p>A patient is fitted by maximum a posteriori least squares around the population model. Linearising the model around that fit gives a Gaussian spread of the patient's parameters, <i>P</i> = (SᵀS/σ² + I)⁻¹, which turns into a forecast of every future reading. The risk of a target <i>y</i> is the chance that at least one reading in the window after the rise falls under 65 mmHg, and the chosen target is the smallest one under the limit α:</p>
+<div class="eq">R(y) = 1 − E<sub>δη</sub>[ ∏<sub>j</sub> Φ((ŷ<sub>j</sub> + [S′δη]<sub>j</sub> − 65) ÷ σ) ], &nbsp;&nbsp; y* = min{ y ∈ [65, F̂(u<sub>max</sub>)] : R(y) ≤ α }</div>
+<p>The dose for a target is a steady drip ū = k<sub>el</sub>·h⁻¹(y) plus the smallest 10-second bolus that gets the pressure to the target within the rise time.</p>
+</section>
+
+<section class="card" aria-labelledby="demo-h">
+<h2 id="demo-h">Try it: treat a virtual patient</h2>
+<p>Each virtual patient starts with low blood pressure. For the first minutes everyone gets the same collection drip (0.36 nmol/s for 2.5 min, then 0.18 nmol/s), as in the paper. At the decision time the model is fitted to the noisy readings, and the rule picks a target and a dose.</p>
+<div class="btnrow"><button type="button" class="primary" id="nextBtn">New virtual patient</button><span class="note" id="patientLbl" style="margin:0"></span></div>
+<div class="controls">
+ <div><label for="alpha"><span>Allowed risk α</span> <output id="alphaO"></output></label><input type="range" id="alpha" min="0" max="3" step="1" value="2"></div>
+ <div><label for="coll"><span>Data collected before deciding</span> <output id="collO"></output></label><input type="range" id="coll" min="5" max="20" step="2.5" value="10"></div>
+ <div><label for="noise"><span>Monitor noise σ</span> <output id="noiseO"></output></label><input type="range" id="noise" min="1" max="4" step="0.5" value="2"></div>
+</div>
+<label class="toggle"><input type="checkbox" id="reveal" checked> Show what the true patient does with the recommended dose</label>
+<div class="stats">
+ <div class="stat"><div class="v" id="sY"></div><div class="l">Personal target y*</div></div>
+ <div class="stat"><div class="v" id="sR"></div><div class="l">Predicted risk at y*</div></div>
+ <div class="stat"><div class="v" id="sU"></div><div class="l">Drip ū</div></div>
+ <div class="stat"><div class="v" id="sB"></div><div class="l">Bolus (over 10 s)</div></div>
+ <div class="stat"><div class="v" id="sT"></div><div class="l">Lowest real reading, y* dose</div></div>
+ <div class="stat"><div class="v" id="s70"></div><div class="l">Lowest real reading, fixed 70 mmHg dose</div></div>
+</div>
+<p class="note verdict" id="verdict" aria-live="polite"></p>
+<div class="plot-title" style="margin-top:14px">Mean arterial pressure (mmHg) over time (min)</div>
+<canvas id="mapPlot" role="img" aria-label="Blood pressure readings, fitted model, forecast with 90% band and the true patient's response"></canvas>
+<div class="legend"><span style="--k:var(--muted)">Readings</span><span style="--k:var(--c1)">Fit, then forecast (90% band)</span><span style="--k:var(--cx)">True patient (no noise)</span><span style="--k:var(--c2)">65 mmHg floor</span><span style="--k:var(--c3)">Target y*</span></div>
+<div class="plot-title" style="margin-top:12px">Norepinephrine rate (nmol/s)</div>
+<canvas id="nePlot" role="img" aria-label="Norepinephrine infusion rate over time"></canvas>
+<div class="plot-title" style="margin-top:16px">Predicted risk of any reading below 65 mmHg, against the target chosen</div>
+<canvas id="riskPlot" role="img" aria-label="Risk of hypotension as a function of the blood pressure target, with the allowed level"></canvas>
+<div class="legend"><span style="--k:var(--c1)">Risk R(y) from the fit</span><span style="--k:var(--c2)">Allowed level α</span><span style="--k:var(--c3)">Chosen y*</span></div>
+</section>
+
+<section class="card" aria-labelledby="res-h">
+<h2 id="res-h">What the paper found on 4,096 virtual patients</h2>
+<p>Decision at 10 minutes; readings counted in the 10-minute window after the rise. From the paper's Table II.</p>
+<table><thead><tr><th style="text-align:left">Rule</th><th>α</th><th>Target (mmHg)</th><th>Patients treated (%)</th><th>Any reading &lt; 65 (%)</th><th>Median NE (nmol)</th></tr></thead><tbody>
+<tr><td>Personal target y*</td><td>1%</td><td>—</td><td>67</td><td>2.3</td><td>111</td></tr>
+<tr><td>Personal target y*</td><td>2%</td><td>—</td><td>70</td><td>3.7</td><td>111</td></tr>
+<tr><td>Personal target y*</td><td>5%</td><td>—</td><td>74</td><td>6.9</td><td>112</td></tr>
+<tr><td>Personal target y*</td><td>10%</td><td>—</td><td>77</td><td>10.1</td><td>112</td></tr>
+<tr><td>Oracle (knows the true patient)</td><td>5%</td><td>—</td><td>95</td><td>4.6</td><td>96</td></tr>
+<tr><td>One target for everyone</td><td>5%</td><td>89</td><td>100</td><td>3.0</td><td>313</td></tr>
+<tr><td>Fitted patient, fixed target</td><td>—</td><td>70</td><td>100</td><td>25.0</td><td>100</td></tr>
+<tr><td>Population dose, fixed target</td><td>—</td><td>70</td><td>100</td><td>65.7</td><td>57</td></tr>
+</tbody></table>
+<p class="note">The single 89 mmHg target meets 5% but needs nearly three times the drug, and could only be found by trying every target on the whole cohort. The rule slightly overshoots its promised level (6.9% against 5%); most of those low readings are monitor noise, and the true pressure went below 65 mmHg for about one patient in a thousand. On 31 real surgery records, the forecast was well calibrated after 5–15 minutes of data but became overconfident with longer records.</p>
+</section>
+
+<section class="card" aria-labelledby="how-h">
+<h2 id="how-h">How to use it</h2>
+<ul>
+<li><strong>Meet a patient:</strong> press <em>New virtual patient</em>. Grey dots are the noisy readings during the collection drip; the blue line is the model fitted to them.</li>
+<li><strong>Read the decision:</strong> after the dashed line the blue band is the forecast under the recommended dose. The rule pushes the target up until the band's chance of touching 65 mmHg falls below α. If even the highest allowed drip cannot get there, the patient is refused and the decision goes back to the clinician (rare in this simplified demo, but about a quarter of patients in the paper at α = 5%).</li>
+<li><strong>Trade safety for drug:</strong> move α from 10% down to 1%. The risk curve's crossing point moves right, so the target and the dose go up.</li>
+<li><strong>Wait for more data:</strong> lengthen the collection from 5 to 20 minutes. The fit becomes surer, so for many patients the target can come down a few mmHg.</li>
+<li><strong>Turn up the monitor noise:</strong> with σ = 4 mmHg any of the dozens of readings in the window can dip low by chance, so the target rises by several mmHg. In the paper too, most low readings under y* were noise rather than true low pressure.</li>
+<li><strong>Compare with a fixed target:</strong> the last stat applies the fitted 70 mmHg dose to the same true patient. It often dips below 65 mmHg, because 70 leaves no room for the fit's uncertainty.</li>
+</ul>
+</section>
+<p class="note" style="margin-top:24px">Demo by Grok Bot for the Daily Research Explorer. The model equations, the risk formula, the target search, the bolus rule, the collection drip, the 10 s sampling, the 10 s bolus and the limits u<sub>max</sub> = 0.5 nmol/s and B<sub>max</sub> = 75 nmol follow the paper. To run in a browser, the demo only fits three of the seven parameters (the response curve's a and b and the clearance k<sub>el</sub>), uses made-up population values (not the published ones), white noise with a known σ, a 2-minute rise time, and the same reduced model for the true patient. Its numbers show how the method behaves, not clinical doses. Cohort results in the table are copied from the paper.</p>
+</main>
+<script>
+"use strict";
+const $=id=>document.getElementById(id);
+const css=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+// Illustrative population (made up for the demo), units: nmol, s, mmHg
+const POP={ka:0.02,k12:0.005,k21:0.003,kel:0.01,Emax:100,a:840,b:20};
+const OM=[0.5,0.3,0.35];           // spread of ln b, ln a, ln kel (illustrative)
+const UMAX=0.5,BMAX=75,TAUB=10,TR=120,DT=1,WIN=600,FLOOR=65;
+const ALPHAS=[0.01,0.02,0.05,0.10];
+function rng(seed){let s=seed>>>0;return()=>{s=s+0x6D2B79F5|0;let t=Math.imul(s^s>>>15,1|s);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function gauss(r){let u=0;while(u===0)u=r();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*r())}
+function Phi(x){const z=Math.abs(x)/Math.SQRT2,t=1/(1+0.3275911*z);const e=1-(((((1.061405429*t-1.453152027)*t)+1.421413741)*t-0.284496736)*t+0.254829592)*t*Math.exp(-z*z);return x>=0?0.5*(1+e):0.5*(1-e)}
+const par=eta=>({...POP,b:POP.b*Math.exp(OM[0]*eta[0]),a:POP.a*Math.exp(OM[1]*eta[1]),kel:POP.kel*Math.exp(OM[2]*eta[2])});
+const h=(p,Ac)=>p.Emax-p.a/(p.b+Ac);
+const hinv=(p,y)=>p.a/(p.Emax-y)-p.b;
+const collU=s=>s<150?0.36:0.18;
+// simulate from state x over [0,T) with rate function u(s); record MAP every 10 s (at s=10,20,...)
+function sim(p,x,T,u,rec){let [d,c,q]=x;const out=[];for(let s=0;s<T;s+=DT){const v=u(s);const dd=v-p.ka*d,dc=p.ka*d-(p.k12+p.kel)*c+p.k21*q,dq=p.k12*c-p.k21*q;d+=dd*DT;c+=dc*DT;q+=dq*DT;if(rec&&((s+DT)%10===0))out.push(h(p,c))}return{x:[d,c,q],y:out}}
+function collect(p,T){return sim(p,[0,0,0],T,collU,true)}
+function bolusFor(p,x,y,ub){const reach=B=>{let [d,c,q]=x;for(let s=0;s<TR;s+=DT){const v=ub+(s<TAUB?B/TAUB:0);const dd=v-p.ka*d,dc=p.ka*d-(p.k12+p.kel)*c+p.k21*q,dq=p.k12*c-p.k21*q;d+=dd*DT;c+=dc*DT;q+=dq*DT;if(h(p,c)>=y)return true}return false};
+ if(reach(0))return 0;if(!reach(BMAX))return BMAX;let lo=0,hi=BMAX;for(let i=0;i<18;i++){const m=(lo+hi)/2;reach(m)?hi=m:lo=m}return hi}
+function control(p,x,y){const ub=Math.min(UMAX,Math.max(0,p.kel*hinv(p,y)));return{ub,B:bolusFor(p,x,y,ub)}}
+const ctrlU=c=>s=>c.ub+(s<TAUB?c.B/TAUB:0);
+// forecast of readings in (t+TR, t+WIN] for parameters eta under fixed control c
+function forecast(eta,T,c){const p=par(eta),x=collect(p,T).x;return sim(p,x,WIN,ctrlU(c),true).y}
+let S={};
+const D=3;
+function solve(M,v){const n=v.length,A=M.map((r,i)=>r.concat([v[i]]));for(let i=0;i<n;i++){let p=i;for(let k=i+1;k<n;k++)if(Math.abs(A[k][i])>Math.abs(A[p][i]))p=k;[A[i],A[p]]=[A[p],A[i]];for(let k=i+1;k<n;k++){const f=A[k][i]/A[i][i];for(let j=i;j<=n;j++)A[k][j]-=f*A[i][j]}}const x=new Array(n).fill(0);for(let i=n-1;i>=0;i--){let s=A[i][n];for(let j=i+1;j<n;j++)s-=A[i][j]*x[j];x[i]=s/A[i][i]}return x}
+function inv(M){const n=M.length;const cols=[];for(let k=0;k<n;k++){const e=new Array(n).fill(0);e[k]=1;cols.push(solve(M,e))}return M.map((_,i)=>cols.map(c=>c[i]))}
+function chol(P){const n=P.length,L=P.map(()=>new Array(n).fill(0));for(let i=0;i<n;i++)for(let j=0;j<=i;j++){let s=P[i][j];for(let k=0;k<j;k++)s-=L[i][k]*L[j][k];L[i][j]=i===j?Math.sqrt(Math.max(1e-12,s)):s/L[j][j]}return L}
+function jac(fn,eta,y0){const ep=1e-4,Sm=[];for(let k=0;k<D;k++){const e2=eta.slice();e2[k]+=ep;const y1=fn(e2);Sm.push(y1.map((v,i)=>(v-y0[i])/ep))}return Sm}
+function normal(Sm,sig,n){const A=[];for(let a=0;a<D;a++){A.push([]);for(let b=0;b<D;b++){let s=a===b?1:0;for(let i=0;i<n;i++)s+=Sm[a][i]*Sm[b][i]/(sig*sig);A[a].push(s)}}return A}
+function fit(ys,T,sig){let eta=new Array(D).fill(0);const n=ys.length,model=e=>collect(par(e),T).y;
+ const J=e=>{const y=model(e);let s=0;for(let i=0;i<n;i++)s+=(ys[i]-y[i])**2;return s/(sig*sig)+e.reduce((q,v)=>q+v*v,0)};
+ let lam=1e-2,cur=J(eta);
+ for(let it=0;it<40;it++){const y0=model(eta),Sm=jac(model,eta,y0),A=normal(Sm,sig,n);
+  const g=eta.map((e,a)=>{let s=-e;for(let i=0;i<n;i++)s+=Sm[a][i]*(ys[i]-y0[i])/(sig*sig);return s});
+  let ok=false;for(let tr=0;tr<8&&!ok;tr++){const M=A.map((r,i)=>r.map((v,j)=>i===j?v*(1+lam):v));const st=solve(M,g);
+   const ne=eta.map((e,k)=>Math.max(-3,Math.min(3,e+st[k])));const nj=J(ne);
+   if(nj<cur){eta=ne;const dj=cur-nj;cur=nj;lam=Math.max(1e-6,lam/3);ok=true;if(dj<1e-6)it=99}else lam*=4}
+  if(!ok)break}
+ // Laplace posterior covariance P=(S^T S/σ²+I)^-1 at the estimate
+ const y0=model(eta),P=inv(normal(jac(model,eta,y0),sig,n));
+ return{eta,P,L:chol(P),fitY:y0}}
+// draws of ξ ~ N(0,I) (common random numbers so R(y) is smooth)
+const XI=(()=>{const r=rng(12345),a=[];for(let i=0;i<1500;i++){const z=[];for(let k=0;k<D;k++)z.push(gauss(r));a.push(z)}return a})();
+function riskOf(F,T,sig,y){const pf=par(F.eta),xf=collect(pf,T).x,c=control(pf,xf,y);
+ const fn=e=>forecast(e,T,c),m=fn(F.eta),Sp=jac(fn,F.eta,m);
+ // S' L : sensitivity of each reading to ξ
+ const SL=m.map((_,j)=>{const r=[];for(let k=0;k<D;k++){let s=0;for(let i=k;i<D;i++)s+=Sp[i][j]*F.L[i][k];r.push(s)}return r});
+ const j0=TR/10;let acc=0;
+ for(const z of XI){let pr=1;
+  for(let j=j0;j<m.length;j++){let d=0;for(let k=0;k<D;k++)d+=SL[j][k]*z[k];pr*=Phi((m[j]+d-FLOOR)/sig);if(pr<1e-9)break}acc+=pr}
+ const band=SL.map(r=>Math.sqrt(r.reduce((q,v)=>q+v*v,0)+sig*sig));
+ return{R:1-acc/XI.length,c,m,band}}
+// patient draws: reject implausible ones (as in the paper's Appendix E)
+function drawPatient(seed){const r=rng(seed*7919+1);for(;;){const z=[gauss(r),gauss(r),gauss(r)],p=par(z);const F0=h(p,0),Fm=h(p,UMAX/p.kel);if(F0>=30&&F0<65&&Fm>=70&&Fm<=200)return z}}
+let seed=1;
+function compute(){const a=ALPHAS[+$("alpha").value],T=+$("coll").value*60,sig=+$("noise").value;
+ const zt=drawPatient(seed),pt=par(zt),r=rng(seed*31+7);
+ const truth=collect(pt,T),ys=truth.y.map(v=>v+sig*gauss(r));
+ const F=fit(ys,T,sig),pf=par(F.eta),xf=collect(pf,T).x,ymax=Math.min(h(pf,UMAX/pf.kel),pf.Emax-0.5);
+ const curve=[];const N=26;for(let i=0;i<=N;i++){const y=65+(ymax-65)*i/N;curve.push([y,riskOf(F,T,sig,y).R])}
+ let yst=null,res=null;const rHi=riskOf(F,T,sig,ymax);
+ if(rHi.R<=a){let lo=65,hi=ymax;const r65=riskOf(F,T,sig,65);if(r65.R<=a){yst=65;res=r65}else{for(let i=0;i<40&&hi-lo>0.05;i++){const m=(lo+hi)/2;riskOf(F,T,sig,m).R<=a?hi=m:lo=m}yst=hi;res=riskOf(F,T,sig,hi)}}
+ const shown=res||rHi;
+ const apply=c=>{const rr=rng(seed*131+11);const out=sim(pt,truth.x,WIN,ctrlU(c),true).y;const noisy=out.map(v=>v+sig*gauss(rr));let mn=Infinity;for(let j=TR/10;j<noisy.length;j++)mn=Math.min(mn,noisy[j]);return{out,noisy,mn}};
+ const trueRes=apply(shown.c);
+ const c70=control(pf,xf,70),t70=apply(c70);
+ S={a,T,sig,zt,ys,F,curve,yst,res,shown,trueRes,t70,ymax,truthY:truth.y};}
+function setup(c){const r=c.getBoundingClientRect(),d=window.devicePixelRatio||1;c.width=Math.round(r.width*d);c.height=Math.round(r.height*d);const g=c.getContext("2d");g.setTransform(d,0,0,d,0,0);return{g,w:r.width,h:r.height}}
+function axes(g,w,hh,pad,x0,x1,y0,y1,xt,yt,xl,yl){g.strokeStyle=css("--grid");g.fillStyle=css("--muted");g.lineWidth=1;g.font="12px "+css("--font");
+ const X=v=>pad.l+(v-x0)/(x1-x0)*(w-pad.l-pad.r),Y=v=>hh-pad.b-(v-y0)/(y1-y0)*(hh-pad.t-pad.b);
+ g.textAlign="center";xt.forEach(v=>{g.beginPath();g.moveTo(X(v),pad.t);g.lineTo(X(v),hh-pad.b);g.stroke();g.fillText(xl?xl(v):v,X(v),hh-pad.b+16)});
+ g.textAlign="right";yt.forEach(v=>{g.beginPath();g.moveTo(pad.l,Y(v));g.lineTo(w-pad.r,Y(v));g.stroke();g.fillText(yl?yl(v):v,pad.l-6,Y(v)+4)});return{X,Y}}
+function line(g,pts,X,Y){g.beginPath();pts.forEach((p,i)=>i?g.lineTo(X(p[0]),Y(p[1])):g.moveTo(X(p[0]),Y(p[1])));g.stroke()}
+function draw(){const s=S,Tm=s.T/60,tEnd=Tm+WIN/60,rev=$("reveal").checked;
+ {const c=$("mapPlot"),{g,w,h:hh}=setup(c);g.clearRect(0,0,w,hh);const pad={l:40,r:12,t:10,b:26};
+  const xt=[];for(let v=0;v<=tEnd+0.01;v+=5)xt.push(v);
+  const {X,Y}=axes(g,w,hh,pad,0,tEnd,30,110,xt,[30,40,50,60,70,80,90,100,110]);
+  // window shading
+  g.fillStyle=css("--accent-soft");g.fillRect(X(Tm+TR/60),pad.t,X(tEnd)-X(Tm+TR/60),hh-pad.t-pad.b);
+  const fm=s.shown.m,bd=s.shown.band,tt=j=>Tm+(j+1)/6;
+  g.globalAlpha=.22;g.fillStyle=css("--c1");g.beginPath();fm.forEach((v,j)=>{const x=X(tt(j)),y=Y(Math.min(110,v+1.645*bd[j]));j?g.lineTo(x,y):g.moveTo(x,y)});for(let j=fm.length-1;j>=0;j--)g.lineTo(X(tt(j)),Y(Math.max(30,fm[j]-1.645*bd[j])));g.closePath();g.fill();g.globalAlpha=1;
+  g.strokeStyle=css("--c2");g.lineWidth=2;line(g,[[0,FLOOR],[tEnd,FLOOR]],X,Y);
+  if(s.yst!==null){g.strokeStyle=css("--c3");g.setLineDash([6,4]);g.lineWidth=1.5;line(g,[[Tm,s.yst],[tEnd,s.yst]],X,Y);g.setLineDash([])}
+  g.strokeStyle=css("--muted");g.setLineDash([3,3]);g.lineWidth=1;line(g,[[Tm,30],[Tm,110]],X,Y);g.setLineDash([]);
+  g.fillStyle=css("--muted");s.ys.forEach((v,i)=>{g.beginPath();g.arc(X((i+1)/6),Y(v),2.2,0,7);g.fill()});
+  if(rev){s.trueRes.noisy.forEach((v,j)=>{g.beginPath();g.arc(X(tt(j)),Y(Math.max(30,Math.min(110,v))),2.2,0,7);g.fill()})}
+  g.strokeStyle=css("--c1");g.lineWidth=2.5;line(g,s.F.fitY.map((v,i)=>[(i+1)/6,v]),X,Y);
+  g.setLineDash([7,4]);line(g,fm.map((v,j)=>[tt(j),v]),X,Y);g.setLineDash([]);
+  if(rev){g.strokeStyle=css("--cx");g.lineWidth=1.5;line(g,s.truthY.map((v,i)=>[(i+1)/6,v]).concat(s.trueRes.out.map((v,j)=>[tt(j),v])),X,Y)}
+  g.fillStyle=css("--muted");g.font="11px "+css("--font");g.textAlign="left";g.fillText("collection",X(0.3),pad.t+12);g.fillText(s.yst===null?"highest dose (refused)":"recommended dose",X(Tm)+5,pad.t+12);g.fillText("risk window",X(Tm+TR/60)+5,pad.t+26)}
+ {const c=$("nePlot"),{g,w,h:hh}=setup(c);g.clearRect(0,0,w,hh);const pad={l:40,r:12,t:8,b:24};const xt=[];for(let v=0;v<=tEnd+0.01;v+=5)xt.push(v);
+  const {X,Y}=axes(g,w,hh,pad,0,tEnd,0,1,xt,[0,0.5,1]);const pts=[];for(let s0=0;s0<s.T;s0+=5)pts.push([s0/60,collU(s0)]);
+  g.strokeStyle=css("--muted");g.lineWidth=2;line(g,pts,X,Y);const c2=s.shown.c,q=[];for(let s0=0;s0<WIN;s0+=1)q.push([Tm+s0/60,Math.min(1,ctrlU(c2)(s0))]);
+  g.strokeStyle=css("--c1");line(g,q,X,Y);if(c2.B>0){g.fillStyle=css("--text");g.font="11px "+css("--font");g.textAlign="left";g.fillText("bolus "+c2.B.toFixed(1)+" nmol (clipped)",X(Tm)+6,Y(0.92))}}
+ {const c=$("riskPlot"),{g,w,h:hh}=setup(c);g.clearRect(0,0,w,hh);const pad={l:44,r:12,t:10,b:26};const x1=Math.ceil(s.ymax/5)*5;const xt=[];for(let v=65;v<=x1;v+=5)xt.push(v);
+  const {X,Y}=axes(g,w,hh,pad,65,x1,0,1,xt,[0,.25,.5,.75,1],null,v=>Math.round(v*100)+"%");
+  g.strokeStyle=css("--c2");g.lineWidth=1.5;g.setLineDash([5,4]);line(g,[[65,s.a],[x1,s.a]],X,Y);g.setLineDash([]);
+  g.strokeStyle=css("--c1");g.lineWidth=2.5;line(g,s.curve,X,Y);
+  if(s.yst!==null){g.fillStyle=css("--c3");g.strokeStyle=css("--text");g.lineWidth=2;g.beginPath();g.arc(X(s.yst),Y(s.res.R),6,0,7);g.fill();g.stroke()}
+  g.fillStyle=css("--muted");g.font="11px "+css("--font");g.textAlign="right";g.fillText("highest reachable target "+s.ymax.toFixed(1)+" mmHg",w-pad.r-4,pad.t+12)}}
+function stats(){const s=S,f=v=>v.toFixed(1);
+ $("alphaO").textContent=Math.round(s.a*100)+"%";$("collO").textContent=(s.T/60)+" min";$("noiseO").textContent=s.sig.toFixed(1)+" mmHg";
+ $("patientLbl").textContent="Patient #"+seed;
+ const ok=s.yst!==null;
+ $("sY").textContent=ok?f(s.yst)+" mmHg":"none";$("sR").textContent=(s.shown.R*100).toFixed(1)+"%";
+ $("sU").textContent=ok?s.shown.c.ub.toFixed(3)+" nmol/s":"—";$("sB").textContent=ok?f(s.shown.c.B)+" nmol":"—";
+ $("sT").textContent=ok?f(s.trueRes.mn)+" mmHg":"—";$("s70").textContent=f(s.t70.mn)+" mmHg";
+ $("verdict").textContent=ok?(`Recommend a ${f(s.yst)} mmHg target: predicted risk ${(s.shown.R*100).toFixed(1)}% ≤ ${Math.round(s.a*100)}%. `+(s.trueRes.mn<65?"This time the real readings still dipped below 65 mmHg, which the rule allows a few times in a hundred.":"The real readings stayed above 65 mmHg."))
+  :`No recommendation: even the highest target the drip can reach (${f(s.ymax)} mmHg) has a predicted risk of ${(s.shown.R*100).toFixed(1)}%, above ${Math.round(s.a*100)}%. The decision goes back to the clinician; collecting more data may help.`}
+function update(){compute();stats();draw()}
+let pending=false;const sched=()=>{if(pending)return;pending=true;requestAnimationFrame(()=>{pending=false;update()})};
+["alpha","coll","noise"].forEach(id=>$(id).addEventListener("input",sched));
+$("reveal").addEventListener("change",draw);
+$("nextBtn").addEventListener("click",()=>{seed++;sched()});
+window.addEventListener("resize",draw);
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change",draw);
+update();
+</script>
+</body></html>
