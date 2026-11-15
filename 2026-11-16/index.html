@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="light dark">
+<title>El Niño as a clock nudged by the seasons — Research Explorer, 16 Nov 2026</title>
+<link rel="stylesheet" href="../assets/style.css">
+<style>
+canvas#velPlot,canvas#histPlot{height:260px}
+canvas#seriesPlot{height:220px}
+canvas#durPlot{height:300px}
+.btnrow{display:flex;flex-wrap:wrap;gap:8px;margin:4px 0 14px;align-items:center}
+.btnrow button{font:500 14px var(--font);color:#fff;background:var(--accent);border:0;border-radius:8px;padding:7px 14px;min-height:32px;cursor:pointer}
+.btnrow button.secondary{color:var(--text);background:var(--accent-soft)}
+.verdict{font-weight:600}
+label.toggle{justify-content:flex-start}
+</style></head><body><main>
+<a class="back" href="../">‹ All demos</a>
+<div class="eyebrow">16 Nov 2026 · Climate</div>
+<h1>El Niño as a clock nudged by the seasons</h1>
+<p class="lede">The El Niño–Southern Oscillation swings the tropical Pacific between warm El Niño and cool La Niña every two to seven years, and the calendar year keeps pushing it around. This paper turns 50 years of sea-surface temperatures into two clock hands, one for the year and one for ENSO, and learns from the data how the year speeds up or slows down the ENSO hand. The fitted equations predict how long an El Niño or La Niña lasts depending on the month it starts, and show that ENSO tends to linger near a rhythm of one cycle every three years.</p>
+<p class="authors">Takahiro Arai, Yoji Kawamura</p>
+
+<section class="card why" aria-labelledby="why-h">
+<h2 id="why-h">Why it matters</h2>
+<p>El Niño and La Niña shift rainfall, drought, heatwaves and cyclone risk around the world, so forecasters need to know not just whether an event is coming but how long it will last once it starts. Using two equations learned from 50 years of ocean temperatures, this paper shows that an event's expected length depends on the month it begins (El Niño lasts about 20 months if it starts in May–July but about 17 if it starts in November–February), and that ENSO statistically lingers near one cycle every three years, a simple, testable rule for forecasts and climate models.</p>
+</section>
+
+<section class="card" aria-labelledby="paper-h">
+<h2 id="paper-h">The paper</h2>
+<p style="margin:0 0 6px"><strong>Data-driven Reconstruction of the Phase Dynamics for the El Niño-Southern Oscillation Reveals Seasonality and Statistical Synchronization with the Annual Cycle</strong></p>
+<p class="cite" style="margin:0">Takahiro Arai, Yoji Kawamura (Center for Mathematical Science and Advanced Technology, Japan Agency for Marine-Earth Science and Technology (JAMSTEC), Yokohama). arXiv:2611.14868 [physics.geo-ph; also nlin.AO, physics.ao-ph], 11 November 2026. <a href="https://arxiv.org/abs/2611.14868">Read on arXiv</a> · <a href="https://arxiv.org/pdf/2611.14868">PDF</a></p>
+<p style="margin-top:14px">In plain language: a Koopman (dynamic-mode) analysis of monthly ERSSTv5 sea-surface temperatures (1970–2025) finds two rhythms, the annual cycle (0.991 cycles per year) and the ENSO cycle (0.244 cycles per year, about four years). Each is reduced to an angle: θ<sub>a</sub> for the time of year and θ<sub>e</sub> for the ENSO stage (El Niño around θ<sub>e</sub> = 0, La Niña around π). Bayesian regression then fits how fast each angle turns:</p>
+<div class="eq">θ̇<sub>a</sub> = Q<sub>a</sub>(θ<sub>a</sub>, θ<sub>e</sub>) + η<sub>a</sub>(t), &nbsp;&nbsp; θ̇<sub>e</sub> = Q<sub>e</sub>(θ<sub>a</sub>, θ<sub>e</sub>) + η<sub>e</sub>(t)</div>
+<p>where Q are two-dimensional Fourier series and η is white noise. Q<sub>a</sub> is almost exactly one cycle per year, while Q<sub>e</sub> clearly depends on the month: the year modulates ENSO's speed. Averaging over fast terms leaves equations that depend only on the phase difference ψ<sub>mn</sub> = θ<sub>a</sub> − (m/n)θ<sub>e</sub>; for the 3 : 1 ratio, ψ = θ<sub>a</sub> − 3θ<sub>e</sub>:</p>
+<div class="eq">θ̇<sub>a</sub> = ω<sub>a</sub> + Γ<sub>a</sub>(ψ) + ζ<sub>a</sub>, &nbsp; θ̇<sub>e</sub> = ω<sub>e</sub> + Γ<sub>e</sub>(ψ) + ζ<sub>e</sub>, &nbsp;&nbsp; ψ̇ = ω<sub>a</sub> − 3ω<sub>e</sub> + Γ<sub>a</sub>(ψ) − 3Γ<sub>e</sub>(ψ) + ζ</div>
+<p>If ψ̇ never reaches zero there is no full lock, but ψ crawls through a "slow region" and piles up there: <em>statistical</em> 3 : 1 phase locking. The paper finds ω<sub>ψ</sub>/2π = 0.332 cycles/year and a modulation range ΔΓ<sub>ψ</sub>/2π = 0.278, so ψ takes 2.3 years per cycle at its fastest and 4.9 at its slowest, with a sharp pile-up near ψ/2π ≈ 0.75. Other ratios (2 : 1, 4 : 1, 5 : 1, 5 : 2) show no such lock. An El Niño's length is the time θ<sub>e</sub> takes to run from 13π/8 to 2π + 3π/8 (La Niña: 3π/8 to 9π/8), found by simulating the noisy equations 5,000 times for each starting month.</p>
+</section>
+
+<section class="card" aria-labelledby="demo-h">
+<h2 id="demo-h">Try it: run the ENSO clock</h2>
+<p>This demo simulates the averaged 3 : 1 equations above with the paper's numbers. The default settings reproduce the paper's results; the sliders let you ask "what if".</p>
+<div class="controls">
+ <div><label for="coupling"><span>Seasonal nudge strength</span> <output id="couplingO"></output></label><input type="range" id="coupling" min="0" max="2.5" step="0.05" value="1"></div>
+ <div><label for="noise"><span>Weather noise</span> <output id="noiseO"></output></label><input type="range" id="noise" min="0" max="3" step="0.1" value="1"></div>
+ <div><label for="freq"><span>ENSO natural rate ω<sub>e</sub>/2π</span> <output id="freqO"></output></label><input type="range" id="freq" min="0.18" max="0.30" step="0.0025" value="0.2226"></div>
+</div>
+<div class="btnrow"><button type="button" id="rerun">New random run</button><button type="button" class="secondary" id="reset">Paper's values</button></div>
+<div class="stats">
+ <div class="stat"><div class="v" id="sLock"></div><div class="l">3 : 1 locking</div></div>
+ <div class="stat"><div class="v" id="sPer"></div><div class="l">Average ENSO cycle</div></div>
+ <div class="stat"><div class="v" id="sSlow"></div><div class="l">Time ψ spends in its slowest quarter (25% if no lock)</div></div>
+ <div class="stat"><div class="v" id="sEN"></div><div class="l">El Niño length, shortest–longest start month</div></div>
+ <div class="stat"><div class="v" id="sLN"></div><div class="l">La Niña length, shortest–longest start month</div></div>
+</div>
+<p class="note verdict" id="verdict" aria-live="polite"></p>
+<div class="grid" style="margin-top:14px">
+ <div class="plot"><div class="plot-title">Speed of the phase difference ψ̇ (cycles/year)</div>
+  <canvas id="velPlot" role="img" aria-label="Deterministic speed of the phase difference psi against psi"></canvas>
+  <div class="legend"><span style="--k:var(--c1)">ψ̇(ψ), no noise</span><span style="--k:var(--c2)">Zero: a full lock if crossed</span></div></div>
+ <div class="plot"><div class="plot-title">Where ψ spends its time (1,000 simulated years)</div>
+  <canvas id="histPlot" role="img" aria-label="Histogram of the phase difference from a long simulation, with the no-noise prediction"></canvas>
+  <div class="legend"><span style="--k:var(--c1)">Simulated histogram</span><span style="--k:var(--cx)">No-noise share ∝ 1/ψ̇</span><span style="--k:var(--muted)">Uniform (no lock)</span></div></div>
+</div>
+<div class="plot-title" style="margin-top:16px">40 years of the simulated ENSO stage, cos θ<sub>e</sub></div>
+<canvas id="seriesPlot" role="img" aria-label="Simulated ENSO stage over 40 years, with El Nino and La Nina stages shaded"></canvas>
+<div class="legend"><span style="--k:var(--c2)">El Niño stages</span><span style="--k:var(--c1)">La Niña stages</span><span style="--k:var(--cx)">cos θ<sub>e</sub></span></div>
+<div class="plot-title" style="margin-top:16px">How long an event lasts, by the month it starts (600 runs per month)</div>
+<canvas id="durPlot" role="img" aria-label="Mean and 95 percent range of El Nino and La Nina durations against starting month"></canvas>
+<div class="legend"><span style="--k:var(--c2)">El Niño: mean and 2.5–97.5% range</span><span style="--k:var(--c1)">La Niña: mean and 2.5–97.5% range</span><span style="--k:var(--cx)">Paper’s approximate means, from its text (full model)</span></div>
+</section>
+
+<section class="card" aria-labelledby="res-h">
+<h2 id="res-h">What the paper found</h2>
+<table><thead><tr><th style="text-align:left">Result</th><th>Value</th></tr></thead><tbody>
+<tr><td>Annual and ENSO Koopman frequencies</td><td>0.9912 and 0.2439 cycles/yr</td></tr>
+<tr><td>El Niño mean length, starts May–Jul / Nov–Feb</td><td>≈ 20 / ≈ 17 months</td></tr>
+<tr><td>La Niña mean length, starts Jun–Aug / Jan–Apr</td><td>≈ 22 / 18–19 months</td></tr>
+<tr><td>Widest spread of lengths</td><td>starts in boreal spring</td></tr>
+<tr><td>3 : 1 phase-difference speed, fastest / slowest</td><td>2.3 / 4.9 years per cycle</td></tr>
+<tr><td>Noise σ<sub>a</sub>²/(2π)², σ<sub>e</sub>²/(2π)²</td><td>5.016×10⁻⁵, 5.372×10⁻⁴ cycle²/yr</td></tr>
+</tbody></table>
+<table style="margin-top:14px"><thead><tr><th style="text-align:left">Ratio m : n</th><th>ω<sub>ψ</sub>/2π (cycles/yr)</th><th>ΔΓ<sub>ψ</sub>/2π (cycles/yr)</th><th>Statistical lock?</th></tr></thead><tbody>
+<tr><td>2 : 1</td><td>0.5333</td><td>0.1060</td><td>No</td></tr>
+<tr><td>5 : 2</td><td>0.4142</td><td>0.0110</td><td>No</td></tr>
+<tr><td><strong>3 : 1</strong></td><td><strong>0.3321</strong></td><td><strong>0.2775</strong></td><td><strong>Yes</strong></td></tr>
+<tr><td>4 : 1</td><td>0.0626</td><td>0.0046</td><td>No</td></tr>
+<tr><td>5 : 1</td><td>−0.1718</td><td>0.0003</td><td>No</td></tr>
+</tbody></table>
+<p class="note">From the paper's text and Table F1. Only 3 : 1 has a modulation comparable to its drift, which is what makes ψ dwell. The 4 : 1 phase difference moves slowly only because its frequencies happen to be close, not because of coupling.</p>
+</section>
+
+<section class="card" aria-labelledby="how-h">
+<h2 id="how-h">How to use it</h2>
+<ul>
+<li><strong>Start with the paper's values:</strong> the top-left curve dips but stays above zero, so ψ never stops; the histogram piles up near ψ/2π ≈ 0.75, where ψ moves slowest. That pile-up is the statistical 3 : 1 lock.</li>
+<li><strong>Read the bottom chart:</strong> El Niño (orange) lasts longest when it starts in May–July and shortest in winter; La Niña (blue) peaks around June–August. The shaded ranges are widest for spring starts, as in the paper. The black dots are the paper's reported means.</li>
+<li><strong>Turn up the seasonal nudge:</strong> past about 2.4× the curve touches zero and ENSO locks fully to a three-year beat. At 0 the season has no effect, durations no longer depend on the month, and the histogram goes flat.</li>
+<li><strong>Change ENSO's natural rate:</strong> moving ω<sub>e</sub>/2π towards 1/3 cycle per year (a three-year ENSO) makes locking easy; moving it away weakens the pile-up.</li>
+<li><strong>Change the noise:</strong> more weather noise widens the duration ranges and blurs the histogram; with no noise every run of the same month gives the same length.</li>
+</ul>
+</section>
+<p class="note" style="margin-top:24px">Demo by Grok Bot for the Daily Research Explorer. The averaged equations, the 3 : 1 phase difference, ω<sub>ψ</sub>/2π = 0.3321, ΔΓ<sub>ψ</sub>/2π = 0.2775, the noise intensities, the pile-up location ψ/2π ≈ 0.75, the El Niño and La Niña start and end phases, and the month-to-phase rule θ<sub>a</sub> = 2π(μ − 1)/12 come from the paper. Simplifications: the paper's coupling function has harmonics up to third order and its duration results come from the full two-variable Q<sub>e</sub>; here Γ<sub>a</sub> = 0, ω<sub>a</sub> = 2π per year, and Γ<sub>e</sub> is a single cosine with the paper's peak-to-peak range, its slowest point placed at the histogram peak. It still reproduces the paper's seasonal pattern of durations closely. Euler–Maruyama steps of about 3 days.</p>
+</main>
+<script>
+"use strict";
+const $=id=>document.getElementById(id);
+const css=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const TAU=2*Math.PI;
+// Paper values (cycles/year): omega_psi/2pi = 0.3321, DeltaGamma_psi/2pi = 0.2775, peak of psi histogram at 0.75
+const WA=1.0, WE0=(1-0.3321)/3, DG=0.2775, PSISTAR=0.75*TAU, SA2=5.016e-5, SE2=5.372e-4;
+const EN0=13*Math.PI/8, EN1=TAU+3*Math.PI/8, LN0=3*Math.PI/8, LN1=9*Math.PI/8;
+const PAPER_EN={5:20,6:20,7:20,11:17,12:17,1:17,2:17}, PAPER_LN={6:22,7:22,8:22,1:18.5,2:18.5,3:18.5,4:18.5};
+const MONTHS=["J","F","M","A","M","J","J","A","S","O","N","D"];
+const DT=1/120;
+let seed=1;
+function rng(s){s=s>>>0;return()=>{s=s+0x6D2B79F5|0;let t=Math.imul(s^s>>>15,1|s);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function gaussFn(r){let spare=null;return()=>{if(spare!==null){const v=spare;spare=null;return v}let u=0;while(u===0)u=r();const v=r(),m=Math.sqrt(-2*Math.log(u));spare=m*Math.sin(TAU*v);return m*Math.cos(TAU*v)}}
+let P={},S={};
+function params(){const k=+$("coupling").value,n=+$("noise").value,we=+$("freq").value;
+ // Gamma_e(psi) = A cos(psi - psi*), psi-dot modulation = -3 Gamma_e  => peak-to-peak DG*k = 6A
+ return{k,n,we,A:DG*k/6,sa:Math.sqrt(SA2)*n,se:Math.sqrt(SE2)*n}}
+const Ge=(p,psi)=>p.A*Math.cos(psi-PSISTAR);                 // cycles/year
+const psidot=(p,psi)=>WA-3*p.we-3*Ge(p,psi);                  // cycles/year
+// one Euler–Maruyama step (phases in radians, rates in cycles/year)
+function step(p,st,g){const psi=st.a-3*st.e;
+ st.a+=TAU*(WA*DT+p.sa*Math.sqrt(DT)*g());
+ st.e+=TAU*((p.we+Ge(p,psi))*DT+p.se*Math.sqrt(DT)*g())}
+function firstPassage(p,a0,e0,e1,g){const st={a:a0,e:e0};let t=0;while(st.e<e1&&t<20){step(p,st,g);t+=DT}return t*12}
+function pct(arr,q){const s=arr.slice().sort((x,y)=>x-y);const i=(s.length-1)*q,lo=Math.floor(i),hi=Math.ceil(i);return s[lo]+(s[hi]-s[lo])*(i-lo)}
+function compute(){const p=params();P=p;const g=gaussFn(rng(seed*104729+7));
+ // long run for histogram and mean period
+ const NB=36,hist=new Array(NB).fill(0),st={a:0,e:0},Y=1000,N=Math.round(Y/DT);
+ for(let i=0;i<N;i++){step(p,st,g);const psi=((st.a-3*st.e)%TAU+TAU)%TAU;hist[Math.floor(psi/TAU*NB)%NB]++}
+ const period=Y/(st.e/TAU);
+ // slowest quarter of psi (centred on psi*)
+ let slow=0;for(let b=0;b<NB;b++){const c=(b+0.5)/NB*TAU;let d=Math.abs(c-PSISTAR);d=Math.min(d,TAU-d);if(d<=TAU/8)slow+=hist[b]}
+ // 40-year series
+ const ser=[],s2={a:0,e:EN0};for(let i=0;i<=40/DT;i++){if(i%2===0)ser.push(s2.e);step(p,s2,g)}
+ // durations by start month
+ const R=600,dur={EN:[],LN:[]};
+ for(let m=0;m<12;m++){const a0=TAU*m/12,en=[],ln=[];
+  for(let r=0;r<R;r++){en.push(firstPassage(p,a0,EN0,EN1,g));ln.push(firstPassage(p,a0,LN0,LN1,g))}
+  dur.EN.push({m:en.reduce((x,y)=>x+y,0)/R,lo:pct(en,0.025),hi:pct(en,0.975)});
+  dur.LN.push({m:ln.reduce((x,y)=>x+y,0)/R,lo:pct(ln,0.025),hi:pct(ln,0.975)})}
+ let vmin=Infinity,vmax=-Infinity;for(let i=0;i<=360;i++){const v=psidot(p,i/360*TAU);vmin=Math.min(vmin,v);vmax=Math.max(vmax,v)}
+ S={hist,N,NB,period,slow:slow/N,ser,dur,vmin,vmax}}
+function setup(c){const r=c.getBoundingClientRect(),d=window.devicePixelRatio||1;c.width=Math.round(r.width*d);c.height=Math.round(r.height*d);const g=c.getContext("2d");g.setTransform(d,0,0,d,0,0);return{g,w:r.width,h:r.height}}
+function axes(g,w,h,pad,x0,x1,y0,y1,xt,yt,xl,yl,xfmt,yfmt){g.strokeStyle=css("--grid");g.lineWidth=1;g.fillStyle=css("--muted");g.font="11px "+css("--font");
+ const X=x=>pad.l+(x-x0)/(x1-x0)*(w-pad.l-pad.r),Y=y=>h-pad.b-(y-y0)/(y1-y0)*(h-pad.t-pad.b);
+ g.textAlign="right";g.textBaseline="middle";for(const v of yt){g.beginPath();g.moveTo(pad.l,Y(v));g.lineTo(w-pad.r,Y(v));g.stroke();g.fillText(yfmt?yfmt(v):v,pad.l-6,Y(v))}
+ g.textAlign="center";g.textBaseline="top";for(const v of xt){g.beginPath();g.moveTo(X(v),pad.t);g.lineTo(X(v),h-pad.b);g.stroke();g.fillText(xfmt?xfmt(v):v,X(v),h-pad.b+5)}
+ if(xl){g.fillText(xl,(pad.l+w-pad.r)/2,h-14)}
+ if(yl){g.save();g.translate(12,(pad.t+h-pad.b)/2);g.rotate(-Math.PI/2);g.textBaseline="middle";g.fillText(yl,0,0);g.restore()}
+ return{X,Y}}
+function drawVel(){const{g,w,h}=setup($("velPlot")),p=P,pad={l:46,r:12,t:12,b:40};g.clearRect(0,0,w,h);
+ const y1=Math.max(0.6,Math.ceil(S.vmax*10)/10+0.05),y0=Math.min(-0.1,Math.floor(S.vmin*10)/10-0.05);
+ const yt=[];for(let v=Math.ceil(y0*5)/5;v<=y1+1e-9;v+=0.2)yt.push(+v.toFixed(1));
+ const{X,Y}=axes(g,w,h,pad,0,1,y0,y1,[0,0.25,0.5,0.75,1],yt,"ψ / 2π","",v=>v,v=>v.toFixed(1));
+ g.strokeStyle=css("--c2");g.lineWidth=1.5;g.setLineDash([5,4]);g.beginPath();g.moveTo(X(0),Y(0));g.lineTo(X(1),Y(0));g.stroke();g.setLineDash([]);
+ g.strokeStyle=css("--c1");g.lineWidth=2.5;g.beginPath();for(let i=0;i<=200;i++){const x=i/200,v=psidot(p,x*TAU);i?g.lineTo(X(x),Y(v)):g.moveTo(X(x),Y(v))}g.stroke();
+ g.fillStyle=css("--muted");g.font="11px "+css("--font");g.textAlign="left";g.textBaseline="top";
+ g.fillText("fastest "+(1/S.vmax).toFixed(1)+" yr/cycle",pad.l+6,pad.t+2);
+ g.fillText(S.vmin>0?"slowest "+(1/S.vmin).toFixed(1)+" yr/cycle":"stops: full lock",pad.l+6,pad.t+16)}
+function drawHist(){const{g,w,h}=setup($("histPlot")),p=P,pad={l:46,r:12,t:12,b:40};g.clearRect(0,0,w,h);
+ const dens=S.hist.map(c=>c/S.N*S.NB);           // density relative to uniform = 1
+ let theo=null;if(S.vmin>0){theo=[];let z=0;for(let i=0;i<=200;i++){const v=1/psidot(p,i/200*TAU);theo.push(v);if(i<200)z+=v/200}theo=theo.map(v=>v/z)}
+ let ymax=Math.max(2,...dens,...(theo||[0]));ymax=Math.ceil(ymax*2)/2;const yt=[];for(let v=0;v<=ymax+1e-9;v+=ymax>4?1:0.5)yt.push(v);
+ const{X,Y}=axes(g,w,h,pad,0,1,0,ymax,[0,0.25,0.5,0.75,1],yt,"ψ / 2π","",v=>v,v=>v.toFixed(1)+"×");
+ g.fillStyle=css("--c1");g.globalAlpha=0.55;const bw=(X(1)-X(0))/S.NB;dens.forEach((d,b)=>{g.fillRect(X(b/S.NB)+1,Y(d),bw-2,Y(0)-Y(d))});g.globalAlpha=1;
+ g.strokeStyle=css("--muted");g.setLineDash([4,4]);g.lineWidth=1.5;g.beginPath();g.moveTo(X(0),Y(1));g.lineTo(X(1),Y(1));g.stroke();g.setLineDash([]);
+ if(theo){g.strokeStyle=css("--cx");g.lineWidth=2;g.beginPath();theo.forEach((v,i)=>{const x=i/200;i?g.lineTo(X(x),Y(Math.min(v,ymax))):g.moveTo(X(x),Y(Math.min(v,ymax)))});g.stroke()}}
+function drawSeries(){const{g,w,h}=setup($("seriesPlot")),pad={l:46,r:12,t:12,b:36};g.clearRect(0,0,w,h);
+ const xt=[];for(let y=0;y<=40;y+=5)xt.push(y);
+ const{X,Y}=axes(g,w,h,pad,0,40,-1.15,1.15,xt,[-1,0,1],"years","",v=>v,v=>v);
+ const ser=S.ser,dt=2*DT;
+ for(let i=0;i<ser.length-1;i++){const e=((ser[i]%TAU)+TAU)%TAU;const en=(e>=EN0||e<3*Math.PI/8),ln=(e>=LN0&&e<LN1);
+  if(en||ln){g.fillStyle=css(en?"--c2":"--c1");g.globalAlpha=0.16;g.fillRect(X(i*dt),pad.t,X((i+1)*dt)-X(i*dt)+0.5,h-pad.t-pad.b)}}
+ g.globalAlpha=1;g.strokeStyle=css("--cx");g.lineWidth=2;g.beginPath();ser.forEach((e,i)=>{const x=X(i*dt),y=Y(Math.cos(e));i?g.lineTo(x,y):g.moveTo(x,y)});g.stroke();
+ g.fillStyle=css("--muted");g.textAlign="left";g.textBaseline="top";g.font="11px "+css("--font");g.fillText("El Niño ↑",pad.l+4,pad.t+2);g.textBaseline="bottom";g.fillText("La Niña ↓",pad.l+4,h-pad.b-2)}
+function drawDur(){const{g,w,h}=setup($("durPlot")),pad={l:46,r:12,t:12,b:40};g.clearRect(0,0,w,h);const D=S.dur;
+ let lo=Math.min(...D.EN.map(d=>d.lo),...D.LN.map(d=>d.lo),16),hi=Math.max(...D.EN.map(d=>d.hi),...D.LN.map(d=>d.hi),23);
+ lo=Math.floor(lo/2)*2;hi=Math.ceil(hi/2)*2;const yt=[];const stp=(hi-lo)>20?4:2;for(let v=lo;v<=hi;v+=stp)yt.push(v);
+ const{X,Y}=axes(g,w,h,pad,-0.5,11.5,lo,hi,[...Array(12).keys()],yt,"start month","months",m=>MONTHS[m],v=>v);
+ const off={EN:-0.12,LN:0.12};
+ for(const key of ["LN","EN"]){const col=css(key==="EN"?"--c2":"--c1");const arr=D[key];
+  g.fillStyle=col;g.globalAlpha=0.16;g.beginPath();arr.forEach((d,m)=>{m?g.lineTo(X(m),Y(d.hi)):g.moveTo(X(m),Y(d.hi))});for(let m=11;m>=0;m--)g.lineTo(X(m),Y(arr[m].lo));g.closePath();g.fill();g.globalAlpha=1;
+  g.strokeStyle=col;g.lineWidth=2.5;g.beginPath();arr.forEach((d,m)=>{m?g.lineTo(X(m),Y(d.m)):g.moveTo(X(m),Y(d.m))});g.stroke();
+  const ref=key==="EN"?PAPER_EN:PAPER_LN;g.fillStyle=css("--cx");for(const k in ref){const m=+k-1;g.beginPath();g.arc(X(m+off[key]),Y(ref[k]),3.5,0,TAU);g.fill();g.strokeStyle=col;g.lineWidth=1.5;g.stroke()}}}
+function draw(){drawVel();drawHist();drawSeries();drawDur()}
+function stats(){const p=P,f1=v=>v.toFixed(1);
+ $("couplingO").textContent=p.k.toFixed(2)+"×";$("noiseO").textContent=p.n.toFixed(1)+"×";$("freqO").textContent=p.we.toFixed(3)+" (≈"+(1/p.we).toFixed(1)+" yr)";
+ const locked=S.vmin<=0;$("sLock").textContent=locked?"Full":(S.slow>0.32?"Statistical":"None");
+ $("sPer").textContent=f1(S.period)+" yr";$("sSlow").textContent=Math.round(S.slow*100)+"%";
+ const rng2=a=>{let mi=0,ma=0;a.forEach((d,i)=>{if(d.m<a[mi].m)mi=i;if(d.m>a[ma].m)ma=i});return{mi,ma,txt:f1(a[mi].m)+"–"+f1(a[ma].m)+" mo"}};
+ const en=rng2(S.dur.EN),ln=rng2(S.dur.LN);$("sEN").textContent=en.txt;$("sLN").textContent=ln.txt;
+ const full=["January","February","March","April","May","June","July","August","September","October","November","December"];
+ $("verdict").textContent=(locked?"The no-noise speed of ψ reaches zero, so ENSO would lock completely to one cycle every three years; only noise lets it slip. ":S.slow>0.32?`ψ never stops but spends ${Math.round(S.slow*100)}% of its time in its slowest quarter: statistical 3 : 1 locking. `:"The seasonal nudge is too weak to make ψ linger, so there is no locking. ")+
+  ((S.dur.EN[en.ma].m-S.dur.EN[en.mi].m<1&&S.dur.LN[ln.ma].m-S.dur.LN[ln.mi].m<1)?"Event lengths barely depend on the starting month (differences under a month are just random scatter).":
+  `El Niño lasts longest when it starts in ${full[en.ma]} and shortest in ${full[en.mi]}; La Niña longest from ${full[ln.ma]}, shortest from ${full[ln.mi]}.`)}
+function update(){compute();stats();draw()}
+let pending=false;const sched=()=>{if(pending)return;pending=true;requestAnimationFrame(()=>{pending=false;update()})};
+["coupling","noise","freq"].forEach(id=>$(id).addEventListener("input",sched));
+$("rerun").addEventListener("click",()=>{seed++;sched()});
+$("reset").addEventListener("click",()=>{$("coupling").value=1;$("noise").value=1;$("freq").value=0.2226;seed=1;sched()});
+window.addEventListener("resize",draw);
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change",draw);
+update();
+</script>
+</body></html>
