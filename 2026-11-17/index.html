@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="light dark">
+<title>Is the AI confused by the question, or does it just not know? — Research Explorer, 17 Nov 2026</title>
+<link rel="stylesheet" href="../assets/style.css">
+<style>
+canvas#scatterPlot{height:340px}
+canvas#barPlot{height:340px}
+canvas#biasPlot,canvas#spreadPlot{height:280px}
+.btnrow{display:flex;flex-wrap:wrap;gap:8px;margin:4px 0 14px;align-items:center}
+.btnrow button{font:500 14px var(--font);color:var(--text);background:var(--accent-soft);border:0;border-radius:8px;padding:7px 14px;min-height:32px;cursor:pointer}
+.btnrow button.primary{color:#fff;background:var(--accent)}
+.btnrow button[aria-pressed="true"]{outline:2px solid var(--accent);outline-offset:1px}
+.btnrow .lbl{font-size:13px;color:var(--muted);margin-right:2px}
+.verdict{font-weight:600}
+</style></head><body><main>
+<a class="back" href="../">‹ All demos</a>
+<div class="eyebrow">17 Nov 2026 · AI</div>
+<h1>Is the AI confused by the question, or does it just not know?</h1>
+<p class="lede">When a large language model gives a shaky answer, the fix depends on the cause. This paper asks a question in several reworded versions, samples several answers to each version, turns every answer into a point in an embedding space, and splits the spread of those points exactly into a part that stays within a wording (aleatoric uncertainty) and a part that changes between wordings (epistemic uncertainty). It works with nothing but the model's text outputs, and adds a one-line correction for a bias that otherwise makes answer noise look like a knowledge gap.</p>
+<p class="authors">Wang Ma, Debarun Bhattacharjya, Junkyu Lee, Nhan H. Pham, Harsha Kokel, Qiang Ji</p>
+
+<section class="card why" aria-labelledby="why-h">
+<h2 id="why-h">Why it matters</h2>
+<p>When a chatbot may be wrong, the right response depends on why: an ambiguous question calls for clarification, while a gap in the model's knowledge calls for a search or a human, yet existing black-box checks give only one "how unsure" number. This paper splits that number into the two parts using only sampled answers to reworded prompts, with a one-line bias correction that cuts the false link between the two parts from a rank correlation of 0.65 to 0.12 at three answers per wording, and it ranks wrong answers about as well as methods that need the model's internals.</p>
+</section>
+
+<section class="card" aria-labelledby="paper-h">
+<h2 id="paper-h">The paper</h2>
+<p style="margin:0 0 6px"><strong>Black-Box Uncertainty Quantification for Large Language Models via Ensemble-of-Ensembles</strong></p>
+<p class="cite" style="margin:0">Wang Ma (Rensselaer Polytechnic Institute), Debarun Bhattacharjya (Lirio), Junkyu Lee (IBM Software Innovation Lab), Nhan H. Pham (independent researcher), Harsha Kokel (IBM Software Innovation Lab), Qiang Ji (Rensselaer Polytechnic Institute); work done at IBM Research. arXiv:2611.18453 [cs.LG], 13 November 2026. Accepted at NeurIPS 2026. <a href="https://arxiv.org/abs/2611.18453">Read on arXiv</a> · <a href="https://arxiv.org/pdf/2611.18453">PDF</a> · <a href="https://github.com/wma17/Black-box_UQ_for_LLMs_Ensemble_of_Ensemble">Code</a></p>
+<p style="margin-top:14px">In plain language: the <em>outer ensemble</em> is N meaning-preserving paraphrases x<sub>1</sub>…x<sub>N</sub> of the question (picked by adding small noise to the question's embedding and snapping to the nearest cached paraphrase). The <em>inner ensemble</em> is M sampled answers to each paraphrase, each embedded as a vector z<sub>i,j</sub>. The law of total covariance splits the total spread exactly:</p>
+<div class="eq">Cov(Z) = E<sub>Δ</sub>[Cov(Z | Δ)] + Cov<sub>Δ</sub>(E[Z | Δ]) &nbsp;&nbsp;i.e.&nbsp;&nbsp; U<sub>T</sub> = U<sub>A</sub> (within wordings) + U<sub>E</sub> (between wordings)</div>
+<p>With per-paraphrase means μ̂<sub>i</sub> and covariances Σ̂<sub>i</sub> (divisor M − 1), the estimators are</p>
+<div class="eq">Û<sub>A</sub> = (1/N) Σ<sub>i</sub> Σ̂<sub>i</sub>, &nbsp;&nbsp; Û<sub>E</sub><sup>raw</sup> = 1/(N−1) Σ<sub>i</sub> (μ̂<sub>i</sub> − μ̄)(μ̂<sub>i</sub> − μ̄)<sup>⊤</sup>, &nbsp;&nbsp; Û<sub>E</sub> = Û<sub>E</sub><sup>raw</sup> − Û<sub>A</sub>/M, &nbsp;&nbsp; Û<sub>T</sub> = Û<sub>A</sub> + Û<sub>E</sub></div>
+<p>Because each μ̂<sub>i</sub> is itself an average of only M noisy answers, the raw between-wording spread is inflated by exactly U<sub>A</sub>/M; subtracting Û<sub>A</sub>/M makes Û<sub>E</sub> unbiased for any M ≥ 2. Each matrix is reduced to a score by its trace. The paper also proves that on questions where the model answers the same way every time for a given wording but changes with the wording (confident hallucinations, prompt-format artefacts), any check based only on repeated answers to one prompt scores exactly zero while the between-wording part stays positive.</p>
+</section>
+
+<section class="card" aria-labelledby="demo-h">
+<h2 id="demo-h">Try it: an ensemble of ensembles</h2>
+<p>Each dot is one simulated answer drawn in a 2-D stand-in for the embedding space; each colour is one rewording of the question. You set the true amount of each kind of uncertainty, and the demo runs the paper's estimators on the samples.</p>
+<div class="btnrow" role="group" aria-label="Example questions"><span class="lbl">Examples:</span>
+ <button type="button" data-p="easy">Easy question</button>
+ <button type="button" data-p="ambig">Ambiguous question</button>
+ <button type="button" data-p="gap">Knowledge gap</button>
+ <button type="button" data-p="halluc">Confident hallucination</button>
+</div>
+<div class="controls">
+ <div><label for="sa"><span>Spread within a wording, σ<sub>A</sub></span> <output id="saO"></output></label><input type="range" id="sa" min="0" max="1.5" step="0.01" value="0.6"></div>
+ <div><label for="se"><span>Shift between wordings, σ<sub>E</sub></span> <output id="seO"></output></label><input type="range" id="se" min="0" max="1.5" step="0.01" value="0.5"></div>
+ <div><label for="nOuter"><span>Rewordings N (outer ensemble)</span> <output id="nOuterO"></output></label><input type="range" id="nOuter" min="2" max="30" step="1" value="10"></div>
+ <div><label for="mInner"><span>Answers per rewording M (inner ensemble)</span> <output id="mInnerO"></output></label><input type="range" id="mInner" min="2" max="30" step="1" value="3"></div>
+</div>
+<div class="btnrow"><button type="button" class="primary" id="resample">Draw new answers</button><span class="note" id="cost" style="margin:0"></span></div>
+<div class="stats">
+ <div class="stat"><div class="v" id="vAU"></div><div class="l">Aleatoric Û<sub>A</sub> (true <span id="tAU"></span>)</div></div>
+ <div class="stat"><div class="v" id="vEUr"></div><div class="l">Epistemic, raw Û<sub>E</sub><sup>raw</sup></div></div>
+ <div class="stat"><div class="v" id="vEU"></div><div class="l">Epistemic, corrected Û<sub>E</sub> (true <span id="tEU"></span>)</div></div>
+ <div class="stat"><div class="v" id="vFix"></div><div class="l">Single-prompt consistency check (M answers to the original wording)</div></div>
+</div>
+<p class="note verdict" id="verdict" aria-live="polite"></p>
+<div class="grid" style="margin-top:14px">
+ <div class="plot"><div class="plot-title">Simulated answers in embedding space</div>
+  <canvas id="scatterPlot" role="img" aria-label="Scatter of simulated answer embeddings coloured by rewording, with per-rewording means"></canvas>
+  <div class="legend"><span style="--k:var(--muted)">Dots: answers, one colour per rewording</span><span style="--k:var(--cx)">Rings: per-rewording means μ̂<sub>i</sub>; cross: overall mean</span></div></div>
+ <div class="plot"><div class="plot-title">Uncertainty scores (trace of each matrix)</div>
+  <canvas id="barPlot" role="img" aria-label="Bar chart of true and estimated aleatoric, epistemic and total uncertainty"></canvas>
+  <div class="legend"><span style="--k:var(--c1)">Aleatoric</span><span style="--k:var(--c4)">Epistemic, raw</span><span style="--k:var(--c2)">Epistemic, corrected</span><span style="--k:var(--c3)">Total</span><span style="--k:var(--muted)">Single-prompt check</span><span style="--k:var(--cx)">True value</span></div></div>
+</div>
+<div class="grid" style="margin-top:16px">
+ <div class="plot"><div class="plot-title">The finite-M bias: average over 200 repeats at each M</div>
+  <canvas id="biasPlot" role="img" aria-label="Average raw and corrected epistemic estimates against the number of answers per rewording"></canvas>
+  <div class="legend"><span style="--k:var(--c4)">Raw Û<sub>E</sub><sup>raw</sup> ≈ U<sub>E</sub> + U<sub>A</sub>/M</span><span style="--k:var(--c2)">Corrected Û<sub>E</sub></span><span style="--k:var(--cx)">True U<sub>E</sub></span></div></div>
+ <div class="plot"><div class="plot-title">Spread of the two estimates at your N and M (600 repeats)</div>
+  <canvas id="spreadPlot" role="img" aria-label="Histograms of raw and corrected epistemic estimates across repeated runs"></canvas>
+  <div class="legend"><span style="--k:var(--c4)">Raw</span><span style="--k:var(--c2)">Corrected</span><span style="--k:var(--cx)">True U<sub>E</sub></span></div></div>
+</div>
+</section>
+
+<section class="card" aria-labelledby="res-h">
+<h2 id="res-h">What the paper found</h2>
+<table><thead><tr><th style="text-align:left">Result (from the paper)</th><th>Value</th></tr></thead><tbody>
+<tr><td>Rank correlation between Û<sub>A</sub> and raw Û<sub>E</sub>, TriviaQA, LLaMA-3-8B, N = 10, M = 3 / 30</td><td>0.647 / 0.283</td></tr>
+<tr><td>Same, after the 1/M correction, M = 3 / 30</td><td>0.115 / 0.213</td></tr>
+<tr><td>AU correctness AUROC, TriviaQA, LLaMA-3-8B (cosine / ROUGE-L labels), N = M = 20</td><td>0.799 / 0.845</td></tr>
+<tr><td>Best white-box baseline there (G-NLL, needs token probabilities)</td><td>0.786 / 0.798</td></tr>
+<tr><td>Clarifying ambiguous questions (AmbigQA): shift in EU / single-prompt self-consistency</td><td>−0.218 / −0.022 (standardised)</td></tr>
+<tr><td>Supplying the evidence passage (Natural Questions): shift in AU / EU</td><td>−0.610 / −0.604 (standardised)</td></tr>
+</tbody></table>
+<p class="note">Tested on five short-answer benchmarks (TriviaQA, TruthfulQA, SciQA, GPQA, CoQA) with LLaMA-3 8B/70B and Qwen2.5 7B/72B. In the clarification test only the scores that use reworded prompts moved; every check based on a single fixed prompt stayed statistically unchanged, as the separation theorem predicts. Results vary by dataset: on some columns, such as GPQA with Qwen2.5-7B, all methods are close to chance.</p>
+</section>
+
+<section class="card" aria-labelledby="how-h">
+<h2 id="how-h">How to use it</h2>
+<ul>
+<li><strong>Try the examples:</strong> "Ambiguous question" makes each colour a wide cloud sitting in the same place (high aleatoric); "Knowledge gap" makes tight clouds in different places (high epistemic).</li>
+<li><strong>Watch the confident hallucination:</strong> every wording gives the same answer every time, so the single-prompt consistency check reads exactly 0, yet the rewordings disagree and the epistemic score catches it.</li>
+<li><strong>See the bias:</strong> with M = 2 or 3 the raw epistemic score (purple) sits well above the true value, by U<sub>A</sub>/M. The corrected score (orange) is centred on the truth at every M. Set σ<sub>E</sub> to 0 to see the raw score invent a knowledge gap that is not there.</li>
+<li><strong>Trade off cost:</strong> the total cost is N × M model calls. More rewordings N narrows the spread of the epistemic estimate; more answers M mainly shrinks the bias the correction removes. Note the corrected score can dip below zero on a single run, since it is unbiased rather than clipped.</li>
+</ul>
+</section>
+<p class="note" style="margin-top:24px">Demo by Grok Bot for the Daily Research Explorer. The two-level estimators, the law-of-total-covariance split, the 1/M bias correction, trace reduction and the quoted results come from the paper. Simplifications: real answers are embedded by a sentence encoder in hundreds of dimensions; here the embeddings are 2-D with isotropic Gaussian noise, the per-rewording means are drawn as μ<sub>i</sub> ~ N(0, σ<sub>E</sub>²I) and answers as z<sub>i,j</sub> ~ N(μ<sub>i</sub>, σ<sub>A</sub>²I), so the true scores are U<sub>A</sub> = 2σ<sub>A</sub>² and U<sub>E</sub> = 2σ<sub>E</sub>². The single-prompt check is the trace of the sample covariance of M answers to the original wording, standing in for fixed-prompt methods such as self-consistency or embedding variance.</p>
+</main>
+<script>
+"use strict";
+const $=id=>document.getElementById(id);
+const css=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const TAU=2*Math.PI;
+let seed=1;
+function rng(s){s=s>>>0;return()=>{s=s+0x6D2B79F5|0;let t=Math.imul(s^s>>>15,1|s);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function gaussFn(r){let spare=null;return()=>{if(spare!==null){const v=spare;spare=null;return v}let u=0;while(u===0)u=r();const v=r(),m=Math.sqrt(-2*Math.log(u));spare=m*Math.sin(TAU*v);return m*Math.cos(TAU*v)}}
+const PRESETS={easy:[0.15,0.1],ambig:[1.0,0.12],gap:[0.15,0.9],halluc:[0,0.7]};
+let P={},S={};
+function params(){return{sa:+$("sa").value,se:+$("se").value,N:+$("nOuter").value,M:+$("mInner").value}}
+// draw one two-level ensemble; returns samples (optional) and the trace estimators
+function ensemble(p,g,keep){const{N,M,sa,se}=p;const mus=[],pts=[];let sumCov=0,mx=0,my=0;
+ for(let i=0;i<N;i++){const cx=se*g(),cy=se*g();let ax=0,ay=0;const zs=[];
+  for(let j=0;j<M;j++){const x=cx+sa*g(),y=cy+sa*g();zs.push([x,y]);ax+=x;ay+=y}
+  ax/=M;ay/=M;let c=0;for(const z of zs){c+=(z[0]-ax)**2+(z[1]-ay)**2}c/=(M-1);
+  sumCov+=c;mus.push([ax,ay]);mx+=ax;my+=ay;if(keep)pts.push(zs)}
+ mx/=N;my/=N;let b=0;for(const m of mus)b+=(m[0]-mx)**2+(m[1]-my)**2;b/=(N-1);
+ const AU=sumCov/N,EUr=b,EU=b-AU/M;return{AU,EUr,EU,TU:AU+EU,mus,pts,mx,my}}
+function fixedPrompt(p,g){// M answers to the original wording (its own conditional mean), trace of sample covariance
+ const cx=p.se*g(),cy=p.se*g();const zs=[];let ax=0,ay=0;for(let j=0;j<p.M;j++){const x=cx+p.sa*g(),y=cy+p.sa*g();zs.push([x,y]);ax+=x;ay+=y}
+ ax/=p.M;ay/=p.M;let c=0;for(const z of zs)c+=(z[0]-ax)**2+(z[1]-ay)**2;return c/(p.M-1)}
+function compute(){const p=params();P=p;const g=gaussFn(rng(seed*7919+13));
+ const one=ensemble(p,g,true);const fix=fixedPrompt(p,g);
+ const g2=gaussFn(rng(seed*104729+101));const Ms=[],raw=[],cor=[];
+ for(let M=2;M<=30;M++){let a=0,b=0;const R=200;const q={...p,M};for(let r=0;r<R;r++){const e=ensemble(q,g2,false);a+=e.EUr;b+=e.EU}Ms.push(M);raw.push(a/R);cor.push(b/R)}
+ const g3=gaussFn(rng(seed*31337+7));const hr=[],hc=[];for(let r=0;r<600;r++){const e=ensemble(p,g3,false);hr.push(e.EUr);hc.push(e.EU)}
+ S={one,fix,Ms,raw,cor,hr,hc,tAU:2*p.sa*p.sa,tEU:2*p.se*p.se}}
+function setup(c){const r=c.getBoundingClientRect(),d=window.devicePixelRatio||1;c.width=Math.round(r.width*d);c.height=Math.round(r.height*d);const g=c.getContext("2d");g.setTransform(d,0,0,d,0,0);return{g,w:r.width,h:r.height}}
+function axes(g,w,h,pad,x0,x1,y0,y1,xt,yt,xl,yl,xfmt,yfmt){g.strokeStyle=css("--grid");g.lineWidth=1;g.fillStyle=css("--muted");g.font="11px "+css("--font");
+ const X=x=>pad.l+(x-x0)/(x1-x0)*(w-pad.l-pad.r),Y=y=>h-pad.b-(y-y0)/(y1-y0)*(h-pad.t-pad.b);
+ g.textAlign="right";g.textBaseline="middle";for(const v of yt){g.beginPath();g.moveTo(pad.l,Y(v));g.lineTo(w-pad.r,Y(v));g.stroke();g.fillText(yfmt?yfmt(v):v,pad.l-6,Y(v))}
+ g.textAlign="center";g.textBaseline="top";for(const v of xt){g.beginPath();g.moveTo(X(v),pad.t);g.lineTo(X(v),h-pad.b);g.stroke();g.fillText(xfmt?xfmt(v):v,X(v),h-pad.b+5)}
+ if(xl){g.fillText(xl,(pad.l+w-pad.r)/2,h-14)}
+ if(yl){g.save();g.translate(12,(pad.t+h-pad.b)/2);g.rotate(-Math.PI/2);g.textBaseline="middle";g.fillText(yl,0,0);g.restore()}
+ return{X,Y}}
+function niceTicks(lo,hi,n){const span=hi-lo||1,raw=span/n,mag=10**Math.floor(Math.log10(raw)),st=[1,2,2.5,5,10].map(k=>k*mag).find(s=>s>=raw);const t=[];for(let v=Math.ceil(lo/st)*st;v<=hi+1e-9;v+=st)t.push(+v.toFixed(6));return t}
+const fmt=v=>Math.abs(v)<10?v.toFixed(2):v.toFixed(1);
+function drawScatter(){const{g,w,h}=setup($("scatterPlot")),pad={l:36,r:12,t:12,b:30};g.clearRect(0,0,w,h);const o=S.one;
+ let ext=0.5;for(const zs of o.pts)for(const z of zs)ext=Math.max(ext,Math.abs(z[0]),Math.abs(z[1]));ext=Math.ceil(ext*1.1*2)/2;
+ const pw=w-pad.l-pad.r,ph=h-pad.t-pad.b,sc=Math.min(pw,ph)/(2*ext),xr=pw/(2*sc),yr=ph/(2*sc);
+ const t=niceTicks(-ext,ext,4);const{X,Y}=axes(g,w,h,pad,-xr,xr,-yr,yr,niceTicks(-xr,xr,5),t,"","",v=>+v.toFixed(2),v=>+v.toFixed(2));
+ const N=o.pts.length;const dark=matchMedia("(prefers-color-scheme: dark)").matches;
+ o.pts.forEach((zs,i)=>{const col=`hsl(${Math.round(360*i/N)},${dark?75:70}%,${dark?62:46}%)`;g.fillStyle=col;g.globalAlpha=0.7;
+  for(const z of zs){g.beginPath();g.arc(X(z[0]),Y(z[1]),3.2,0,TAU);g.fill()}g.globalAlpha=1;
+  g.strokeStyle=col;g.lineWidth=2.2;g.beginPath();g.arc(X(o.mus[i][0]),Y(o.mus[i][1]),7,0,TAU);g.stroke();
+  g.strokeStyle=css("--cx");g.lineWidth=0.8;g.beginPath();g.arc(X(o.mus[i][0]),Y(o.mus[i][1]),8.5,0,TAU);g.stroke()});
+ g.strokeStyle=css("--cx");g.lineWidth=2.5;const cx=X(o.mx),cy=Y(o.my);g.beginPath();g.moveTo(cx-8,cy);g.lineTo(cx+8,cy);g.moveTo(cx,cy-8);g.lineTo(cx,cy+8);g.stroke()}
+function drawBars(){const{g,w,h}=setup($("barPlot")),pad={l:46,r:12,t:16,b:44};g.clearRect(0,0,w,h);const o=S.one;
+ const items=[{n:"Aleatoric",v:o.AU,t:S.tAU,c:"--c1"},{n:"Epistemic raw",v:o.EUr,t:S.tEU,c:"--c4"},{n:"Epistemic corr.",v:o.EU,t:S.tEU,c:"--c2"},{n:"Total",v:o.TU,t:S.tAU+S.tEU,c:"--c3"},{n:"Single prompt",v:S.fix,t:S.tAU,c:"--muted"}];
+ let hi=Math.max(0.2,...items.map(d=>Math.max(d.v,d.t)))*1.12,lo=Math.min(0,...items.map(d=>d.v))*1.12;
+ const yt=niceTicks(lo,hi,5);const{X,Y}=axes(g,w,h,pad,0,items.length,lo,hi,[],yt,"","",null,fmt);
+ const bw=(X(1)-X(0))*0.56;g.font="11px "+css("--font");
+ items.forEach((d,i)=>{const xc=X(i+0.5);g.fillStyle=css(d.c);g.globalAlpha=0.85;const y0=Y(0),y1=Y(d.v);g.fillRect(xc-bw/2,Math.min(y0,y1),bw,Math.abs(y1-y0)||1);g.globalAlpha=1;
+  g.strokeStyle=css("--cx");g.lineWidth=2.5;g.beginPath();g.moveTo(xc-bw/2-4,Y(d.t));g.lineTo(xc+bw/2+4,Y(d.t));g.stroke();
+  g.fillStyle=css("--text");g.textAlign="center";g.textBaseline="bottom";g.fillText(fmt(d.v),xc,Math.min(y0,y1)-3);
+  g.fillStyle=css("--muted");g.textBaseline="top";const words=d.n.split(" ");g.fillText(words[0],xc,h-pad.b+6);if(words[1])g.fillText(words[1],xc,h-pad.b+20)});
+ g.strokeStyle=css("--muted");g.lineWidth=1;g.beginPath();g.moveTo(pad.l,Y(0));g.lineTo(w-pad.r,Y(0));g.stroke()}
+function drawBias(){const{g,w,h}=setup($("biasPlot")),pad={l:46,r:12,t:12,b:40};g.clearRect(0,0,w,h);
+ let hi=Math.max(0.1,...S.raw,S.tEU)*1.1,lo=Math.min(0,...S.cor)*1.1;const yt=niceTicks(lo,hi,5);
+ const{X,Y}=axes(g,w,h,pad,2,30,lo,hi,[2,5,10,15,20,25,30],yt,"answers per rewording, M","",v=>v,fmt);
+ g.strokeStyle=css("--cx");g.lineWidth=1.5;g.setLineDash([6,4]);g.beginPath();g.moveTo(X(2),Y(S.tEU));g.lineTo(X(30),Y(S.tEU));g.stroke();g.setLineDash([]);
+ // theory curve for raw: U_E + U_A/M
+ g.strokeStyle=css("--c4");g.globalAlpha=0.35;g.lineWidth=6;g.beginPath();for(let M=2;M<=30;M+=0.25){const v=S.tEU+S.tAU/M;M>2?g.lineTo(X(M),Y(v)):g.moveTo(X(M),Y(v))}g.stroke();g.globalAlpha=1;
+ for(const [arr,c] of [[S.raw,"--c4"],[S.cor,"--c2"]]){g.strokeStyle=css(c);g.fillStyle=css(c);g.lineWidth=2.2;g.beginPath();arr.forEach((v,i)=>{i?g.lineTo(X(S.Ms[i]),Y(v)):g.moveTo(X(S.Ms[i]),Y(v))});g.stroke();arr.forEach((v,i)=>{g.beginPath();g.arc(X(S.Ms[i]),Y(v),2.4,0,TAU);g.fill()})}
+ g.strokeStyle=css("--accent");g.lineWidth=1;g.setLineDash([2,3]);g.beginPath();g.moveTo(X(P.M),pad.t);g.lineTo(X(P.M),h-pad.b);g.stroke();g.setLineDash([]);
+ g.fillStyle=css("--muted");g.font="11px "+css("--font");g.textAlign="left";g.textBaseline="top";g.fillText("your M",X(P.M)+4,pad.t+2);g.fillText("faint band: theory U_E + U_A/M",pad.l+6,h-pad.b-16)}
+function drawSpread(){const{g,w,h}=setup($("spreadPlot")),pad={l:46,r:12,t:12,b:40};g.clearRect(0,0,w,h);
+ const all=S.hr.concat(S.hc).slice().sort((a,b)=>a-b);let lo=Math.min(all[Math.floor(all.length*0.005)],S.tEU,0),hi=Math.max(all[Math.floor(all.length*0.995)],S.tEU)+1e-6;const pd=(hi-lo)*0.05;lo-=pd;hi+=pd;
+ const NB=40,bins=a=>{const b=new Array(NB).fill(0);for(const v of a){const k=Math.floor((v-lo)/(hi-lo)*NB);if(k>=0&&k<NB)b[k]++}return b};const br=bins(S.hr),bc=bins(S.hc);
+ const ymax=Math.max(...br,...bc)*1.1||1;const{X,Y}=axes(g,w,h,pad,lo,hi,0,ymax,niceTicks(lo,hi,5),niceTicks(0,ymax,4),"epistemic estimate (trace)","",fmt,v=>Math.round(v));
+ const bw=X(lo+(hi-lo)/NB)-X(lo);
+ for(const [b,c] of [[br,"--c4"],[bc,"--c2"]]){g.fillStyle=css(c);g.globalAlpha=0.45;b.forEach((n,k)=>{g.fillRect(X(lo+k*(hi-lo)/NB)+0.5,Y(n),bw-1,Y(0)-Y(n))});g.globalAlpha=1}
+ const mean=a=>a.reduce((x,y)=>x+y,0)/a.length;
+ for(const [a,c] of [[S.hr,"--c4"],[S.hc,"--c2"]]){g.strokeStyle=css(c);g.lineWidth=2;const m=mean(a);g.beginPath();g.moveTo(X(m),pad.t);g.lineTo(X(m),h-pad.b);g.stroke()}
+ g.strokeStyle=css("--cx");g.lineWidth=2;g.setLineDash([6,4]);g.beginPath();g.moveTo(X(S.tEU),pad.t);g.lineTo(X(S.tEU),h-pad.b);g.stroke();g.setLineDash([]);
+ g.fillStyle=css("--muted");g.font="11px "+css("--font");g.textAlign="right";g.textBaseline="top";g.fillText("solid lines: averages",w-pad.r-4,pad.t+2)}
+function draw(){drawScatter();drawBars();drawBias();drawSpread()}
+function stats(){const p=P,o=S.one;
+ $("saO").textContent=p.sa.toFixed(2);$("seO").textContent=p.se.toFixed(2);$("nOuterO").textContent=p.N;$("mInnerO").textContent=p.M;
+ $("cost").textContent=`${p.N} × ${p.M} = ${p.N*p.M} model calls per question`;
+ $("vAU").textContent=fmt(o.AU);$("vEUr").textContent=fmt(o.EUr);$("vEU").textContent=fmt(o.EU);$("vFix").textContent=fmt(S.fix);
+ $("tAU").textContent=fmt(S.tAU);$("tEU").textContent=fmt(S.tEU);
+ const tot=o.AU+Math.max(o.EU,0);let msg;
+ if(tot<0.15)msg="Low total uncertainty: the answers agree within and across wordings, so the answer can likely be trusted.";
+ else if(S.fix<0.02&&o.EU>0.1)msg="Every wording gives the same answer every time, so a single-prompt consistency check sees nothing, but the wordings disagree with each other: the between-wording (epistemic) part flags a likely confident hallucination.";
+ else if(o.AU>=2*Math.max(o.EU,0))msg="Mostly aleatoric: answers vary even for one fixed wording. In the paper's framing that points to an ambiguous or open-ended question, where asking the user to clarify is the useful step.";
+ else if(Math.max(o.EU,0)>=2*o.AU)msg="Mostly epistemic: the model's typical answer moves when the question is merely reworded. In the paper's framing that points to a knowledge gap, where retrieval or handing to a human is the useful step.";
+ else msg="Both parts are substantial: the answers vary within each wording and also shift between wordings.";
+ const bias=S.tAU/p.M;if(bias>0.05&&S.tEU<0.02)msg+=` Note the raw epistemic score would on average report about ${fmt(bias)} here, a knowledge gap that isn't there; the correction removes it.`;
+ $("verdict").textContent=msg;
+ document.querySelectorAll("[data-p]").forEach(b=>{const q=PRESETS[b.dataset.p];b.setAttribute("aria-pressed",String(Math.abs(q[0]-p.sa)<1e-9&&Math.abs(q[1]-p.se)<1e-9))})}
+function update(){compute();stats();draw()}
+let pending=false;const sched=()=>{if(pending)return;pending=true;requestAnimationFrame(()=>{pending=false;update()})};
+["sa","se","nOuter","mInner"].forEach(id=>$(id).addEventListener("input",sched));
+$("resample").addEventListener("click",()=>{seed++;sched()});
+document.querySelectorAll("[data-p]").forEach(b=>b.addEventListener("click",()=>{const q=PRESETS[b.dataset.p];$("sa").value=q[0];$("se").value=q[1];sched()}));
+window.addEventListener("resize",draw);
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change",draw);
+update();
+</script>
+</body></html>
