@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="light dark">
+<title>Why some pores in a sodium battery never fill — Research Explorer, 18 Nov 2026</title>
+<link rel="stylesheet" href="../assets/style.css">
+<style>
+canvas#poreCanvas{height:340px;aspect-ratio:auto}
+canvas#trajPlot{height:340px}
+canvas#sizePlot,canvas#defPlot{height:280px}
+canvas#profilePlot,canvas#histPlot{height:300px}
+.btnrow{display:flex;flex-wrap:wrap;gap:8px;margin:4px 0 14px;align-items:center}
+.btnrow button{font:500 14px var(--font);color:var(--text);background:var(--accent-soft);border:0;border-radius:8px;padding:7px 14px;min-height:32px;cursor:pointer}
+.btnrow button.primary{color:#fff;background:var(--accent)}
+.btnrow button:disabled{opacity:.5;cursor:default}
+.btnrow button[aria-pressed="true"]{outline:2px solid var(--accent);outline-offset:1px}
+.btnrow .lbl{font-size:13px;color:var(--muted);margin-right:2px}
+.verdict{font-weight:600}
+</style></head><body><main>
+<a class="back" href="../">‹ All demos</a>
+<div class="eyebrow">18 Nov 2026 · Materials &amp; Energy</div>
+<h1>Why some pores in a sodium battery never fill</h1>
+<p class="lede">Sodium-ion batteries store much of their charge by packing sodium into tiny closed pores inside a hard-carbon anode, and that filling is usually pictured as one flat "plateau" on the voltage curve. This paper combines first-principles calculations with a grand-canonical Monte Carlo model of a single pore and finds instead that every pore size fills at its own voltage (roughly 0.28 V divided by the diameter in nm), that big pores need a large sodium seed before they fill and so can stay empty at real charging speeds, and that wall defects speed up the seeding but slow down the final filling. Below, the paper's lattice model runs live in your browser.</p>
+<p class="authors">Ihor Radchenko, Andrés Felipe Usuga, Yuxin Tang, Oleksandr I. Malyi</p>
+
+<section class="card why" aria-labelledby="why-h">
+<h2 id="why-h">Why it matters</h2>
+<p>Sodium-ion batteries are a cheaper, lithium-free option for grid storage and low-cost cars, and most of the charge in their hard-carbon anodes sits in closed pores, which designers have tried to make as large and numerous as possible. This paper shows that pores larger than a few nanometres may never fill at realistic charging speeds and that wall defects help only up to a point, so the useful target is a window of pore sizes and defect levels that fills fast, not the largest possible pore volume.</p>
+</section>
+
+<section class="card" aria-labelledby="paper-h">
+<h2 id="paper-h">The paper</h2>
+<p style="margin:0 0 6px"><strong>Kinetic and Thermodynamic Limits of Sodium Pore Filling in Hard Carbon</strong></p>
+<p class="cite" style="margin:0">Ihor Radchenko and Andrés Felipe Usuga (Centre of Excellence ENSEMBLE3, Warsaw, Poland), Yuxin Tang (College of Chemical Engineering, Fuzhou University, China), Oleksandr I. Malyi (Qingyuan Innovation Laboratory, Quanzhou, China). arXiv:2611.20749 [cond-mat.mtrl-sci], submitted 16 November 2026. <a href="https://arxiv.org/abs/2611.20749">Read on arXiv</a> · <a href="https://arxiv.org/pdf/2611.20749">PDF</a></p>
+<p style="margin-top:14px">In plain language: the pore is a ring of carbon wall sites around empty lattice sites. Sodium atoms can enter or leave only through sites touching the wall, where they trade with the sodium counter-electrode, and can hop between neighbouring sites inside. The energy of a configuration is a sum of pair interactions, ordered as the paper requires, |E<sub>Na–C</sub>| &lt; |E<sub>Na–Na</sub>| &lt; |E<sub>Na–defect</sub>|:</p>
+<div class="eq">H = ε<sub>NaNa</sub>·(Na–Na neighbour pairs) + ε<sub>C</sub>·(Na–wall contacts) + ε<sub>D</sub>·(Na on defect sites)</div>
+<p>The applied voltage V sets how eager sodium is to come in, by shifting the chemical potential of the electrode below that of sodium metal:</p>
+<div class="eq">μ<sub>Na</sub>(electrode) = μ<sub>Na</sub>(metal) − eV &nbsp;&nbsp;·&nbsp;&nbsp; P(accept insertion) = min[1, exp(−(ΔH − μ<sub>Na</sub>)/kT)]</div>
+<p>Removals and hops use the same Metropolis rule. The fully filled pore is favourable whenever V is below its filling voltage, which the paper finds scales as <span class="math" style="display:inline;padding:1px 6px">V<sub>fill</sub> ≈ 0.28 / d</span> (d in nm). The catch is the path there: half-filled pores are unstable, so a sodium cluster has to nucleate first, and in big pores that seed must be large. The paper's time to fill therefore depends on the <em>undervoltage</em>, how far V sits below the pore's filling voltage, and defects change both the seeding (faster) and the final wall-wetting and diffusion stage (slower, because defects pin sodium to the wall).</p>
+</section>
+
+<section class="card" aria-labelledby="demo-h">
+<h2 id="demo-h">Try it: fill one pore</h2>
+<p>A live grand-canonical Monte Carlo run of the lattice pore model (one lattice site = 0.25 nm). Grey squares are carbon wall, purple squares are wall defects, blue dots are sodium. Change a slider and the run restarts. Simulation kT sets the temperature (0.19 eV ≈ 2200 K, the paper's choice; higher runs faster).</p>
+<div class="btnrow" role="group" aria-label="Examples"><span class="lbl">Examples:</span>
+ <button type="button" data-p="small">Small pore</button>
+ <button type="button" data-p="large">Large pore</button>
+ <button type="button" data-p="highv">Small undervoltage</button>
+ <button type="button" data-p="defect">Large pore + defects</button>
+</div>
+<div class="controls">
+ <div><label for="dia"><span>Pore diameter d</span> <output id="diaO"></output></label><input type="range" id="dia" min="1.5" max="6" step="0.25" value="2.5"></div>
+ <div><label for="volt"><span>Voltage V vs Na</span> <output id="voltO"></output></label><input type="range" id="volt" min="0" max="0.2" step="0.005" value="0"></div>
+ <div><label for="defp"><span>Defects on the pore wall</span> <output id="defpO"></output></label><input type="range" id="defp" min="0" max="50" step="1" value="0"></div>
+ <div><label for="kt"><span>Simulation kT</span> <output id="ktO"></output></label><input type="range" id="kt" min="0.17" max="0.27" step="0.005" value="0.21"></div>
+ <div><label for="speed"><span>Speed (sweeps per frame)</span> <output id="speedO"></output></label><input type="range" id="speed" min="1" max="400" step="1" value="60"></div>
+</div>
+<div class="btnrow"><button type="button" class="primary" id="play">Pause</button><button type="button" id="restart">Restart with new seed</button></div>
+<div class="stats">
+ <div class="stat"><div class="v" id="vVfill"></div><div class="l">Filling voltage of this pore (lattice model, 0 K)</div></div>
+ <div class="stat"><div class="v" id="vUnder"></div><div class="l">Undervoltage V<sub>fill</sub> − V</div></div>
+ <div class="stat"><div class="v" id="vFill"></div><div class="l">Pore filled</div></div>
+ <div class="stat"><div class="v" id="vT30"></div><div class="l">Sweeps to 30% (seeding stage)</div></div>
+ <div class="stat"><div class="v" id="vT99"></div><div class="l">Sweeps to 99% (full)</div></div>
+</div>
+<p class="note verdict" id="verdict" aria-live="polite"></p>
+<div class="grid" style="margin-top:14px">
+ <div class="plot"><div class="plot-title">The pore, live</div>
+  <canvas id="poreCanvas" role="img" aria-label="Lattice view of the pore showing carbon wall, defects and sodium atoms"></canvas>
+  <div class="legend"><span style="--k:var(--muted)">Carbon wall</span><span style="--k:var(--c4)">Wall defect</span><span style="--k:var(--c1)">Sodium</span></div></div>
+ <div class="plot"><div class="plot-title">Filling ratio against Monte Carlo sweeps</div>
+  <canvas id="trajPlot" role="img" aria-label="Filling ratio of the pore against Monte Carlo sweeps"></canvas>
+  <div class="legend"><span style="--k:var(--c1)">This run</span><span style="--k:var(--cx)">30% and 99% marks</span></div></div>
+</div>
+</section>
+
+<section class="card" aria-labelledby="sweep-h">
+<h2 id="sweep-h">Sweeps: pore size and defects</h2>
+<p>Each button runs three independent pores per point at the voltage, defect level and temperature set above, up to a budget of <span id="budgetTxt"></span> sweeps, and plots the median. Points drawn as open circles did not fill within the budget.</p>
+<div class="btnrow"><button type="button" class="primary" id="runSize">Run pore-size sweep</button><button type="button" class="primary" id="runDef">Run defect sweep at this d</button><span class="note" id="sweepStatus" style="margin:0" aria-live="polite"></span></div>
+<div class="grid">
+ <div class="plot"><div class="plot-title">Time to fill against pore diameter (log scale)</div>
+  <canvas id="sizePlot" role="img" aria-label="Median sweeps to fill against pore diameter"></canvas>
+  <div class="legend"><span style="--k:var(--c2)">Sweeps to 99%</span><span style="--k:var(--c3)">Sweeps to 30%</span></div></div>
+ <div class="plot"><div class="plot-title">Effect of defects, relative to a defect-free pore</div>
+  <canvas id="defPlot" role="img" aria-label="Seeding and late-stage filling times against defect percentage, normalised to zero defects"></canvas>
+  <div class="legend"><span style="--k:var(--c3)">Early stage, 0 → 30%</span><span style="--k:var(--c2)">Late stage, 30 → 99%</span></div></div>
+</div>
+</section>
+
+<section class="card" aria-labelledby="prof-h">
+<h2 id="prof-h">From one pore to a whole electrode</h2>
+<p>A real anode holds a spread of pore sizes. If each size fills at V<sub>fill</sub> = 0.28/d, the "plateau" is really a gentle slope made of many small steps; and pores too large to fill in the charging time add nothing. Pick a pore-size distribution (by share of pore volume) and the largest pore that still fills in time; the sweep above helps you choose that cut-off.</p>
+<div class="controls">
+ <div><label for="med"><span>Median pore diameter</span> <output id="medO"></output></label><input type="range" id="med" min="1" max="6" step="0.1" value="2.5"></div>
+ <div><label for="spr"><span>Size spread σ</span> <output id="sprO"></output></label><input type="range" id="spr" min="0.05" max="0.8" step="0.01" value="0.35"></div>
+ <div><label for="dcut"><span>Largest pore that fills in time</span> <output id="dcutO"></output></label><input type="range" id="dcut" min="1" max="8" step="0.1" value="3.5"></div>
+</div>
+<div class="stats">
+ <div class="stat"><div class="v" id="vAcc"></div><div class="l">Closed-pore volume that is usable</div></div>
+ <div class="stat"><div class="v" id="vSpan"></div><div class="l">Voltage span of the "plateau" (10% → 90% of filling)</div></div>
+ <div class="stat"><div class="v" id="vMid"></div><div class="l">Voltage at half filling</div></div>
+</div>
+<div class="grid" style="margin-top:14px">
+ <div class="plot"><div class="plot-title">Sodiation curve from pore filling only</div>
+  <canvas id="profilePlot" role="img" aria-label="Voltage against filled share of closed-pore volume, for all pores and for kinetically accessible pores"></canvas>
+  <div class="legend"><span style="--k:var(--c4)">All pores (thermodynamic limit)</span><span style="--k:var(--c1)">Only pores that fill in time</span><span style="--k:var(--muted)">One pore size: a flat plateau</span></div></div>
+ <div class="plot"><div class="plot-title">Pore volume by diameter</div>
+  <canvas id="histPlot" role="img" aria-label="Distribution of pore volume against pore diameter, with the filling voltage curve"></canvas>
+  <div class="legend"><span style="--k:var(--c1)">Fills in time</span><span style="--k:var(--muted)">Too slow, stays empty</span><span style="--k:var(--c3)">V<sub>fill</sub> = 0.28/d (right axis)</span></div></div>
+</div>
+</section>
+
+<section class="card" aria-labelledby="res-h">
+<h2 id="res-h">What the paper found</h2>
+<table><thead><tr><th style="text-align:left">Result (from the paper)</th><th>Value</th></tr></thead><tbody>
+<tr><td>Voltage of full pore filling, Monte Carlo model at 0 K (d in nm)</td><td>≈ 0.28 / d V</td></tr>
+<tr><td>Median filling time, 2.5 nm vs 5.0 nm pore at 0 V</td><td>1 : 31</td></tr>
+<tr><td>Normalised time to fill a 2.5 nm pore at 0 / 0.05 / 0.06 V</td><td>1 / 5.3 / 13.3</td></tr>
+<tr><td>Na adsorption on a graphene monovacancy (vs Na metal), DFT</td><td>−1.01 eV</td></tr>
+<tr><td>Clustering energy per Na on a defect, Na<sub>1</sub> / Na<sub>3</sub> / Na<sub>5</sub> / Na<sub>8</sub> / Na<sub>12</sub></td><td>−1.28 / −0.62 / −0.48 / −0.34 / −0.30 eV</td></tr>
+<tr><td>Defect effect on filling time</td><td>Faster seeding, slower late stage; an optimum defect level exists for every pore size and temperature studied</td></tr>
+</tbody></table>
+<p class="note">DFT on carbon-nanotube model pores (1.2, 1.3 and 1.6 nm) shows that even defect-free pores store sodium once van der Waals forces are included, that a finite sodium cluster is needed before filling is stable, and that smaller pores fill at higher voltages. The Monte Carlo runs use 2200 K to speed sampling, so times are relative, not seconds. The authors conclude that total closed-pore volume alone does not predict usable plateau capacity.</p>
+</section>
+
+<section class="card" aria-labelledby="how-h">
+<h2 id="how-h">How to use it</h2>
+<ul>
+<li><strong>Compare sizes:</strong> "Small pore" fills within a thousand or two sweeps; "Large pore" sits at a thin wetting layer for a long time, because it needs a big sodium seed before filling takes off.</li>
+<li><strong>Raise the voltage:</strong> filling slows as V gets close to V<sub>fill</sub> and stops above it. That is why charging cut-offs above 0 V (used to avoid sodium plating) can leave large pores unused.</li>
+<li><strong>Add defects:</strong> the seeding stage (time to 30%) gets faster and V<sub>fill</sub> goes up, but defects pin sodium to the wall, so the final stage can get slower. Run the defect sweep to see the two stages pull in opposite directions.</li>
+<li><strong>Scale up:</strong> in the last panel, move the cut-off below the typical pore size and watch the usable capacity collapse, even though every one of those pores would hold sodium in the thermodynamic limit.</li>
+</ul>
+</section>
+<p class="note" style="margin-top:24px">Demo by Grok Bot for the Daily Research Explorer. The lattice grand-canonical Monte Carlo set-up (insertion only at wall sites, chemical potential offset by −eV, pair energies ordered |E<sub>Na–C</sub>| &lt; |E<sub>Na–Na</sub>| &lt; |E<sub>Na–defect</sub>|, 30% and 99% stage marks, elevated simulation temperature), the 0.28/d scaling and the quoted results come from the paper. The energies here are illustrative choices, not the paper's fitted values: ε<sub>NaNa</sub> = −0.60 eV per bond, ε<sub>C</sub> = −0.51 eV per wall contact and ε<sub>D</sub> = −1.0 eV extra on a defect, which on this square lattice gives V<sub>fill</sub> between about 0.24/d and 0.28/d; kT = 0.21 eV by default (about 2400 K; the paper uses 2200 K). Sodium metal is taken as 2ε<sub>NaNa</sub> per atom. One sweep is one attempted move per pore site. The electrode panel assumes equal sodium density in every pore and a sharp kinetic cut-off; real cut-offs depend on rate, voltage and defects, so the numbers show trends, not a prediction for a specific carbon.</p>
+</main>
+<script>
+"use strict";
+const $=id=>document.getElementById(id);
+const css=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+function rng(s){s=s>>>0;return()=>{s=s+0x6D2B79F5|0;let t=Math.imul(s^s>>>15,1|s);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+const A=0.25,EN=-0.60,EC=-0.51,ED=-1.0,BUDGET=40000;
+$("budgetTxt").textContent=BUDGET.toLocaleString();
+// ---------- lattice pore model ----------
+function makePore(dnm,defFrac,r){const D=Math.max(3,Math.round(dnm/A)),R=D/2,L=D+2,c=(L-1)/2;
+ const inP=new Uint8Array(L*L);for(let y=0;y<L;y++)for(let x=0;x<L;x++)if((x-c)**2+(y-c)**2<=R*R)inP[y*L+x]=1;
+ const sites=[],wall=new Uint8Array(L*L),def=new Uint8Array(L*L),nb=new Array(L*L),cont=new Uint8Array(L*L),carbon=new Uint8Array(L*L);
+ for(let y=0;y<L;y++)for(let x=0;x<L;x++){const i=y*L+x;if(!inP[i])continue;sites.push(i);let k=0;const n=[];
+  for(const[dx,dy]of[[1,0],[-1,0],[0,1],[0,-1]]){const j=(y+dy)*L+x+dx;if(inP[j])n.push(j);else{k++;carbon[j]=1}}nb[i]=n;cont[i]=k;if(k)wall[i]=1}
+ const walls=sites.filter(i=>wall[i]);const nd=Math.round(defFrac*walls.length);
+ for(let k=0;k<nd;k++){const m=k+Math.floor(r()*(walls.length-k));[walls[k],walls[m]]=[walls[m],walls[k]];def[walls[k]]=1}
+ const base=new Float64Array(L*L);for(const i of sites)base[i]=cont[i]*EC+(def[i]?ED:0);
+ const p={L,D,sites,nb,wall,def,base,carbon,occ:new Uint8Array(L*L),n:0,N:sites.length};
+ let E=0,b=0;for(const i of sites){E+=base[i];b+=nb[i].length}E+=b/2*EN;p.vfill=-(E-p.N*2*EN)/p.N;return p}
+function siteE(p,i,ex){let k=0;const n=p.nb[i];for(let a=0;a<n.length;a++){const j=n[a];if(j!==ex&&p.occ[j])k++}return p.base[i]+k*EN}
+function sweep(p,V,kT,r){const mu=2*EN-V,S=p.sites,N=S.length,occ=p.occ;
+ for(let a=0;a<N;a++){const i=S[(r()*N)|0];
+  if(r()<0.5){if(!p.wall[i])continue;
+   if(!occ[i]){const dE=siteE(p,i,-1)-mu;if(dE<=0||r()<Math.exp(-dE/kT)){occ[i]=1;p.n++}}
+   else{const dE=mu-siteE(p,i,-1);if(dE<=0||r()<Math.exp(-dE/kT)){occ[i]=0;p.n--}}}
+  else{if(!occ[i])continue;const n=p.nb[i];if(!n.length)continue;const j=n[(r()*n.length)|0];if(occ[j])continue;
+   const dE=siteE(p,j,i)-siteE(p,i,-1);if(dE<=0||r()<Math.exp(-dE/kT)){occ[i]=0;occ[j]=1}}}}
+// ---------- drawing helpers ----------
+function setup(c){const r=c.getBoundingClientRect(),d=window.devicePixelRatio||1;c.width=Math.max(1,Math.round(r.width*d));c.height=Math.max(1,Math.round(r.height*d));const g=c.getContext("2d");g.setTransform(d,0,0,d,0,0);return{g,w:r.width,h:r.height}}
+function axes(g,w,h,pad,x0,x1,y0,y1,xt,yt,xl,yl,xfmt,yfmt,ylog){g.strokeStyle=css("--grid");g.lineWidth=1;g.fillStyle=css("--muted");g.font="11px "+css("--font");
+ const X=x=>pad.l+(x-x0)/(x1-x0)*(w-pad.l-pad.r),Y=ylog?(y=>h-pad.b-(Math.log10(y)-y0)/(y1-y0)*(h-pad.t-pad.b)):(y=>h-pad.b-(y-y0)/(y1-y0)*(h-pad.t-pad.b));
+ g.textAlign="right";g.textBaseline="middle";for(const v of yt){const yy=Y(v);g.beginPath();g.moveTo(pad.l,yy);g.lineTo(w-pad.r,yy);g.stroke();g.fillText(yfmt?yfmt(v):v,pad.l-6,yy)}
+ g.textAlign="center";g.textBaseline="top";for(const v of xt){g.beginPath();g.moveTo(X(v),pad.t);g.lineTo(X(v),h-pad.b);g.stroke();g.fillText(xfmt?xfmt(v):v,X(v),h-pad.b+5)}
+ if(xl)g.fillText(xl,(pad.l+w-pad.r)/2,h-14);
+ if(yl){g.save();g.translate(12,(pad.t+h-pad.b)/2);g.rotate(-Math.PI/2);g.textBaseline="middle";g.fillText(yl,0,0);g.restore()}
+ return{X,Y}}
+function niceTicks(lo,hi,n){const span=hi-lo||1,raw=span/n,mag=10**Math.floor(Math.log10(raw)),st=[1,2,2.5,5,10].map(k=>k*mag).find(s=>s>=raw);const t=[];for(let v=Math.ceil(lo/st-1e-9)*st;v<=hi+1e-9;v+=st)t.push(+v.toFixed(6));return t}
+const kfmt=v=>v>=1000?(v/1000)+"k":String(v);
+// ---------- live run ----------
+let pore,R,traj,t30,t99,sweeps,running=true,seed=1;
+const params=()=>({d:+$("dia").value,V:+$("volt").value,df:+$("defp").value/100,kT:+$("kt").value,sp:+$("speed").value});
+function restart(){const q=params();R=rng(seed*7919+17);pore=makePore(q.d,q.df,R);traj=[0];t30=t99=null;sweeps=0;labels();stats();drawAll()}
+function labels(){const q=params();$("diaO").textContent=q.d.toFixed(2)+" nm";$("voltO").textContent=q.V.toFixed(3)+" V";$("defpO").textContent=Math.round(q.df*100)+"%";
+ $("ktO").textContent=q.kT.toFixed(3)+" eV";$("speedO").textContent=q.sp;
+ $("medO").textContent=(+$("med").value).toFixed(1)+" nm";$("sprO").textContent=(+$("spr").value).toFixed(2);$("dcutO").textContent=(+$("dcut").value).toFixed(1)+" nm"}
+function stats(){const q=params(),f=pore.n/pore.N,u=pore.vfill-q.V;
+ $("vVfill").textContent=pore.vfill.toFixed(3)+" V";$("vUnder").textContent=(u>=0?"+":"")+u.toFixed(3)+" V";
+ $("vFill").textContent=(100*f).toFixed(0)+"%";$("vT30").textContent=t30?t30.toLocaleString():"–";$("vT99").textContent=t99?t99.toLocaleString():"–";
+ let m;if(u<=0)m="Thermodynamically limited: the voltage is above this pore's filling voltage, so a full pore is not favourable. It will only hold a thin layer on the wall.";
+ else if(t99)m=`Filled in ${t99.toLocaleString()} sweeps: kinetically accessible at this voltage.`;
+ else if(sweeps>=BUDGET)m=`Not filled within ${BUDGET.toLocaleString()} sweeps although a full pore is favourable: kinetically limited.`;
+ else if(!t30)m="Waiting for a sodium seed (nucleus) big enough to be stable…";
+ else m="Seed formed; now the pore fills by cluster growth and diffusion along the wall…";
+ $("verdict").textContent=m}
+function drawPore(){const{g,w,h}=setup($("poreCanvas"));g.clearRect(0,0,w,h);const p=pore,L=p.L,s=Math.min(w,h)/L,ox=(w-s*L)/2,oy=(h-s*L)/2;
+ const cm=css("--muted"),c4=css("--c4"),c1=css("--c1"),gr=css("--grid");
+ for(let y=0;y<L;y++)for(let x=0;x<L;x++){const i=y*L+x,X=ox+x*s,Y=oy+y*s;
+  if(p.carbon[i]){g.fillStyle=cm;g.globalAlpha=.55;g.fillRect(X+.5,Y+.5,s-1,s-1);g.globalAlpha=1}
+  else if(p.nb[i]){if(p.def[i]){g.fillStyle=c4;g.globalAlpha=.35;g.fillRect(X+.5,Y+.5,s-1,s-1);g.globalAlpha=1}
+   else if(s>7){g.fillStyle=gr;g.fillRect(X+s/2-.75,Y+s/2-.75,1.5,1.5)}
+   if(p.occ[i]){g.fillStyle=c1;g.beginPath();g.arc(X+s/2,Y+s/2,s*.42,0,2*Math.PI);g.fill()}}}}
+function drawTraj(){const{g,w,h}=setup($("trajPlot")),pad={l:44,r:12,t:12,b:40};g.clearRect(0,0,w,h);
+ const xmax=Math.max(200,sweeps*1.05),xt=niceTicks(0,xmax,5);const{X,Y}=axes(g,w,h,pad,0,xmax,0,1,xt,[0,.25,.5,.75,1],"Monte Carlo sweeps","Filling ratio",kfmt,v=>Math.round(v*100)+"%");
+ g.strokeStyle=css("--cx");g.setLineDash([4,4]);for(const v of[.3,.99]){g.beginPath();g.moveTo(pad.l,Y(v));g.lineTo(w-pad.r,Y(v));g.stroke()}g.setLineDash([]);
+ g.strokeStyle=css("--c1");g.lineWidth=2;g.beginPath();const n=traj.length,step=Math.max(1,Math.floor(n/800));for(let k=0;k<n;k+=step){const xx=X(k),yy=Y(traj[k]);k?g.lineTo(xx,yy):g.moveTo(xx,yy)}g.lineTo(X(n-1),Y(traj[n-1]));g.stroke()}
+function drawAll(){drawPore();drawTraj();drawSize();drawDef();drawProfile()}
+function tick(){if(running&&pore&&!t99&&sweeps<BUDGET){const q=params();const t0=performance.now();
+  for(let k=0;k<q.sp&&sweeps<BUDGET&&!t99;k++){sweep(pore,q.V,q.kT,R);sweeps++;const f=pore.n/pore.N;traj.push(f);if(!t30&&f>=.3)t30=sweeps;if(f>=.99)t99=sweeps;if(performance.now()-t0>14)break}
+  stats();drawPore();drawTraj()}
+ requestAnimationFrame(tick)}
+// ---------- batch sweeps (chunked) ----------
+let job=null,sizeRes=null,defRes=null;
+function runJob(points,onDone,name){const q=params();job={points,q,k:0,rep:0,res:points.map(()=>({t30:[],t99:[]})),cur:null,onDone,name};$("runSize").disabled=$("runDef").disabled=true;requestAnimationFrame(jobStep)}
+function jobStep(){if(!job)return;const t0=performance.now(),q=job.q,REPS=3;
+ while(performance.now()-t0<12){
+  if(!job.cur){const pt=job.points[job.k];const r=rng((job.k*101+job.rep*7+seed*13)>>>0);job.cur={p:makePore(pt.d,pt.df,r),r,s:0,t30:null}}
+  const c=job.cur;for(let m=0;m<20;m++){sweep(c.p,q.V,q.kT,c.r);c.s++;const f=c.p.n/c.p.N;if(!c.t30&&f>=.3)c.t30=c.s;if(f>=.99||c.s>=BUDGET)break}
+  const f=c.p.n/c.p.N;if(f>=.99||c.s>=BUDGET){const o=job.res[job.k];o.t30.push(c.t30||Infinity);o.t99.push(f>=.99?c.s:Infinity);job.cur=null;job.rep++;if(job.rep>=REPS){job.rep=0;job.k++;if(job.k>=job.points.length){const j=job;job=null;$("runSize").disabled=$("runDef").disabled=false;$("sweepStatus").textContent=j.name+" done.";j.onDone(j.res,j.q);return}}}}
+ $("sweepStatus").textContent=`${job.name}: point ${job.k+1} of ${job.points.length}, run ${job.rep+1} of 3…`;requestAnimationFrame(jobStep)}
+const median=a=>{const b=a.slice().sort((x,y)=>x-y);return b[b.length>>1]};
+$("runSize").addEventListener("click",()=>{const q=params();const pts=[];for(let d=1.5;d<=6.001;d+=0.5)pts.push({d,df:q.df});
+ runJob(pts,(res,q)=>{sizeRes={q,pts:pts.map((p,i)=>({d:p.d,t30:median(res[i].t30),t99:median(res[i].t99)}))};drawSize()},"Pore-size sweep")});
+$("runDef").addEventListener("click",()=>{const q=params();const pts=[0,5,10,20,30,40,50].map(x=>({d:q.d,df:x/100}));
+ runJob(pts,(res,q)=>{defRes={q,pts:pts.map((p,i)=>({x:p.df*100,e:median(res[i].t30),l:median(res[i].t99)-median(res[i].t30)}))};drawDef()},"Defect sweep")});
+function emptyMsg(g,w,h,t){g.fillStyle=css("--muted");g.font="13px "+css("--font");g.textAlign="center";g.textBaseline="middle";g.fillText(t,w/2,h/2)}
+function drawSize(){const{g,w,h}=setup($("sizePlot")),pad={l:48,r:12,t:12,b:40};g.clearRect(0,0,w,h);
+ const{X,Y}=axes(g,w,h,pad,1.25,6.25,0,Math.log10(BUDGET*2),[1.5,2,3,4,5,6],[1,10,100,1000,10000],"Pore diameter d (nm)","Sweeps (median of 3)",v=>v,kfmt,true);
+ if(!sizeRes){emptyMsg(g,w,h,"Press “Run pore-size sweep”");return}
+ const top=Y(BUDGET*1.6);
+ for(const[key,col]of[["t30","--c3"],["t99","--c2"]]){g.strokeStyle=g.fillStyle=css(col);g.lineWidth=2;g.beginPath();let on=false;
+  for(const p of sizeRes.pts){const v=p[key];if(isFinite(v)){const xx=X(p.d),yy=Y(Math.max(1,v));on?g.lineTo(xx,yy):g.moveTo(xx,yy);on=true}}g.stroke();
+  for(const p of sizeRes.pts){const v=p[key],xx=X(p.d);g.beginPath();if(isFinite(v)){g.arc(xx,Y(Math.max(1,v)),3.5,0,2*Math.PI);g.fill()}else{g.lineWidth=1.5;g.arc(xx,top,4,0,2*Math.PI);g.stroke()}}}
+ g.fillStyle=css("--muted");g.font="11px "+css("--font");g.textAlign="left";g.textBaseline="top";const q=sizeRes.q;g.fillText(`V = ${q.V.toFixed(3)} V · defects ${Math.round(q.df*100)}% · kT ${q.kT.toFixed(3)} eV`,pad.l+6,pad.t+2)}
+function drawDef(){const{g,w,h}=setup($("defPlot")),pad={l:48,r:12,t:12,b:40};g.clearRect(0,0,w,h);
+ if(!defRes){axes(g,w,h,pad,0,50,0,2,[0,10,20,30,40,50],[0,1,2],"Defects on wall (%)","Time ÷ time at 0%");emptyMsg(g,w,h,"Press “Run defect sweep at this d”");return}
+ const b=defRes.pts[0],rel=defRes.pts.map(p=>({x:p.x,e:p.e/b.e,l:p.l/b.l}));let ym=1.2;for(const r of rel){if(isFinite(r.e))ym=Math.max(ym,r.e);if(isFinite(r.l))ym=Math.max(ym,r.l)}ym=Math.min(ym*1.1,10);
+ const{X,Y}=axes(g,w,h,pad,0,50,0,ym,[0,10,20,30,40,50],niceTicks(0,ym,4),"Defects on wall (%)","Time ÷ time at 0%",v=>v,v=>v);
+ g.strokeStyle=css("--cx");g.setLineDash([4,4]);g.beginPath();g.moveTo(pad.l,Y(1));g.lineTo(w-pad.r,Y(1));g.stroke();g.setLineDash([]);
+ if(!isFinite(b.l)||!isFinite(b.e)){emptyMsg(g,w,h,"The defect-free pore did not fill: try a smaller d or lower V");return}
+ for(const[key,col]of[["e","--c3"],["l","--c2"]]){g.strokeStyle=g.fillStyle=css(col);g.lineWidth=2;g.beginPath();let on=false;for(const r of rel){const v=r[key];if(isFinite(v)){const yy=Y(Math.min(v,ym));on?g.lineTo(X(r.x),yy):g.moveTo(X(r.x),yy);on=true}}g.stroke();
+  for(const r of rel){const v=r[key];g.beginPath();if(isFinite(v)){g.arc(X(r.x),Y(Math.min(v,ym)),3.5,0,2*Math.PI);g.fill()}else{g.lineWidth=1.5;g.arc(X(r.x),Y(ym)+6,4,0,2*Math.PI);g.stroke()}}}
+ g.fillStyle=css("--muted");g.font="11px "+css("--font");g.textAlign="left";g.textBaseline="top";g.fillText(`d = ${defRes.q.d.toFixed(2)} nm · V = ${defRes.q.V.toFixed(3)} V`,pad.l+6,pad.t+2)}
+// ---------- electrode-scale profile ----------
+const VF=d=>0.28/d;
+function distro(){const m=+$("med").value,s=+$("spr").value,dc=+$("dcut").value;const ds=[],w=[];const lo=0.6,hi=12,n=600;let tot=0;
+ for(let k=0;k<n;k++){const d=lo+(hi-lo)*(k+.5)/n;const z=(Math.log(d)-Math.log(m))/s;const p=Math.exp(-z*z/2)/d;ds.push(d);w.push(p);tot+=p}
+ for(let k=0;k<n;k++)w[k]/=tot;return{ds,w,dc,m,s}}
+function drawProfile(){const D=distro();const{ds,w,dc}=D;
+ // usable fraction
+ let acc=0;for(let k=0;k<ds.length;k++)if(ds[k]<=dc)acc+=w[k];
+ // filling at voltage V: pores with VF(d)>=V i.e. d<=0.28/V; cumulative from small d
+ const cum=[];let c=0;for(let k=0;k<ds.length;k++){c+=w[k];cum.push(c)}
+ const dAt=f=>{for(let k=0;k<cum.length;k++)if(cum[k]>=f)return ds[k];return ds[ds.length-1]};
+ const v10=VF(dAt(.1)),v90=VF(dAt(.9)),v50=VF(dAt(.5));
+ $("vAcc").textContent=(100*acc).toFixed(0)+"%";$("vSpan").textContent=v10.toFixed(3)+" → "+v90.toFixed(3)+" V";$("vMid").textContent=v50.toFixed(3)+" V";
+ {const{g,w:W,h}=setup($("profilePlot")),pad={l:48,r:12,t:12,b:40};g.clearRect(0,0,W,h);const vmax=0.3;
+  const{X,Y}=axes(g,W,h,pad,0,1,0,vmax,[0,.25,.5,.75,1],niceTicks(0,vmax,6),"Filled share of all closed-pore volume","Voltage vs Na metal (V)",v=>Math.round(v*100)+"%",v=>v.toFixed(2));
+  g.strokeStyle=css("--muted");g.setLineDash([5,4]);g.lineWidth=1.5;g.beginPath();g.moveTo(X(0),Y(VF(D.m)));g.lineTo(X(1),Y(VF(D.m)));g.stroke();g.setLineDash([]);
+  const line=(col,cap)=>{g.strokeStyle=css(col);g.lineWidth=2.5;g.beginPath();let q=0,first=true;g.moveTo(X(0),Y(vmax));
+   for(let k=0;k<ds.length;k++){if(cap&&ds[k]>dc)break;q+=w[k];const v=Math.min(vmax,VF(ds[k]));g.lineTo(X(q),Y(v))}
+   g.lineTo(X(q),Y(0));g.stroke()};
+  line("--c4",false);line("--c1",true)}
+ {const{g,w:W,h}=setup($("histPlot")),pad={l:48,r:44,t:12,b:40};g.clearRect(0,0,W,h);const xmax=8;let pm=0;
+  // bin to 0.1 nm for display
+  const bins=[];for(let b=0;b<Math.round(xmax/0.1);b++){const d=(b+.5)*0.1,z=(Math.log(d)-Math.log(D.m))/D.s;bins.push(Math.exp(-z*z/2)/d)}const bt=bins.reduce((a,v)=>a+v,0);for(let b=0;b<bins.length;b++){bins[b]/=bt;pm=Math.max(pm,bins[b])}pm*=1.1;
+  const{X,Y}=axes(g,W,h,pad,0,xmax,0,pm,[0,1,2,3,4,5,6,7,8],[],"Pore diameter d (nm)","Share of pore volume",v=>v,null);
+  const bw=X(0.1)-X(0);for(let b=0;b<bins.length;b++){if(!bins[b])continue;const d=b*0.1;g.fillStyle=d+0.05<=dc?css("--c1"):css("--muted");g.globalAlpha=d+0.05<=dc?.85:.4;g.fillRect(X(d)+.3,Y(bins[b]),Math.max(1,bw-.6),Y(0)-Y(bins[b]))}g.globalAlpha=1;
+  g.strokeStyle=css("--cx");g.setLineDash([4,4]);g.beginPath();g.moveTo(X(dc),pad.t);g.lineTo(X(dc),h-pad.b);g.stroke();g.setLineDash([]);
+  const vm=0.3,Yr=v=>h-pad.b-v/vm*(h-pad.t-pad.b);g.strokeStyle=css("--c3");g.lineWidth=2;g.beginPath();let f=true;for(let d=0.94;d<=xmax;d+=0.05){const yy=Yr(VF(d));f?g.moveTo(X(d),yy):g.lineTo(X(d),yy);f=false}g.stroke();
+  g.fillStyle=css("--muted");g.font="11px "+css("--font");g.textAlign="left";g.textBaseline="middle";for(const v of[0,.1,.2,.3])g.fillText(v.toFixed(1)+" V",W-pad.r+4,Yr(v))}}
+// ---------- wiring ----------
+const PRESETS={small:{dia:1.75,volt:0,defp:0},large:{dia:4.5,volt:0,defp:0},highv:{dia:2.5,volt:0.08,defp:0},defect:{dia:4.5,volt:0,defp:20}};
+let pend=false;const sched=()=>{if(pend)return;pend=true;requestAnimationFrame(()=>{pend=false;restart();markPresets()})};
+["dia","volt","defp","kt"].forEach(id=>$(id).addEventListener("input",sched));
+$("speed").addEventListener("input",labels);
+["med","spr","dcut"].forEach(id=>$(id).addEventListener("input",()=>{labels();drawProfile()}));
+$("play").addEventListener("click",()=>{running=!running;$("play").textContent=running?"Pause":"Play"});
+$("restart").addEventListener("click",()=>{seed++;restart()});
+function markPresets(){document.querySelectorAll("[data-p]").forEach(b=>{const q=PRESETS[b.dataset.p];b.setAttribute("aria-pressed",String(Object.keys(q).every(k=>Math.abs(+$(k).value-q[k])<1e-9)))})}
+document.querySelectorAll("[data-p]").forEach(b=>b.addEventListener("click",()=>{const q=PRESETS[b.dataset.p];for(const k in q)$(k).value=q[k];running=true;$("play").textContent="Pause";sched()}));
+window.addEventListener("resize",drawAll);
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change",drawAll);
+restart();markPresets();requestAnimationFrame(tick);
+</script>
+</body></html>
