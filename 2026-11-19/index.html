@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="light dark">
+<title>Why blood lingers in the heart's side pocket — Research Explorer, 19 Nov 2026</title>
+<link rel="stylesheet" href="../assets/style.css">
+<style>
+canvas#laaCanvas{height:320px}
+canvas#concPlot{height:320px}
+canvas#cyclePlot,canvas#budgetPlot{height:280px}
+.btnrow{display:flex;flex-wrap:wrap;gap:8px;margin:4px 0 14px;align-items:center}
+.btnrow button{font:500 14px var(--font);color:var(--text);background:var(--accent-soft);border:0;border-radius:8px;padding:7px 14px;min-height:32px;cursor:pointer}
+.btnrow button.primary{color:#fff;background:var(--accent)}
+.btnrow button[aria-pressed="true"]{outline:2px solid var(--accent);outline-offset:1px}
+.btnrow .lbl{font-size:13px;color:var(--muted);margin-right:2px}
+.verdict{font-weight:600}
+</style></head><body><main>
+<a class="back" href="../">‹ All demos</a>
+<div class="eyebrow">19 Nov 2026 · Medicine</div>
+<h1>Why blood lingers in the heart's side pocket</h1>
+<p class="lede">The left atrial appendage is a small, finger-shaped pouch off the heart's left upper chamber, and in atrial fibrillation it is where about 90% of the clots that cause strokes form. Using blood-flow simulations of 17 real patients' hearts, with wall motion taken from 4D CT scans, this paper shows that plenty of blood crosses the pouch's mouth each beat, yet the pouch is cleared at only about a quarter to a half of the rate that this amount of exchange should give. The reason: blood near the mouth is pushed out and then sucked back in, while old blood at the tip stays put. Below, a reduced two-region version of the paper's washout analysis runs live.</p>
+<p class="authors">Y. Stöcker, M. Guerrero-Hurtado, A. Gonzalo, S. Sharda, E. Durán, P. Martinez-Legazpi, A. M. Kahn, E. McVeigh, J. Bermejo, O. Flores, J. C. del Álamo, M. Garcia-Villalba</p>
+
+<section class="card why" aria-labelledby="why-h">
+<h2 id="why-h">Why it matters</h2>
+<p id="whyText">Atrial fibrillation affects tens of millions of people, and doctors judge their stroke risk and need for blood thinners or an appendage-closing device mostly from scores and simple measures such as how much the appendage squeezes or how much blood flows through its mouth. This paper shows that flow through the mouth does not tell you how well the appendage is actually cleared, because blood is often swapped back and forth near the opening while old blood stays at the tip, so better risk checks and treatments need to measure which blood is exchanged, not just how much.</p>
+</section>
+
+<section class="card" aria-labelledby="paper-h">
+<h2 id="paper-h">The paper</h2>
+<p style="margin:0 0 6px"><strong>Fluid exchange and renewal in the left atrial appendage</strong></p>
+<p class="cite" style="margin:0">Y. Stöcker, M. Guerrero-Hurtado, A. Gonzalo, S. Sharda, E. Durán, P. Martinez-Legazpi, A. M. Kahn, E. McVeigh, J. Bermejo, O. Flores, J. C. del Álamo, M. Garcia-Villalba (TU Wien; Universidad Carlos III de Madrid; University of Washington; Universidad de Málaga; UNED and CIBERCV; UC San Diego; Hospital General Universitario Gregorio Marañón, Madrid). arXiv:2611.21221 [physics.flu-dyn], submitted 16 November 2026. <a href="https://arxiv.org/abs/2611.21221">Read on arXiv</a> · <a href="https://arxiv.org/pdf/2611.21221">PDF</a></p>
+<p style="margin-top:14px"><strong>In plain language:</strong> the team simulated blood flow in 17 patients' left atria (8 scanned in normal rhythm, 9 during atrial fibrillation), released a harmless "dye" that filled only the appendage, and watched how fast it was washed out. They split the flow through the appendage mouth (the ostium) into an <em>active</em> part, forced by the appendage changing volume, and a <em>passive</em> part, where blood goes in and out at the same time with no net change:</p>
+<div class="eq">Q<sub>act</sub>(t) = |dV<sub>LAA</sub>/dt| &nbsp;&nbsp;·&nbsp;&nbsp; Q<sub>pas</sub>(t) = Q<sub>in</sub> + Q<sub>out</sub> − Q<sub>act</sub> = 2·min(Q<sub>in</sub>, Q<sub>out</sub>)</div>
+<p>If the appendage were perfectly stirred and every drop coming in were fresh, the dye would decay as</p>
+<div class="eq">c̄<sub>m</sub>(t) = exp[ −∫ Q<sub>in</sub>(τ) / V<sub>LAA</sub>(τ) dτ ]</div>
+<p>using either only the volume-driven inflow, max(dV/dt, 0) (rate k<sub>V</sub>), or the true inflow through the mouth (rate k<sub>Q</sub>). The real washout rate per cycle, k<sub>n</sub> = −ln[c̄(t<sub>n</sub>+T)/c̄(t<sub>n</sub>)]/T, splits exactly into three parts:</p>
+<div class="eq">k = k<sub>Q</sub> + α + β, &nbsp; α = −⟨(Q<sub>in</sub>/V)·(c̄<sub>in</sub>/c̄)⟩ ≤ 0, &nbsp; β = ⟨(Q<sub>out</sub>/V)·(c̄<sub>out</sub>/c̄ − 1)⟩</div>
+<p>α is the penalty for sucking back dye that was just pushed out (re-ingestion); β is negative when the blood leaving is cleaner than the appendage average, which happens when old blood hides at the tip (last in, first out).</p>
+</section>
+
+<section class="card" aria-labelledby="demo-h">
+<h2 id="demo-h">Try it: wash out an appendage</h2>
+<p>A reduced model: the appendage is two equal regions, the <em>mouth</em> region (where blood enters and leaves) and the <em>tip</em>. Just outside the mouth is a small pocket of atrial blood that holds whatever was recently pushed out. Dye starts at 100% in the appendage and the model runs for 10 heartbeats; rates are averaged over beats 2 to 8, as in the paper.</p>
+<div class="btnrow" role="group" aria-label="Examples"><span class="lbl">Examples:</span>
+ <button type="button" data-p="sr">Normal rhythm</button>
+ <button type="button" data-p="af">AF, weak squeeze</button>
+ <button type="button" data-p="cav">AF, cavity-like flow</button>
+ <button type="button" data-p="ideal">Perfectly stirred</button>
+</div>
+<div class="controls">
+ <div><label for="ef"><span>Appendage squeeze (emptying fraction)</span> <output id="efO"></output></label><input type="range" id="ef" min="0.05" max="0.7" step="0.01" value="0.35"></div>
+ <div><label for="hr"><span>Heart rate</span> <output id="hrO"></output></label><input type="range" id="hr" min="45" max="140" step="1" value="70"></div>
+ <div><label for="pas"><span>Two-way swapping at the mouth (V̂<sub>pas</sub> per beat)</span> <output id="pasO"></output></label><input type="range" id="pas" min="0" max="3" step="0.05" value="1"></div>
+ <div><label for="reing"><span>Re-ingestion of just-expelled blood</span> <output id="reingO"></output></label><input type="range" id="reing" min="0" max="1" step="0.01" value="0.4"></div>
+ <div><label for="mix"><span>Stirring between mouth and tip</span> <output id="mixO"></output></label><input type="range" id="mix" min="0" max="3" step="0.01" value="0.1"></div>
+</div>
+<div class="stats">
+ <div class="stat"><div class="v" id="sAct"></div><div class="l">Active share of exchange V<sub>act</sub>/V<sub>total</sub> (paper: 24–78%)</div></div>
+ <div class="stat"><div class="v" id="sRQ"></div><div class="l">Washout efficiency k/k<sub>Q</sub> (paper: 26–53%)</div></div>
+ <div class="stat"><div class="v" id="sRV"></div><div class="l">k/k<sub>V</sub> vs squeeze-only model (paper: either side of 1)</div></div>
+ <div class="stat"><div class="v" id="sK"></div><div class="l">Washout rate k (paper: 0.20–0.87 s⁻¹)</div></div>
+ <div class="stat"><div class="v" id="sTip"></div><div class="l">Dye left at the tip after 10 beats</div></div>
+</div>
+<p class="note verdict" id="verdict" aria-live="polite"></p>
+<div class="grid" style="margin-top:14px">
+ <div class="plot"><div class="plot-title">The appendage, beat by beat</div>
+  <canvas id="laaCanvas" role="img" aria-label="Animated sketch of the appendage, with mouth and tip regions shaded by how much old blood they hold"></canvas>
+  <div class="btnrow" style="margin-top:8px"><button type="button" class="primary" id="play">Pause</button><span class="note" id="beatLbl" style="margin:0"></span></div></div>
+ <div class="plot"><div class="plot-title">Old blood (dye) left in the appendage</div>
+  <canvas id="concPlot" role="img" aria-label="Dye concentration against heartbeats for the model and two well-mixed predictions"></canvas>
+  <div class="legend"><span style="--k:var(--c1)">Whole appendage (model)</span><span style="--k:var(--c4)">Tip region</span><span style="--k:var(--c3)">Mouth region</span><span style="--k:var(--c2)">Well-mixed, true inflow (k<sub>Q</sub>)</span><span style="--k:var(--muted)">Well-mixed, squeeze only (k<sub>V</sub>)</span></div></div>
+ <div class="plot"><div class="plot-title">One heartbeat: volume and flow through the mouth</div>
+  <canvas id="cyclePlot" role="img" aria-label="Appendage volume, inflow and outflow over one heartbeat"></canvas>
+  <div class="legend"><span style="--k:var(--c2)">Inflow Q<sub>in</sub></span><span style="--k:var(--c3)">Outflow Q<sub>out</sub></span><span style="--k:var(--accent)">Active part |dV/dt| (shaded)</span><span style="--k:var(--muted)">Volume (right axis)</span></div></div>
+ <div class="plot"><div class="plot-title">Where the washout rate goes: k = k<sub>Q</sub> + α + β</div>
+  <canvas id="budgetPlot" role="img" aria-label="Waterfall chart of the ideal inflow-driven washout rate, re-ingestion and outflow corrections, and the actual washout rate"></canvas>
+  <div class="legend"><span style="--k:var(--c2)">Ideal k<sub>Q</sub></span><span style="--k:var(--c3)">α re-ingestion</span><span style="--k:var(--c4)">β cleaner blood leaves</span><span style="--k:var(--c1)">Actual k</span></div></div>
+</div>
+</section>
+
+<section class="card" aria-labelledby="res-h">
+<h2 id="res-h">What the paper found</h2>
+<table><thead><tr><th>Measure (17 patient-specific atria)</th><th>Result</th></tr></thead><tbody>
+<tr><td>Total blood swapped through the mouth per beat (÷ appendage volume)</td><td>0.94 to 3.67</td></tr>
+<tr><td>Share of that driven by appendage volume change</td><td>24–78% (24–53% in AF)</td></tr>
+<tr><td>Appendage emptying fraction</td><td>about 13–65%</td></tr>
+<tr><td>Actual washout vs well-mixed prediction with true inflow, k/k<sub>Q</sub></td><td>0.26–0.53</td></tr>
+<tr><td>Re-ingestion penalty α/k<sub>Q</sub></td><td>−0.05 to −0.43</td></tr>
+<tr><td>Outflow-is-cleaner penalty β/k<sub>Q</sub></td><td>−0.13 to −0.76 (bigger than α in most)</td></tr>
+<tr><td>Effective washout rate k</td><td>0.20 to 0.87 s⁻¹</td></tr>
+<tr><td>Mean blood residence time in the appendage</td><td>1.7 to 6.4 s</td></tr>
+</tbody></table>
+<p class="note">Both penalties were negative in every patient. Residence-time maps showed young and old blood side by side, and in one AF patient the old blood sat mainly in the distal tip. Patients with different anatomy and rhythm could end up with similar washout rates, so neither flow volume nor emptying fraction alone predicts how stagnant the appendage is.</p>
+</section>
+
+<section class="card" aria-labelledby="how-h">
+<h2 id="how-h">How to use it</h2>
+<ul>
+<li><strong>Start with "Perfectly stirred":</strong> no re-ingestion and fast stirring make the model curve for the whole appendage sit on the dashed well-mixed (true inflow) prediction, so k/k<sub>Q</sub> is close to 100%.</li>
+<li><strong>Turn down the stirring:</strong> the tip stays dark while the mouth clears; cleaner blood leaves, β grows negative and the washout rate drops even though the same volume crosses the mouth.</li>
+<li><strong>Turn up re-ingestion:</strong> the appendage sucks back blood it has just pushed out, so α eats into the ideal rate.</li>
+<li><strong>Compare "Normal rhythm" with the AF presets:</strong> a weak squeeze lowers the active share; swapping at the mouth can keep total exchange high, but the tip still holds old blood for longer, which is the stagnation linked to clots.</li>
+<li><strong>Read the waterfall:</strong> the first bar is what the flow through the mouth "should" achieve; the α and β drops are the two losses the paper identified; the last bar is what you actually get.</li>
+</ul>
+</section>
+<p class="note" style="margin-top:24px">Demo by Grok Bot for the Daily Research Explorer. The exchange split (Q<sub>act</sub>, Q<sub>pas</sub>), the two well-mixed washout models, the per-cycle washout rate averaged over cycles 2–8, the decomposition k = k<sub>Q</sub> + α + β and all quoted numbers come from the paper. The paper solves full 3D flow in each patient's moving atrium; this page instead uses an illustrative reduced model chosen by Grok Bot: a sinusoidal appendage volume normalised to a mean of 1, passive two-way exchange added equally to inflow and outflow, two equal mouth and tip regions with stirring flow equal to the slider value × the total mouth flow, and a pocket outside the mouth (volume 0.3) that fills with expelled blood and is flushed by the atrium with a 0.5-beat time constant; incoming blood carries the slider fraction of that pocket's dye. It reproduces the trends and ranges, not any patient. Not medical advice.</p>
+</main>
+<script>
+"use strict";
+const $=id=>document.getElementById(id);
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+// ---------- model ----------
+const N=1000,CYC=10,STEP=5;
+function simulate(P){
+ const T=60/P.hr,dphi=1/N,Vmax=1/(1-P.ef/2),Vb=0.3,tau=0.5,fd=0.5;
+ const Vf=ph=>Vmax*(1-P.ef*0.5*(1-Math.cos(2*Math.PI*ph)));
+ const dVf=ph=>-Vmax*P.ef*Math.PI*Math.sin(2*Math.PI*ph);
+ const qp=ph=>P.pas*(1+0.5*Math.cos(2*Math.PI*ph+1));
+ let Mp=(1-fd)*Vf(0),Md=fd*Vf(0),cb=0,cV=1,cQ=1,a=0,b=0,kq=0;
+ const o={t:[],c:[],cp:[],cd:[],cb:[],cV:[],cQ:[],V:[]},c0=[],aI=[],bI=[],kqI=[],cv0=[];
+ for(let s=0;s<=CYC*N;s++){const ph=s*dphi,V=Vf(ph),dV=dVf(ph),Vp=(1-fd)*V,Vd=fd*V,cp=Mp/Vp,cd=Md/Vd,c=(Mp+Md)/V;
+  if(s%N===0){c0.push(c);cv0.push(cV);aI.push(a);bI.push(b);kqI.push(kq);a=b=kq=0}
+  if(s%STEP===0){o.t.push(ph);o.c.push(c);o.cp.push(cp);o.cd.push(cd);o.cb.push(cb);o.cV.push(cV);o.cQ.push(cQ);o.V.push(V)}
+  const Qin=Math.max(dV,0)+qp(ph)/2,Qout=Math.max(-dV,0)+qp(ph)/2,Qx=P.m*(Qin+Qout),cin=P.r*cb,fpd=fd*dV,tr=fpd>0?fpd*cp:fpd*cd;
+  const dMp=Qin*cin-Qout*cp-tr+Qx*(cd-cp),dMd=tr+Qx*(cp-cd);
+  kq+=Qin/V*dphi;a+=-Qin/V*cin/c*dphi;b+=Qout/V*(cp/c-1)*dphi;
+  cb+=dphi*(Qout*(cp-cb)/Vb-cb/tau);cV*=Math.exp(-Math.max(dV,0)/V*dphi);cQ*=Math.exp(-Qin/V*dphi);
+  Mp+=dMp*dphi;Md+=dMd*dphi}
+ let k=0,kQ=0,al=0,be=0,kV=0;
+ for(let n=1;n<=7;n++){k-=Math.log(c0[n+1]/c0[n]);kQ+=kqI[n+1];al+=aI[n+1];be+=bI[n+1];kV-=Math.log(cv0[n+1]/cv0[n])}
+ const f=1/(7*T);
+ // one cycle of flows for plotting
+ const cyc={ph:[],Qin:[],Qout:[],Qact:[],V:[]};let Vact=0,Vtot=0;
+ for(let i=0;i<=200;i++){const ph=i/200,dV=dVf(ph),qi=Math.max(dV,0)+qp(ph)/2,qo=Math.max(-dV,0)+qp(ph)/2;cyc.ph.push(ph);cyc.Qin.push(qi);cyc.Qout.push(qo);cyc.Qact.push(Math.abs(dV));cyc.V.push(Vf(ph));if(i<200){Vact+=Math.abs(dV)/200;Vtot+=(qi+qo)/200}}
+ return{k:k*f,kQ:kQ*f,al:al*f,be:be*f,kV:kV*f,T,o,cyc,Vact,Vtot,Vf,P}}
+// ---------- drawing ----------
+function setup(c){const r=c.getBoundingClientRect(),d=window.devicePixelRatio||1;c.width=Math.max(1,Math.round(r.width*d));c.height=Math.max(1,Math.round(r.height*d));const g=c.getContext("2d");g.setTransform(d,0,0,d,0,0);return{g,w:r.width,h:r.height}}
+function axes(g,w,h,pad,xt,yt,X,Y,xl,yl){g.strokeStyle=css("--grid");g.lineWidth=1;g.fillStyle=css("--muted");g.font="11px "+css("--font");
+ g.textAlign="center";g.textBaseline="top";for(const[v,l]of xt){g.beginPath();g.moveTo(X(v),pad.t);g.lineTo(X(v),h-pad.b);g.stroke();g.fillText(l,X(v),h-pad.b+4)}
+ g.textAlign="right";g.textBaseline="middle";for(const[v,l]of yt){g.beginPath();g.moveTo(pad.l,Y(v));g.lineTo(w-pad.r,Y(v));g.stroke();g.fillText(l,pad.l-5,Y(v))}
+ g.textAlign="center";g.textBaseline="bottom";if(xl)g.fillText(xl,(pad.l+w-pad.r)/2,h-2);
+ if(yl){g.save();g.translate(11,(pad.t+h-pad.b)/2);g.rotate(-Math.PI/2);g.textBaseline="middle";g.fillText(yl,0,0);g.restore()}}
+function line(g,xs,ys,X,Y,col,lw,dash){g.strokeStyle=col;g.lineWidth=lw||2;g.setLineDash(dash||[]);g.beginPath();for(let i=0;i<xs.length;i++){const x=X(xs[i]),y=Y(ys[i]);i?g.lineTo(x,y):g.moveTo(x,y)}g.stroke();g.setLineDash([])}
+let S=null,animT=0,running=true,last=0;
+function drawConc(){const{g,w,h}=setup($("concPlot")),pad={l:44,r:12,t:10,b:34},X=t=>pad.l+t/CYC*(w-pad.l-pad.r),Y=v=>h-pad.b-v*(h-pad.t-pad.b);
+ axes(g,w,h,pad,[0,2,4,6,8,10].map(v=>[v,String(v)]),[0,.25,.5,.75,1].map(v=>[v,Math.round(v*100)+"%"]),X,Y,"heartbeats since dye was released","dye left");
+ const o=S.o;line(g,o.t,o.cV,X,Y,css("--muted"),1.5,[5,4]);line(g,o.t,o.cQ,X,Y,css("--c2"),2,[6,3]);line(g,o.t,o.cp,X,Y,css("--c3"),1.5);line(g,o.t,o.cd,X,Y,css("--c4"),1.5);line(g,o.t,o.c,X,Y,css("--c1"),2.5);
+ g.strokeStyle=css("--cx");g.lineWidth=1;g.setLineDash([3,3]);g.beginPath();g.moveTo(X(animT),pad.t);g.lineTo(X(animT),h-pad.b);g.stroke();g.setLineDash([])}
+function drawCycle(){const{g,w,h}=setup($("cyclePlot")),pad={l:44,r:40,t:10,b:34},c=S.cyc;
+ const qm=Math.max(...c.Qin,...c.Qout,...c.Qact,0.5)*1.1,X=p=>pad.l+p*(w-pad.l-pad.r),Y=v=>h-pad.b-v/qm*(h-pad.t-pad.b);
+ const st=qm>6?2:qm>3?1:0.5,yt=[];for(let v=0;v<=qm;v+=st)yt.push([v,v.toFixed(1)]);
+ axes(g,w,h,pad,[0,.25,.5,.75,1].map(v=>[v,v.toFixed(2)]),yt,X,Y,"fraction of the heartbeat","flow (appendage volumes per beat)");
+ g.fillStyle=css("--accent");g.globalAlpha=.18;g.beginPath();g.moveTo(X(0),Y(0));for(let i=0;i<c.ph.length;i++)g.lineTo(X(c.ph[i]),Y(c.Qact[i]));g.lineTo(X(1),Y(0));g.fill();g.globalAlpha=1;
+ line(g,c.ph,c.Qin,X,Y,css("--c2"),2);line(g,c.ph,c.Qout,X,Y,css("--c3"),2);
+ const vmin=0,vmax=Math.max(...c.V)*1.05,Yv=v=>h-pad.b-(v-vmin)/(vmax-vmin)*(h-pad.t-pad.b);line(g,c.ph,c.V,X,Yv,css("--muted"),1.5,[4,3]);
+ g.fillStyle=css("--muted");g.font="11px "+css("--font");g.textAlign="left";g.textBaseline="middle";for(const v of[0,.5,1,1.5])if(v<=vmax)g.fillText(v.toFixed(1)+"V̄",w-pad.r+3,Yv(v))}
+function drawBudget(){const{g,w,h}=setup($("budgetPlot")),pad={l:44,r:12,t:16,b:34};const items=[["Ideal k_Q",S.kQ,"--c2"],["α",S.al,"--c3"],["β",S.be,"--c4"],["Actual k",S.k,"--c1"]];
+ const ym=Math.max(S.kQ,0.5)*1.12,Y=v=>h-pad.b-v/ym*(h-pad.t-pad.b),bw=(w-pad.l-pad.r)/4,yt=[];const st=ym>3?1:ym>1.5?0.5:0.25;for(let v=0;v<=ym;v+=st)yt.push([v,v.toFixed(2)]);
+ axes(g,w,h,pad,[],yt,x=>x,Y,"","rate (per second)");let run=0;g.font="12px "+css("--font");g.textAlign="center";
+ items.forEach(([l,v,c],i)=>{const x=pad.l+i*bw+bw*.18,ww=bw*.64;let y0,y1;if(i===0||i===3){y0=0;y1=v;run=i===0?v:run}else{y0=run+v;y1=run;run+=v}
+  g.fillStyle=css(c);g.fillRect(x,Y(Math.max(y0,y1)),ww,Math.abs(Y(y0)-Y(y1)));g.fillStyle=css("--text");g.textBaseline="bottom";g.fillText(v.toFixed(2),x+ww/2,Y(Math.max(y0,y1))-2);
+  g.fillStyle=css("--muted");g.textBaseline="top";g.fillText(l,x+ww/2,h-pad.b+4)})}
+function drawLAA(){const{g,w,h}=setup($("laaCanvas"));const o=S.o,idx=Math.min(o.t.length-1,Math.round(animT*N/STEP)),ph=animT%1,V=S.Vf(ph),sc=Math.sqrt(V);
+ const cx=w*0.42,cy=h*0.5,L=Math.min(w*0.42,190)*sc,R=Math.min(h*0.17,48)*sc,ox=w*0.15;
+ // atrium blob with pocket
+ g.fillStyle=css("--accent-soft")||"rgba(0,122,255,.12)";g.beginPath();g.ellipse(ox,cy,w*0.14,h*0.42,0,0,Math.PI*2);g.fill();
+ g.fillStyle=css("--c3");g.globalAlpha=Math.min(1,o.cb[idx])*0.9;g.beginPath();g.ellipse(ox+w*0.1,cy,w*0.06,h*0.14,0,0,Math.PI*2);g.fill();g.globalAlpha=1;
+ // appendage: mouth region then tip region
+ const x0=ox+w*0.14,xm=x0+L*0.5,x1=x0+L;
+ const shape=(a,b,r0,r1)=>{g.beginPath();g.moveTo(a,cy-r0);g.bezierCurveTo((a+b)/2,cy-r0*1.1,(a+b)/2,cy-r1*1.1,b,cy-r1);g.lineTo(b,cy+r1);g.bezierCurveTo((a+b)/2,cy+r1*1.1,(a+b)/2,cy+r0*1.1,a,cy+r0);g.closePath()};
+ g.fillStyle=css("--card-solid");shape(x0,xm,R*0.7,R);g.fill();shape(xm,x1,R,R*0.2);g.fill();g.beginPath();g.arc(x1,cy,R*0.2,0,Math.PI*2);g.fill();
+ g.fillStyle=css("--c3");g.globalAlpha=Math.max(0.03,o.cp[idx]);shape(x0,xm,R*0.7,R);g.fill();
+ g.fillStyle=css("--c4");g.globalAlpha=Math.max(0.03,o.cd[idx]);shape(xm,x1,R,R*0.2);g.fill();g.beginPath();g.arc(x1,cy,R*0.2,-Math.PI/2,Math.PI/2);g.fill();g.globalAlpha=1;
+ g.strokeStyle=css("--text");g.lineWidth=1.5;g.beginPath();g.moveTo(x0,cy-R*0.7);g.bezierCurveTo((x0+xm)/2,cy-R*0.77,(x0+xm)/2,cy-R*1.1,xm,cy-R);g.bezierCurveTo((xm+x1)/2,cy-R*1.1,(xm+x1)/2,cy-R*0.22,x1,cy-R*0.2);g.arc(x1,cy,R*0.2,-Math.PI/2,Math.PI/2);g.bezierCurveTo((xm+x1)/2,cy+R*0.22,(xm+x1)/2,cy+R*1.1,xm,cy+R);g.bezierCurveTo((x0+xm)/2,cy+R*1.1,(x0+xm)/2,cy+R*0.77,x0,cy+R*0.7);g.stroke();
+ g.setLineDash([3,3]);g.strokeStyle=css("--muted");g.beginPath();g.moveTo(xm,cy-R);g.lineTo(xm,cy+R);g.stroke();g.setLineDash([]);
+ // flow arrow at mouth
+ const dV=S.Vf((ph+0.002)%1)-S.Vf(ph),dir=dV>0?1:-1,ax=x0-8,a0=ax-20*dir,a1=ax+20*dir;
+ g.strokeStyle=css("--accent");g.fillStyle=css("--accent");g.lineWidth=2.5;g.beginPath();g.moveTo(a0,cy);g.lineTo(a1,cy);g.stroke();
+ g.beginPath();g.moveTo(a1+4*dir,cy);g.lineTo(a1-6*dir,cy-6);g.lineTo(a1-6*dir,cy+6);g.closePath();g.fill();
+ g.fillStyle=css("--muted");g.font="12px "+css("--font");g.textAlign="center";g.textBaseline="top";
+ g.fillText("left atrium",ox,cy+h*0.3);g.fillText("mouth "+Math.round(o.cp[idx]*100)+"%",(x0+xm)/2,cy+R+8);g.fillText("tip "+Math.round(o.cd[idx]*100)+"%",(xm+x1)/2,cy+R+8);
+ g.textBaseline="bottom";g.fillText("recently expelled "+Math.round(o.cb[idx]*100)+"%",ox+w*0.1,cy-h*0.15);
+ $("beatLbl").textContent="Beat "+(Math.floor(animT)+1)+" of "+CYC+" · "+(dV>0?"filling":"emptying")}
+function drawAll(){if(!S)return;drawConc();drawCycle();drawBudget();drawLAA()}
+// ---------- wiring ----------
+const ids=["ef","hr","pas","reing","mix"];
+function labels(){$("efO").textContent=Math.round($("ef").value*100)+"%";$("hrO").textContent=$("hr").value+" bpm";$("pasO").textContent=(+$("pas").value).toFixed(2);$("reingO").textContent=Math.round($("reing").value*100)+"%";$("mixO").textContent=(+$("mix").value).toFixed(2)}
+function recompute(){labels();S=simulate({ef:+$("ef").value,hr:+$("hr").value,pas:+$("pas").value,r:+$("reing").value,m:+$("mix").value});
+ const RQ=S.k/S.kQ,RV=S.k/S.kV;$("sAct").textContent=Math.round(S.Vact/S.Vtot*100)+"%";$("sRQ").textContent=Math.round(RQ*100)+"%";$("sRV").textContent=isFinite(RV)?RV.toFixed(2):"—";
+ $("sK").textContent=S.k.toFixed(2)+" s⁻¹";$("sTip").textContent=Math.round(S.o.cd[S.o.cd.length-1]*100)+"%";
+ const loss=S.al+S.be,big=Math.abs(S.be)>Math.abs(S.al)?"cleaner blood leaving while old blood stays at the tip (β)":"sucking back just-expelled blood (re-ingestion, α)";
+ $("verdict").textContent=RQ>0.9?"Close to the well-mixed ideal: what crosses the mouth really does clear the appendage.":`The appendage clears at ${Math.round(RQ*100)}% of what its mouth flow promises. The bigger loss is ${big}. Mean time old blood stays ≈ ${(1/S.k).toFixed(1)} s (1/k).`;
+ markPresets();drawAll()}
+const PRESETS={sr:{ef:.55,hr:65,pas:.8,reing:.5,mix:.15},af:{ef:.2,hr:95,pas:1,reing:.5,mix:.06},cav:{ef:.12,hr:110,pas:.6,reing:.3,mix:.03},ideal:{ef:.45,hr:70,pas:1,reing:0,mix:3}};
+function markPresets(){document.querySelectorAll("[data-p]").forEach(b=>{const q=PRESETS[b.dataset.p];b.setAttribute("aria-pressed",String(Object.keys(q).every(k=>Math.abs(+$(k).value-q[k])<1e-9)))})}
+document.querySelectorAll("[data-p]").forEach(b=>b.addEventListener("click",()=>{const q=PRESETS[b.dataset.p];for(const k in q)$(k).value=q[k];animT=0;recompute()}));
+let pend=false;ids.forEach(id=>$(id).addEventListener("input",()=>{if(pend)return;pend=true;requestAnimationFrame(()=>{pend=false;recompute()})}));
+$("play").addEventListener("click",()=>{running=!running;$("play").textContent=running?"Pause":"Play"});
+function tick(ts){if(running&&S){const dt=Math.min(0.1,(ts-(last||ts))/1000);animT=(animT+dt/Math.max(0.6,S.T*1.4))%CYC;drawLAA();drawConc()}last=ts;requestAnimationFrame(tick)}
+if(matchMedia("(prefers-reduced-motion: reduce)").matches){running=false;$("play").textContent="Play"}
+window.addEventListener("resize",drawAll);matchMedia("(prefers-color-scheme: dark)").addEventListener("change",drawAll);
+recompute();requestAnimationFrame(tick);
+</script>
+</body></html>
