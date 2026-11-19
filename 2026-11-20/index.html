@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="light dark">
+<title>Adding up the evidence that the Atlantic's ocean conveyor is slowing — Research Explorer, 20 Nov 2026</title>
+<link rel="stylesheet" href="../assets/style.css">
+<style>
+canvas#ladderPlot,canvas#priorPlot{height:300px}
+canvas#seriesPlot,canvas#detectPlot{height:300px}
+canvas#projPlot{height:280px}
+.lineset{border:1px solid var(--line);border-radius:16px;padding:14px 16px;margin:0 0 14px}
+.lineset .toggle{margin:0 0 4px;font-weight:600;justify-content:flex-start}
+.lineset .controls{margin:6px 0 0}
+.lineset.off .controls{opacity:.45}
+.btnrow{display:flex;flex-wrap:wrap;gap:8px;margin:4px 0 14px;align-items:center}
+.btnrow button{font:500 14px var(--font);color:var(--text);background:var(--accent-soft);border:0;border-radius:8px;padding:7px 14px;min-height:32px;cursor:pointer}
+.btnrow button.primary{color:#fff;background:var(--accent)}
+.btnrow .lbl{font-size:13px;color:var(--muted);margin-right:2px}
+.verdict{font-weight:600}
+</style></head><body><main>
+<a class="back" href="../">‹ All demos</a>
+<div class="eyebrow">20 Nov 2026 · Climate</div>
+<h1>Adding up the evidence that the Atlantic's ocean conveyor is slowing</h1>
+<p class="lede">The Atlantic Meridional Overturning Circulation (AMOC) carries warm surface water north and cold deep water south, and climate models have long warned that global warming will slow it, possibly past a tipping point. Direct measurements only began in 2004, so whether it is already slowing is still argued about. This review gathers every line of evidence south of 45°N (moorings, ocean reanalyses, temperature, salinity and heat "fingerprints", water age, Gulf Stream position and thousand-year proxy records) and argues that, taken together, they strongly support a slowdown that is already under way. Below, two of the paper's arguments run live: how uncertain clues add up by Bayes' rule, and why a real trend in a short, noisy record can still fail a 95% significance test.</p>
+<p class="authors">Stefan Rahmstorf, Levke Caesar</p>
+
+<section class="card why" aria-labelledby="why-h">
+<h2 id="why-h">Why it matters</h2>
+<p id="whyText">The AMOC moves heat, carbon and fresh water around the Atlantic, and a big weakening or collapse could speed up regional sea-level rise, shift rainfall and drought, and cool north-western Europe. This review shows that many independent, imperfect clues all point the same way, so planners should treat an ongoing slowdown as real now, keep and expand the ocean monitoring arrays, and cut emissions quickly rather than wait for certainty.</p>
+</section>
+
+<section class="card" aria-labelledby="paper-h">
+<h2 id="paper-h">The paper</h2>
+<p style="margin:0 0 6px"><strong>The balance of evidence indicates a slowing AMOC</strong></p>
+<p class="cite" style="margin:0">Stefan Rahmstorf (Potsdam Institute for Climate Impact Research; University of Potsdam) and Levke Caesar (Potsdam Institute for Climate Impact Research). arXiv:2611.23429 [physics.ao-ph], submitted 17 November 2026. <a href="https://arxiv.org/abs/2611.23429">Read on arXiv</a> · <a href="https://arxiv.org/pdf/2611.23429">PDF</a></p>
+<p style="margin-top:14px"><strong>In plain language:</strong> the only continuous measurement of the whole AMOC, the RAPID array at 26°N, has run for about 20 years. The authors' fit to the corrected data (April 2004 to March 2024) gives −0.95 Sv per decade, about 1.9 Sv in total (1 Sv = one million cubic metres of water per second). At that rate the AMOC could fall from its recent average of about 17 Sv to about 10 Sv by 2100, close to where it is likely already past its tipping point. But 20 years is too short to separate climate change from natural ups and downs, so the authors turn to longer, indirect records. They fit straight-line trends to each by ordinary least squares and adjust the p-value for lag-1 autocorrelation of the residuals (this year's wobble partly carries into next year's):</p>
+<div class="eq">x(t) = a + b·t + ε(t), &nbsp;&nbsp; total change = b × (years covered), &nbsp;&nbsp; p adjusted for r<sub>1</sub> = corr(ε<sub>t</sub>, ε<sub>t−1</sub>)</div>
+<p>Their key point is about combining evidence. A trend that misses the 95% threshold is weaker evidence <em>for</em> slowing, not evidence against it. And several uncertain clues multiply up by Bayes' rule:</p>
+<div class="eq">P(S | E) = P(E | S)·P(S) / [ P(E | S)·P(S) + P(E | not S)·(1 − P(S)) ]</div>
+<p>Their worked example: start sceptical at 50:50. The North Atlantic "cold blob" would be seen 75% of the time if the AMOC slowed, but still 33% of the time if it did not, so the odds become 69%, "likely" in IPCC terms. Add the South Atlantic salinity pile-up (80% vs 20%) and the probability goes past 90%, "very likely".</p>
+</section>
+
+<section class="card" aria-labelledby="bayes-h">
+<h2 id="bayes-h">Try it 1: add up the clues</h2>
+<p>Start from your own prior belief, then switch clues on and set how likely each would be to show up <em>if</em> the AMOC has slowed and <em>if</em> it has not. The first two clues start at the paper's illustrative numbers. The third is yours to fill in.</p>
+<div class="btnrow" role="group" aria-label="Examples"><span class="lbl">Examples:</span>
+ <button type="button" data-b="paper">Paper's example</button>
+ <button type="button" data-b="sceptic">Strong sceptic (10% prior)</button>
+ <button type="button" data-b="weak">Weak clues only</button>
+ <button type="button" data-b="overlap">Clues overlap a lot</button>
+</div>
+<div class="controls">
+ <div><label for="prior"><span>Prior belief that the AMOC has slowed since 1993</span> <output id="priorO"></output></label><input type="range" id="prior" min="0.01" max="0.99" step="0.01" value="0.5"></div>
+ <div><label for="rho"><span>Overlap between clues (0 = fully independent)</span> <output id="rhoO"></output></label><input type="range" id="rho" min="0" max="1" step="0.05" value="0"></div>
+</div>
+<div class="lineset" id="L1"><label class="toggle"><input type="checkbox" id="on1" checked> Clue 1: the "cold blob" south of Greenland (Irminger Sea cooling)</label>
+ <div class="controls"><div><label for="ps1"><span>Chance of seeing it if slowed</span> <output id="ps1O"></output></label><input type="range" id="ps1" min="0.01" max="0.99" step="0.01" value="0.75"></div>
+ <div><label for="pn1"><span>Chance of seeing it if not slowed</span> <output id="pn1O"></output></label><input type="range" id="pn1" min="0.01" max="0.99" step="0.01" value="0.33"></div></div></div>
+<div class="lineset" id="L2"><label class="toggle"><input type="checkbox" id="on2" checked> Clue 2: South Atlantic salinity pile-up</label>
+ <div class="controls"><div><label for="ps2"><span>Chance of seeing it if slowed</span> <output id="ps2O"></output></label><input type="range" id="ps2" min="0.01" max="0.99" step="0.01" value="0.8"></div>
+ <div><label for="pn2"><span>Chance of seeing it if not slowed</span> <output id="pn2O"></output></label><input type="range" id="pn2" min="0.01" max="0.99" step="0.01" value="0.2"></div></div></div>
+<div class="lineset off" id="L3"><label class="toggle"><input type="checkbox" id="on3"> Clue 3: your choice (e.g. Gulf Stream moving north, ageing deep water)</label>
+ <div class="controls"><div><label for="ps3"><span>Chance of seeing it if slowed</span> <output id="ps3O"></output></label><input type="range" id="ps3" min="0.01" max="0.99" step="0.01" value="0.6"></div>
+ <div><label for="pn3"><span>Chance of seeing it if not slowed</span> <output id="pn3O"></output></label><input type="range" id="pn3" min="0.01" max="0.99" step="0.01" value="0.4"></div></div></div>
+<div class="stats">
+ <div class="stat"><div class="v" id="sPost"></div><div class="l">Probability the AMOC has slowed, after the clues</div></div>
+ <div class="stat"><div class="v" id="sTerm"></div><div class="l">IPCC likelihood term</div></div>
+ <div class="stat"><div class="v" id="sBF"></div><div class="l">Combined odds multiplier (Bayes factor)</div></div>
+ <div class="stat"><div class="v" id="sNeed"></div><div class="l">Lowest prior that still ends ≥ 90% ("very likely")</div></div>
+</div>
+<p class="note verdict" id="bVerdict" aria-live="polite"></p>
+<div class="grid" style="margin-top:14px">
+ <div class="plot"><div class="plot-title">Belief, clue by clue</div>
+  <canvas id="ladderPlot" role="img" aria-label="Bar chart of the probability that the AMOC has slowed, before and after each clue, with IPCC likelihood bands"></canvas>
+  <div class="legend"><span style="--k:var(--muted)">Prior</span><span style="--k:var(--c1)">After each clue</span><span style="--k:var(--accent-soft)">Bands: likely ≥ 66%, very likely ≥ 90%, virtually certain ≥ 99%</span></div></div>
+ <div class="plot"><div class="plot-title">Any starting belief, same clues</div>
+  <canvas id="priorPlot" role="img" aria-label="Curve of final probability against prior probability for the chosen clues"></canvas>
+  <div class="legend"><span style="--k:var(--c1)">After the clues</span><span style="--k:var(--muted)">No clues (line of no change)</span><span style="--k:var(--c2)">Your prior</span></div></div>
+</div>
+</section>
+
+<section class="card" aria-labelledby="trend-h">
+<h2 id="trend-h">Try it 2: a real trend that fails the test</h2>
+<p>Here a known, real slowing is buried in year-to-year noise, and the record is fitted exactly as in the paper: a straight-line least-squares trend with its p-value adjusted for lag-1 autocorrelation. The right-hand plot repeats this for 300 random noise histories at every record length and shows how often a 95% test would actually catch the slowdown that is truly there.</p>
+<div class="btnrow" role="group" aria-label="Examples"><span class="lbl">Examples:</span>
+ <button type="button" data-t="rapid">RAPID-like: 20 years at −0.95 Sv/decade</button>
+ <button type="button" data-t="long">Same trend, 70-year record</button>
+ <button type="button" data-t="xing">Deep western flow: −2.6 Sv/decade</button>
+ <button type="button" class="primary" id="reroll">New noise</button>
+</div>
+<div class="controls">
+ <div><label for="trend"><span>True trend</span> <output id="trendO"></output></label><input type="range" id="trend" min="-3" max="0" step="0.05" value="-0.95"></div>
+ <div><label for="years"><span>Length of record</span> <output id="yearsO"></output></label><input type="range" id="years" min="10" max="80" step="1" value="20"></div>
+ <div><label for="sd"><span>Year-to-year noise (standard deviation)</span> <output id="sdO"></output></label><input type="range" id="sd" min="0.2" max="3" step="0.05" value="1.2"></div>
+ <div><label for="ar"><span>Noise memory (lag-1 autocorrelation)</span> <output id="arO"></output></label><input type="range" id="ar" min="0" max="0.9" step="0.05" value="0.5"></div>
+</div>
+<div class="stats">
+ <div class="stat"><div class="v" id="sFit"></div><div class="l">Fitted total change (true: <span id="sTrue"></span>)</div></div>
+ <div class="stat"><div class="v" id="sP"></div><div class="l">p-value, AR1-adjusted (RAPID in paper: 0.170)</div></div>
+ <div class="stat"><div class="v" id="sNeff"></div><div class="l">Effective number of independent years</div></div>
+ <div class="stat"><div class="v" id="sDet"></div><div class="l">Chance a 95% test catches it at this length</div></div>
+</div>
+<p class="note verdict" id="tVerdict" aria-live="polite"></p>
+<div class="grid" style="margin-top:14px">
+ <div class="plot"><div class="plot-title">One possible record</div>
+  <canvas id="seriesPlot" role="img" aria-label="Simulated annual AMOC values with the true trend and the fitted trend"></canvas>
+  <div class="legend"><span style="--k:var(--c1)">Annual values (simulated)</span><span style="--k:var(--c3)">True trend</span><span style="--k:var(--c2)">Fitted trend</span></div></div>
+ <div class="plot"><div class="plot-title">How often the slowdown is "significant"</div>
+  <canvas id="detectPlot" role="img" aria-label="Share of simulated records with p below 0.05 against record length"></canvas>
+  <div class="legend"><span style="--k:var(--c1)">Share with p &lt; 0.05 (300 runs each)</span><span style="--k:var(--c2)">Your record length</span></div></div>
+</div>
+<div class="plot" style="margin-top:24px"><div class="plot-title">Where the trend leads if it continues</div>
+ <canvas id="projPlot" role="img" aria-label="Straight-line projection of AMOC strength from 2024 to 2100 at the chosen trend"></canvas>
+ <div class="legend"><span style="--k:var(--c1)">Projection from ~17 Sv in 2024 at the chosen trend</span><span style="--k:var(--c2)">~10 Sv: paper's "close to the threshold" level</span></div>
+ <p class="note" id="projNote" aria-live="polite"></p></div>
+</section>
+
+<section class="card" aria-labelledby="res-h">
+<h2 id="res-h">What the paper compiles</h2>
+<table><thead><tr><th>Record (Table 1 and text)</th><th>Period</th><th>Total fitted change</th><th>p (AR1-adjusted)</th></tr></thead><tbody>
+<tr><td>RAPID array, 26°N</td><td>Apr 2004–Mar 2024</td><td>−1.894 Sv</td><td>0.170</td></tr>
+<tr><td>Ocean reanalyses (Winkelbauer et al. 2026)</td><td>1993–2023</td><td>−3.877 Sv</td><td>&lt; 0.001</td></tr>
+<tr><td>Worthington et al. (2021)</td><td>1981–2016</td><td>−2.560 Sv</td><td>0.162</td></tr>
+<tr><td>SST neural networks (Michel et al. 2025)</td><td>1950–2022</td><td>−2.283 Sv</td><td>&lt; 0.001</td></tr>
+<tr><td>SST fingerprint (Caesar et al. 2018)</td><td>1950–2022</td><td>−1.915 Sv</td><td>0.075</td></tr>
+<tr><td>Irminger Sea density (Chafik et al. 2022)</td><td>1950–2020</td><td>−2.606 Sv</td><td>0.281</td></tr>
+<tr><td>South Atlantic salinity (Zhu et al. 2023)</td><td>1950–2021</td><td>−0.114 psu</td><td>&lt; 0.001</td></tr>
+<tr><td>Heat pile-up (Ren, Xie et al. 2025)</td><td>1957–2020</td><td>−6.561 Sv</td><td>&lt; 0.001</td></tr>
+<tr><td>Equatorial mid-depth warming (Ren, Li et al. 2025)</td><td>1960–2021</td><td>−2.128 Sv</td><td>&lt; 0.001</td></tr>
+</tbody></table>
+<p class="note">Other lines in the review: four mooring arrays from 16.5°N to 42.5°N show the deep western overturning weakening by 2.6 ± 0.7 Sv per decade at 26°N over 2004–2023; ocean reanalyses give 1.23 ± 0.57 Sv per decade and a 15% drop in heat transport at 26°N over three decades; a water-mass transformation study finds 13% ± 2% (~2.4 Sv) decline since 1980; North Atlantic water is "generally aging"; the Gulf Stream has shifted 55 km north over 1993–2024; and proxy records show the weakest AMOC in at least a millennium. Studies finding no trend are mostly north of 45°N, where the flow is more complex. The authors call for a sustained early-warning monitoring system, planning for possible further weakening, and rapid emission cuts.</p>
+</section>
+
+<section class="card" aria-labelledby="how-h">
+<h2 id="how-h">How to use it</h2>
+<ul>
+<li><strong>Press "Paper's example":</strong> with a 50% prior, the cold blob alone lifts the probability to 69%, and adding the salinity pile-up takes it just past 90%, matching the paper.</li>
+<li><strong>Try "Strong sceptic":</strong> even starting at 10%, the same two clues multiply the odds by about nine; turn on clue 3 and watch how fast belief climbs. The right-hand curve shows the result for every possible starting belief at once.</li>
+<li><strong>Slide "Overlap" up:</strong> clues that share a cause (the paper notes the northern and southern salinity signals are not fully independent) count for less. At 100% overlap only the first clue counts.</li>
+<li><strong>Set a clue's two chances equal:</strong> evidence that is just as likely either way changes nothing. Make "if not slowed" bigger than "if slowed" and it lowers belief, which is how evidence of a strengthening AMOC would count.</li>
+<li><strong>In Try it 2, press "RAPID-like" and then "New noise" several times:</strong> the slowing is real every time, yet the p-value often lands above 0.05. Then stretch the record length and watch the catch rate rise. This is why the paper says a non-significant trend is not evidence against slowing.</li>
+</ul>
+</section>
+<p class="note" style="margin-top:24px">Demo by Grok Bot for the Daily Research Explorer. Bayes' rule, the cold-blob (75% / 33%) and salinity (80% / 20%) likelihoods, the 50% prior, the OLS trend with AR1-adjusted p-value, the RAPID trend (−0.95 Sv/decade, p = 0.170), the ~17 Sv average and ~10 Sv level, and all table numbers come from the paper. Choices made by Grok Bot, not the paper: the overlap slider, which shrinks the log odds multiplier of every clue after the first by (1 − overlap); the third clue's default chances; the simulated records, which are a straight-line trend plus AR(1) red noise with the chosen standard deviation and memory (illustrative, not fitted to any dataset); the p-value method, a two-sided t-test with the effective sample size n(1 − r<sub>1</sub>)/(1 + r<sub>1</sub>) from the residuals' lag-1 autocorrelation (a standard adjustment; the paper's exact code is in its GitLab repository); and the straight-line projection from 17 Sv in 2024. The IPCC terms use its calibrated ranges (likely ≥ 66%, very likely ≥ 90%, virtually certain ≥ 99%; unlikely ≤ 33%, very unlikely ≤ 10%).</p>
+</main>
+<script>
+"use strict";
+const $=id=>document.getElementById(id);
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const mn=x=>String(x).replace("-","−");
+const pct=v=>(v>=0.995&&v<0.9995?(v*100).toFixed(1):v>0.9995?(v*100).toFixed(2):Math.round(v*100))+"%";
+// ---------- Bayes ----------
+const ipcc=p=>p>=0.99?"Virtually certain":p>=0.9?"Very likely":p>=0.66?"Likely":p>0.33?"About as likely as not":p>0.1?"Unlikely":p>0.01?"Very unlikely":"Exceptionally unlikely";
+function clues(){const out=[];for(const i of[1,2,3])if($("on"+i).checked)out.push({i,ps:+$("ps"+i).value,pn:+$("pn"+i).value});return out}
+function logBF(cs,rho){let L=0;cs.forEach((c,k)=>{L+=Math.log(c.ps/c.pn)*(k===0?1:1-rho)});return L}
+const post=(p0,L)=>1/(1+(1-p0)/p0*Math.exp(-L));
+// ---------- stats helpers ----------
+function betacf(a,b,x){let qab=a+b,qap=a+1,qam=a-1,c=1,d=1-qab*x/qap;if(Math.abs(d)<1e-30)d=1e-30;d=1/d;let h=d;
+ for(let m=1;m<=200;m++){const m2=2*m;let aa=m*(b-m)*x/((qam+m2)*(a+m2));d=1+aa*d;if(Math.abs(d)<1e-30)d=1e-30;c=1+aa/c;if(Math.abs(c)<1e-30)c=1e-30;d=1/d;h*=d*c;
+  aa=-(a+m)*(qab+m)*x/((a+m2)*(qap+m2));d=1+aa*d;if(Math.abs(d)<1e-30)d=1e-30;c=1+aa/c;if(Math.abs(c)<1e-30)c=1e-30;d=1/d;const del=d*c;h*=del;if(Math.abs(del-1)<3e-12)break}return h}
+function lgamma(x){const g=[76.18009172947146,-86.50532032941677,24.01409824083091,-1.231739572450155,0.1208650973866179e-2,-0.5395239384953e-5];let y=x,t=x+5.5;t-=(x+0.5)*Math.log(t);let s=1.000000000190015;for(const c of g)s+=c/++y;return -t+Math.log(2.5066282746310005*s/x)}
+function ibeta(a,b,x){if(x<=0)return 0;if(x>=1)return 1;const bt=Math.exp(lgamma(a+b)-lgamma(a)-lgamma(b)+a*Math.log(x)+b*Math.log(1-x));return x<(a+1)/(a+b+2)?bt*betacf(a,b,x)/a:1-bt*betacf(b,a,1-x)/b}
+const pT=(t,df)=>ibeta(df/2,0.5,df/(df+t*t)); // two-sided
+function fit(y){const n=y.length;let mx=(n-1)/2,my=0;for(const v of y)my+=v;my/=n;let sxx=0,sxy=0;for(let i=0;i<n;i++){sxx+=(i-mx)**2;sxy+=(i-mx)*(y[i]-my)}
+ const b=sxy/sxx,a=my-b*mx,res=y.map((v,i)=>v-a-b*i);let s0=0,s1=0;for(let i=0;i<n;i++){s0+=res[i]*res[i];if(i)s1+=res[i]*res[i-1]}
+ const r1=Math.max(0,Math.min(0.99,s1/s0)),neff=Math.max(3,n*(1-r1)/(1+r1)),se=Math.sqrt(s0/(neff-2)/sxx),t=Math.abs(b)/se;return{a,b,r1,neff,p:pT(t,neff-2)}}
+function rng(seed){let s=seed>>>0||1;return()=>{s^=s<<13;s>>>=0;s^=s>>>17;s^=s<<5;s>>>=0;return s/4294967296}}
+function gauss(r){let u=0,v=0;while(u===0)u=r();v=r();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v)}
+function series(n,slope,sd,phi,r){const y=[];let e=gauss(r)*sd;for(let i=0;i<n;i++){if(i)e=phi*e+Math.sqrt(1-phi*phi)*sd*gauss(r);y.push(17+slope*(i-(n-1)/2)+e)}return y}
+// ---------- drawing ----------
+function setup(c){const r=c.getBoundingClientRect(),d=window.devicePixelRatio||1;c.width=Math.max(1,Math.round(r.width*d));c.height=Math.max(1,Math.round(r.height*d));const g=c.getContext("2d");g.setTransform(d,0,0,d,0,0);return{g,w:r.width,h:r.height}}
+function axes(g,w,h,pad,xt,yt,X,Y,xl,yl){g.strokeStyle=css("--grid");g.lineWidth=1;g.fillStyle=css("--muted");g.font="11px "+css("--font");
+ g.textAlign="center";g.textBaseline="top";for(const[v,l]of xt){g.beginPath();g.moveTo(X(v),pad.t);g.lineTo(X(v),h-pad.b);g.stroke();g.fillText(l,X(v),h-pad.b+4)}
+ g.textAlign="right";g.textBaseline="middle";for(const[v,l]of yt){g.beginPath();g.moveTo(pad.l,Y(v));g.lineTo(w-pad.r,Y(v));g.stroke();g.fillText(l,pad.l-5,Y(v))}
+ g.textAlign="center";g.textBaseline="bottom";if(xl)g.fillText(xl,(pad.l+w-pad.r)/2,h-2);
+ if(yl){g.save();g.translate(11,(pad.t+h-pad.b)/2);g.rotate(-Math.PI/2);g.textBaseline="middle";g.fillText(yl,0,0);g.restore()}}
+function line(g,xs,ys,X,Y,col,lw,dash){g.strokeStyle=col;g.lineWidth=lw||2;g.setLineDash(dash||[]);g.beginPath();for(let i=0;i<xs.length;i++){const x=X(xs[i]),y=Y(ys[i]);i?g.lineTo(x,y):g.moveTo(x,y)}g.stroke();g.setLineDash([])}
+function bands(g,w,h,pad,Y){g.fillStyle=css("--accent");for(const[lo,hi,a]of[[0.66,0.9,.06],[0.9,0.99,.11],[0.99,1,.18]]){g.globalAlpha=a;g.fillRect(pad.l,Y(hi),w-pad.l-pad.r,Y(lo)-Y(hi))}g.globalAlpha=1;
+ g.fillStyle=css("--muted");g.font="11px "+css("--font");g.textAlign="left";g.textBaseline="bottom";g.fillText("likely",pad.l+4,Y(0.66)-2);g.fillText("very likely",pad.l+4,Y(0.9)-1)}
+let B=null,T=null,seed=20261120;
+function drawLadder(){const{g,w,h}=setup($("ladderPlot")),pad={l:44,r:12,t:12,b:34},Y=v=>h-pad.b-v*(h-pad.t-pad.b);
+ axes(g,w,h,pad,[],[0,.25,.5,.75,1].map(v=>[v,Math.round(v*100)+"%"]),x=>x,Y,"","probability the AMOC has slowed");bands(g,w,h,pad,Y);
+ const st=B.steps,bw=(w-pad.l-pad.r)/Math.max(st.length,1);g.textAlign="center";g.font="12px "+css("--font");
+ st.forEach((s,i)=>{const x=pad.l+i*bw+bw*.2,ww=bw*.6;g.fillStyle=i===0?css("--muted"):css("--c1");g.fillRect(x,Y(s.p),ww,Y(0)-Y(s.p));
+  g.fillStyle=css("--text");g.textBaseline="bottom";g.fillText(pct(s.p),x+ww/2,Math.max(Y(s.p)-2,pad.t+12));g.fillStyle=css("--muted");g.textBaseline="top";g.fillText(s.l,x+ww/2,h-pad.b+4)})}
+function drawPrior(){const{g,w,h}=setup($("priorPlot")),pad={l:44,r:12,t:12,b:34},X=v=>pad.l+v*(w-pad.l-pad.r),Y=v=>h-pad.b-v*(h-pad.t-pad.b);
+ const tk=[0,.25,.5,.75,1].map(v=>[v,Math.round(v*100)+"%"]);axes(g,w,h,pad,tk,tk,X,Y,"prior belief","after the clues");bands(g,w,h,pad,Y);
+ const xs=[],ys=[];for(let i=1;i<200;i++){const p=i/200;xs.push(p);ys.push(post(p,B.L))}
+ line(g,[0,1],[0,1],X,Y,css("--muted"),1.5,[5,4]);line(g,xs,ys,X,Y,css("--c1"),2.5);
+ g.fillStyle=css("--c2");g.beginPath();g.arc(X(B.p0),Y(B.post),5,0,2*Math.PI);g.fill();g.strokeStyle=css("--c2");g.lineWidth=1;g.setLineDash([3,3]);g.beginPath();g.moveTo(X(B.p0),Y(0));g.lineTo(X(B.p0),Y(B.post));g.stroke();g.setLineDash([])}
+function computeB(){const p0=+$("prior").value,rho=+$("rho").value,cs=clues();const names={1:"Cold blob",2:"Salinity",3:"Clue 3"};
+ const steps=[{l:"Prior",p:p0}];let L=0;cs.forEach((c,k)=>{L+=Math.log(c.ps/c.pn)*(k===0?1:1-rho);steps.push({l:"+ "+names[c.i],p:post(p0,L)})});
+ const p=post(p0,L),need=L<=0?null:1/(1+Math.exp(L)/9);B={p0,L,post:p,steps};
+ $("priorO").textContent=pct(p0);$("rhoO").textContent=Math.round(rho*100)+"%";for(const i of[1,2,3]){$("ps"+i+"O").textContent=pct(+$("ps"+i).value);$("pn"+i+"O").textContent=pct(+$("pn"+i).value);$("L"+i).classList.toggle("off",!$("on"+i).checked)}
+ $("sPost").textContent=pct(p);$("sTerm").textContent=ipcc(p);$("sBF").textContent="×"+(Math.exp(L)>=100?Math.round(Math.exp(L)):Math.exp(L).toFixed(2));
+ $("sNeed").textContent=need===null?"none":need<0.01?"< 1%":pct(need);
+ $("bVerdict").textContent=cs.length===0?"No clues switched on: your belief stays where it started.":L>0?`Together the clues multiply the odds of slowing by ${Math.exp(L).toFixed(1)}. Starting from ${pct(p0)}, the probability ends at ${pct(p)}: "${ipcc(p).toLowerCase()}". None of the clues is conclusive on its own.`:"These clues are no more likely if the AMOC slowed than if it did not, so overall they lower or leave the belief unchanged.";
+ drawLadder();drawPrior();markB()}
+const BP={paper:{prior:.5,rho:0,on1:1,ps1:.75,pn1:.33,on2:1,ps2:.8,pn2:.2,on3:0},sceptic:{prior:.1,rho:0,on1:1,ps1:.75,pn1:.33,on2:1,ps2:.8,pn2:.2,on3:0},weak:{prior:.5,rho:0,on1:1,ps1:.6,pn1:.45,on2:1,ps2:.6,pn2:.45,on3:1,ps3:.6,pn3:.45},overlap:{prior:.5,rho:.7,on1:1,ps1:.75,pn1:.33,on2:1,ps2:.8,pn2:.2,on3:0}};
+function setVals(q){for(const k in q){const e=$(k);if(e.type==="checkbox")e.checked=!!q[k];else e.value=q[k]}}
+function matches(q){return Object.keys(q).every(k=>{const e=$(k);return e.type==="checkbox"?e.checked===!!q[k]:Math.abs(+e.value-q[k])<1e-9})}
+function markB(){document.querySelectorAll("[data-b]").forEach(b=>b.setAttribute("aria-pressed",String(matches(BP[b.dataset.b]))))}
+// ---------- trend ----------
+function drawSeries(){const{g,w,h}=setup($("seriesPlot")),pad={l:44,r:12,t:12,b:34},y=T.y,n=y.length,yr0=2024-n+1;
+ let lo=Math.min(...y),hi=Math.max(...y);lo=Math.floor(lo-0.5);hi=Math.ceil(hi+0.5);
+ const X=i=>pad.l+i/(n-1)*(w-pad.l-pad.r),Y=v=>h-pad.b-(v-lo)/(hi-lo)*(h-pad.t-pad.b);
+ const xs=[],step=n>40?20:n>20?10:5;for(let yr=Math.ceil(yr0/step)*step;yr<=2024;yr+=step)xs.push([yr-yr0,String(yr)]);
+ const ys=[],ystep=hi-lo>12?4:hi-lo>6?2:1;for(let v=Math.ceil(lo/ystep)*ystep;v<=hi;v+=ystep)ys.push([v,String(v)]);
+ axes(g,w,h,pad,xs,ys,X,Y,"year (simulated record ending 2024)","AMOC (Sv)");
+ const idx=y.map((_,i)=>i);line(g,idx,y,X,Y,css("--c1"),1.5);g.fillStyle=css("--c1");for(let i=0;i<n;i++){g.beginPath();g.arc(X(i),Y(y[i]),2.4,0,2*Math.PI);g.fill()}
+ line(g,[0,n-1],[17+T.slope*(-(n-1)/2),17+T.slope*((n-1)/2)],X,Y,css("--c3"),2,[6,4]);line(g,[0,n-1],[T.f.a,T.f.a+T.f.b*(n-1)],X,Y,css("--c2"),2.5)}
+function drawDetect(){const{g,w,h}=setup($("detectPlot")),pad={l:44,r:12,t:12,b:34},X=n=>pad.l+(n-10)/70*(w-pad.l-pad.r),Y=v=>h-pad.b-v*(h-pad.t-pad.b);
+ axes(g,w,h,pad,[10,20,30,40,50,60,70,80].map(v=>[v,v+" y"]),[0,.25,.5,.75,1].map(v=>[v,Math.round(v*100)+"%"]),X,Y,"length of record","caught at 95%");
+ line(g,T.det.n,T.det.r,X,Y,css("--c1"),2.5);g.strokeStyle=css("--c2");g.lineWidth=1.5;g.setLineDash([4,3]);g.beginPath();g.moveTo(X(T.n),pad.t);g.lineTo(X(T.n),h-pad.b);g.stroke();g.setLineDash([]);
+ g.fillStyle=css("--c2");g.beginPath();g.arc(X(T.n),Y(T.detNow),5,0,2*Math.PI);g.fill()}
+function drawProj(){const{g,w,h}=setup($("projPlot")),pad={l:44,r:12,t:12,b:34},X=yr=>pad.l+(yr-2024)/76*(w-pad.l-pad.r),Y=v=>h-pad.b-v/20*(h-pad.t-pad.b);
+ axes(g,w,h,pad,[2030,2040,2050,2060,2070,2080,2090,2100].map(v=>[v,String(v)]),[0,5,10,15,20].map(v=>[v,String(v)]),X,Y,"year","AMOC (Sv)");
+ line(g,[2024,2100],[10,10],X,Y,css("--c2"),1.5,[5,4]);line(g,[2024,2100],[17,Math.max(0,17+T.slope*76)],X,Y,css("--c1"),2.5)}
+function computeT(){const slope=+$("trend").value/10,n=+$("years").value,sd=+$("sd").value,phi=+$("ar").value;
+ $("trendO").textContent=mn((slope*10).toFixed(2))+" Sv/decade";$("yearsO").textContent=n+" years";$("sdO").textContent=sd.toFixed(2)+" Sv";$("arO").textContent=phi.toFixed(2);
+ const y=series(n,slope,sd,phi,rng(seed)),f=fit(y);const det={n:[],r:[]};let detNow=0;const R=rng(12345);
+ for(let L=10;L<=80;L++){let hit=0;for(let k=0;k<300;k++){const ff=fit(series(L,slope,sd,phi,R));if(ff.p<0.05&&ff.b<0)hit++}det.n.push(L);det.r.push(hit/300)}
+ detNow=det.r[n-10];
+ T={y,f,n,slope,det,detNow};
+ $("sFit").textContent=mn((f.b*n).toFixed(2))+" Sv";$("sTrue").textContent=mn((slope*n).toFixed(2))+" Sv";$("sP").textContent=f.p<0.001?"< 0.001":f.p.toFixed(3);$("sNeff").textContent=f.neff.toFixed(1)+" of "+n;$("sDet").textContent=Math.round(detNow*100)+"%";
+ $("tVerdict").textContent=slope===0?"There is no real trend here, so any \"significant\" result would be a false alarm (about 5% of the time).":f.p<0.05&&f.b<0?`This record passes the 95% test (p ${f.p<0.001?"< 0.001":"= "+f.p.toFixed(3)}). At this length, about ${Math.round(detNow*100)}% of records with the same real slowing would.`:`The slowing is real, yet this record fails the 95% test (p = ${f.p.toFixed(3)}). At this length only about ${Math.round(detNow*100)}% of records would pass, so "not significant" here is weak evidence for slowing, not evidence against it.`;
+ const yr10=slope<0?2024+7/(-slope):null;$("projNote").textContent=slope<0?`At ${mn((slope*10).toFixed(2))} Sv per decade from ~17 Sv in 2024, the AMOC reaches ~10 Sv around ${Math.round(yr10)}${yr10>2100?" (after 2100)":""}${17+slope*76>0?` and stands at ${(17+slope*76).toFixed(1)} Sv in 2100`:`, and the straight line would hit zero around ${Math.round(2024+17/(-slope))}, far beyond what a straight line can say`}. A straight line is only a what-if: the paper notes models project weakening and a tipping point could make it faster.`:"With no trend, the line stays flat at ~17 Sv.";
+ drawSeries();drawDetect();drawProj();markT()}
+const TP={rapid:{trend:-0.95,years:20},long:{trend:-0.95,years:70},xing:{trend:-2.6,years:20}};
+function markT(){document.querySelectorAll("[data-t]").forEach(b=>b.setAttribute("aria-pressed",String(matches(TP[b.dataset.t]))))}
+// ---------- wiring ----------
+function throttle(fn){let pend=false;return()=>{if(pend)return;pend=true;requestAnimationFrame(()=>{pend=false;fn()})}}
+const rB=throttle(computeB),rT=throttle(computeT);
+["prior","rho","ps1","pn1","ps2","pn2","ps3","pn3"].forEach(id=>$(id).addEventListener("input",rB));["on1","on2","on3"].forEach(id=>$(id).addEventListener("change",rB));
+["trend","years","sd","ar"].forEach(id=>$(id).addEventListener("input",rT));
+document.querySelectorAll("[data-b]").forEach(b=>b.addEventListener("click",()=>{setVals(BP[b.dataset.b]);computeB()}));
+document.querySelectorAll("[data-t]").forEach(b=>b.addEventListener("click",()=>{setVals(TP[b.dataset.t]);computeT()}));
+$("reroll").addEventListener("click",()=>{seed=(seed*1103515245+12345)>>>0;computeT()});
+function drawAll(){if(B){drawLadder();drawPrior()}if(T){drawSeries();drawDetect();drawProj()}}
+window.addEventListener("resize",throttle(drawAll));matchMedia("(prefers-color-scheme: dark)").addEventListener("change",drawAll);
+computeB();computeT();document.body.dataset.ready="1";
+</script>
+</body></html>
