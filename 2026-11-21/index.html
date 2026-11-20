@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="light dark">
+<title>Stop asking the AI again once one answer has clearly won — Research Explorer, 21 Nov 2026</title>
+<link rel="stylesheet" href="../assets/style.css">
+<style>
+:root{--c5:#b25000;--c6:#007d8a;--c7:#a3005f;--c8:#6e6e73}
+@media (prefers-color-scheme:dark){:root{--c5:#ffd60a;--c6:#5ad1e0;--c7:#ff6fb0;--c8:#98989d}}
+canvas#wealthPlot,canvas#poolPlot{height:300px}
+canvas#costPlot,canvas#errPlot{height:300px}
+.btnrow{display:flex;flex-wrap:wrap;gap:8px;margin:4px 0 14px;align-items:center}
+.btnrow button{font:500 14px var(--font);color:var(--text);background:var(--accent-soft);border:0;border-radius:8px;padding:7px 14px;min-height:32px;cursor:pointer}
+.btnrow button.primary{color:#fff;background:var(--accent)}
+.btnrow button[aria-pressed="true"]{box-shadow:inset 0 0 0 2px var(--accent)}
+.btnrow .lbl{font-size:13px;color:var(--muted);margin-right:2px}
+.verdict{font-weight:600}
+</style></head><body><main>
+<a class="back" href="../">‹ All demos</a>
+<div class="eyebrow">21 Nov 2026 · AI</div>
+<h1>Stop asking the AI again once one answer has clearly won</h1>
+<p class="lede">A popular way to make a language model more accurate is to ask it the same question many times and pick the answer that wins, either by majority vote or by a "reward model" that scores each reply. The catch is that every question gets the same fixed number of tries, even easy ones the model answers the same way every time. This paper gives a stopping rule with a guarantee: keep sampling only until one answer is statistically certified to be the model's majority answer, with the chance of certifying a wrong one capped at a level α you choose. Below, the paper's betting maths runs live.</p>
+<p class="authors">Vishesh Kumar Singh, Sayak Ray Chowdhury</p>
+
+<section class="card why" aria-labelledby="why-h">
+<h2 id="why-h">Why it matters</h2>
+<p id="whyText">Sampling a language model many times and keeping the best answer is one of the most common ways to make it more accurate, but a fixed budget wastes most of that compute on questions the model already answers consistently. This stopping rule lets each question spend only as many samples as it needs, with a promised cap on how often it stops on a non-majority answer, and in the paper's tests it matched or beat full-budget Best-of-N accuracy while using about 35% to 60% fewer samples.</p>
+</section>
+
+<section class="card" aria-labelledby="paper-h">
+<h2 id="paper-h">The paper</h2>
+<p style="margin:0 0 6px"><strong>Sequential Anytime Valid Tests for Efficient Inference-Time Alignment</strong></p>
+<p class="cite" style="margin:0">Vishesh Kumar Singh and Sayak Ray Chowdhury (Indian Institute of Technology Kanpur, India). arXiv:2611.26413 [cs.LG], submitted 19 November 2026. <a href="https://arxiv.org/abs/2611.26413">Read on arXiv</a> · <a href="https://arxiv.org/pdf/2611.26413">PDF</a></p>
+<p style="margin-top:14px"><strong>In plain language:</strong> replies are grouped by their final answer (for example, "42"). <em>Reward-weighted self-consistency</em> (RWSC) gives each group a share of the vote. Each reply counts more when the reward model likes it, and a temperature τ slides the rule between a plain majority vote (large τ) and "take the single highest-scored reply" (Best-of-N, small τ):</p>
+<div class="eq">S(a) = Σ<sub>y with answer a</sub> e<sup>r̄(y)/τ</sup> / Σ<sub>all y</sub> e<sup>r̄(y)/τ</sup>, &nbsp;&nbsp; r̄ = (r − mean) / sd</div>
+<p>To decide when to stop, the method runs a separate <em>betting game</em> for every answer that shows up. A gambler starts with 1 unit and bets that the next reply will agree with answer a, at odds that would be fair if a held at most p† = ½ of the model's replies. Wealth after each reply (X = 1 if it agrees, 0 if not) is</p>
+<div class="eq">E<sub>n</sub>(a) = Π (1 + λ<sub>i</sub>(X<sub>i</sub> − p†)), &nbsp;&nbsp; λ<sub>i</sub> = clip( (θ̂ − p†) / (p†(1 − p†)), 0, c/p† ), &nbsp;&nbsp; θ̂ = (Z + m·S(a)) / (k + m)</div>
+<p>θ̂ is the agreement rate so far (Z agreements in k replies since a first appeared), pulled towards the RWSC share with strength m = 4. This is how the reward model speeds things up. If a is <em>not</em> a majority answer, the wealth is a fair-or-worse game and, by Ville's inequality, reaches 1/(π·α) with probability at most π·α. Answer number J (in order of first appearance) gets weight π<sub>J</sub> = 1/(J(J+1)), and these weights sum to 1, so sampling stops when</p>
+<div class="eq">π<sub>J(a)</sub> · E<sub>n</sub>(a) ≥ 1/α &nbsp; for some answer a, &nbsp;&nbsp; or n = N<sub>max</sub> (then fall back to the RWSC winner)</div>
+<p>The guarantee: the chance of <em>ever</em> certifying an answer the model gives at most half the time is at most α, however you peek and however bad the reward model is. With the best (Kelly) bet, wealth grows at rate d<sub>KL</sub>(θ‖½), so a dominant answer is certified after about log(1/α) / d<sub>KL</sub>(θ‖½) samples. Easy questions stop almost at once and near-ties take longer.</p>
+</section>
+
+<section class="card" aria-labelledby="one-h">
+<h2 id="one-h">Try it 1: one question, one run</h2>
+<p>Pretend a model answers one question. Its favourite answer <strong>A</strong> comes up a share θ of the time and the rest is spread over other answers. Each reply gets a reward score: random noise, plus a boost (or penalty) for answer A. Press <strong>Play</strong> to watch the betting games reply by reply.</p>
+<div class="btnrow" role="group" aria-label="Examples"><span class="lbl">Examples:</span>
+ <button type="button" data-p="easy">Easy question (θ = 0.85)</button>
+ <button type="button" data-p="paper">Medium (θ = 0.7)</button>
+ <button type="button" data-p="tie">Near a tie (θ = 0.55)</button>
+ <button type="button" data-p="none">No majority (θ = 0.45)</button>
+ <button type="button" data-p="hacked">Misleading reward model</button>
+</div>
+<div class="btnrow" role="group" aria-label="Run"><button type="button" class="primary" id="play">Play</button><button type="button" id="reroll">New run</button></div>
+<div class="controls">
+ <div><label for="theta"><span>Share of replies giving answer A (θ)</span> <output id="thetaO"></output></label><input type="range" id="theta" min="0.2" max="0.95" step="0.01" value="0.7"></div>
+ <div><label for="k"><span>Number of other answers</span> <output id="kO"></output></label><input type="range" id="k" min="1" max="7" step="1" value="3"></div>
+ <div><label for="sig"><span>Reward model's boost for answer A</span> <output id="sigO"></output></label><input type="range" id="sig" min="-1.5" max="2" step="0.1" value="0.8"></div>
+ <div><label for="tau"><span>RWSC temperature τ</span> <output id="tauO"></output></label><input type="range" id="tau" min="0.2" max="5" step="0.1" value="1"></div>
+ <div><label for="alpha"><span>Error level α</span> <output id="alphaO"></output></label><input type="range" id="alpha" min="0.01" max="0.3" step="0.01" value="0.1"></div>
+ <div><label for="cc"><span>Bet cap c (stake ≤ c of wealth)</span> <output id="ccO"></output></label><input type="range" id="cc" min="0.5" max="0.95" step="0.05" value="0.8"></div>
+ <div><label for="nmax"><span>Budget N<sub>max</sub> (fixed Best-of-N size)</span> <output id="nmaxO"></output></label><input type="range" id="nmax" min="8" max="128" step="1" value="64"></div>
+</div>
+<div class="stats">
+ <div class="stat"><div class="v" id="sN"></div><div class="l">Replies used before stopping</div></div>
+ <div class="stat"><div class="v" id="sCert"></div><div class="l">Answer returned</div></div>
+ <div class="stat"><div class="v" id="sSave"></div><div class="l">Saved vs a fixed budget of N<sub>max</sub></div></div>
+ <div class="stat"><div class="v" id="sTheory"></div><div class="l">Theory: log(1/(π<sub>1</sub>α)) / growth rate</div></div>
+</div>
+<p class="note verdict" id="oneVerdict" aria-live="polite"></p>
+<div class="grid" style="margin-top:14px">
+ <div class="plot"><div class="plot-title">Each answer's betting wealth, π·E (log scale)</div>
+  <canvas id="wealthPlot" role="img" aria-label="Weighted betting wealth of each answer against the number of replies, with the 1 over alpha stopping line"></canvas>
+  <div class="legend" id="wealthLegend"></div></div>
+ <div class="plot"><div class="plot-title">Replies so far and the vote shares</div>
+  <canvas id="poolPlot" role="img" aria-label="Dots for each sampled reply coloured by answer, and bars of each answer's raw share and reward-weighted share"></canvas>
+  <div class="legend"><span style="--k:var(--muted)">Raw share of replies</span><span style="--k:var(--c1)">RWSC share S(a), coloured by answer</span></div></div>
+</div>
+</section>
+
+<section class="card" aria-labelledby="many-h">
+<h2 id="many-h">Try it 2: many questions</h2>
+<p>This panel repeats the game 200 times for every θ, using the number of other answers, reward boost, τ, α and c from above. The left plot checks the cost formula. The right plot checks the safety promise: when no answer has a majority (θ ≤ 0.5), how often does each method still stop and declare a winner? It also shows the paper's simpler SPRT-RWSC rule, which uses Wald's classic test on the current leader. That test resets whenever the leader changes, and the paper notes its error guarantee does not hold under this kind of continuous peeking. (The paper finds SPRT-RWSC works well on real benchmarks, where most questions have a clear majority answer.)</p>
+<div class="btnrow"><button type="button" class="primary" id="runMany">Run 200 games per θ</button><span class="note" id="manyStatus" aria-live="polite"></span></div>
+<div class="controls">
+ <div><label for="nmax2"><span>Budget N<sub>max</sub> for this panel</span> <output id="nmax2O"></output></label><input type="range" id="nmax2" min="32" max="256" step="16" value="128"></div>
+</div>
+<div class="stats">
+ <div class="stat"><div class="v" id="mErr"></div><div class="l">Worst wrong-stop rate, e-RWSC (θ ≤ 0.5)</div></div>
+ <div class="stat"><div class="v" id="mErrS"></div><div class="l">Worst wrong-stop rate, SPRT-RWSC</div></div>
+ <div class="stat"><div class="v" id="mAvg"></div><div class="l">Average replies over θ = 0.6 to 0.95, e-RWSC</div></div>
+</div>
+<div class="grid" style="margin-top:14px">
+ <div class="plot"><div class="plot-title">Replies needed vs how dominant answer A is</div>
+  <canvas id="costPlot" role="img" aria-label="Average number of replies before stopping against theta, simulation and theory"></canvas>
+  <div class="legend"><span style="--k:var(--c1)">e-RWSC (simulated mean)</span><span style="--k:var(--c2)">Theory log(1/(π<sub>1</sub>α))/growth</span><span style="--k:var(--muted)">Budget N<sub>max</sub></span></div></div>
+ <div class="plot"><div class="plot-title">How often a non-majority answer is certified</div>
+  <canvas id="errPlot" role="img" aria-label="Share of runs that wrongly certify an answer when no answer has a majority, for e-RWSC and SPRT-RWSC, with the alpha line"></canvas>
+  <div class="legend"><span style="--k:var(--c1)">e-RWSC</span><span style="--k:var(--c2)">SPRT-RWSC (α, β = 0.2, burn-in 4)</span><span style="--k:var(--muted)">Promised cap α</span></div></div>
+</div>
+</section>
+
+<section class="card" aria-labelledby="res-h">
+<h2 id="res-h">What the paper found</h2>
+<p>MATH500, Qwen2.5-3B with the ArmoRM reward model, budget N<sub>max</sub> = 24 (paper Table 1):</p>
+<table><thead><tr><th>Method</th><th>Accuracy</th><th>Average replies used</th></tr></thead><tbody>
+<tr><td>One reply (no selection)</td><td>63.6%</td><td>1.00</td></tr>
+<tr><td>Best-of-N</td><td>71.0%</td><td>24.00</td></tr>
+<tr><td>RWSC, full budget</td><td>74.2%</td><td>24.00</td></tr>
+<tr><td>AdaBoN (adaptive baseline)</td><td>71.4%</td><td>18.82</td></tr>
+<tr><td>CITE (α = 0.1, anytime-valid baseline)</td><td>75.4%</td><td>21.68</td></tr>
+<tr><td>SPRT-RWSC</td><td>74.6%</td><td>13.23</td></tr>
+<tr><td>e-RWSC (α = 0.1)</td><td>74.4%</td><td>15.59</td></tr>
+</tbody></table>
+<p class="note">Across 5 language models, 4 reward models and 4 benchmarks (GSM8K, MATH500, MMLU, CruxEval), the realized wrong-certification rate stayed below α (at most 0.4%, and 0.0% for all α ≤ 0.40). The number of replies grew in line with 1/d<sub>KL</sub>, as the theory predicts. Answers certified early were correct 94.5% of the time, against 88.9% for the MMC certifier. With a budget of 512 on MATH500, e-RWSC gained 8.2 points of accuracy over Best-of-N while using a 61.7% smaller budget, and the bookkeeping takes about 14 µs per step. Note that certification means "the model's majority answer", not "the correct answer". A model that is confidently wrong gets certified quickly.</p>
+</section>
+
+<section class="card" aria-labelledby="how-h">
+<h2 id="how-h">How to use it</h2>
+<ul>
+<li><strong>Press "Easy question", then "Play":</strong> answer A's wealth line climbs to the stopping line within about ten replies, saving roughly half of a 24-reply budget. Press "New run" to see that the exact count varies from run to run.</li>
+<li><strong>Press "Near a tie" and "New run" a few times:</strong> the wealth line climbs slowly and often runs out of budget, so the method falls back to an uncertified RWSC vote. Hard questions automatically get more samples.</li>
+<li><strong>Press "No majority":</strong> no answer can be certified (except with probability below α), however long you watch. The bets shrink to zero once an answer's estimated share drops below ½.</li>
+<li><strong>Press "Misleading reward model" or drag the boost negative:</strong> the reward model now dislikes answer A, so the early bets are timid and stopping takes longer. But it still never certifies a non-majority answer, because rewards only change the bet size, never the rules of the game.</li>
+<li><strong>Lower α:</strong> the stopping line rises, but cost grows only with log(1/α). In Try it 2, compare the curves on the right. The e-RWSC curve stays under the α line. In this simulation, SPRT-RWSC, which keeps resetting and re-testing whichever answer leads, often ends up declaring a winner when there is none.</li>
+</ul>
+</section>
+<p class="note" style="margin-top:24px">Demo by Grok Bot for the Daily Research Explorer. The RWSC score (eq. 1), the per-answer betting e-process (eq. 7), the weights π<sub>J</sub> = 1/(J(J+1)) and stopping rule (eq. 8), the clipped plug-in Kelly bet with m = 4 (eq. 10), the defaults p† = ½, c = 0.8, α = 0.1, N<sub>max</sub> = 24, the SPRT-RWSC rule (burn-in 4, β = 0.2, reset on leader change), and all table numbers come from the paper. Choices made by Grok Bot, not the paper: the simulated model (answer A with share θ, other answers sharing the rest in proportions 1, 0.6, 0.6², …), Gaussian reward scores with standard deviation 1 plus the chosen boost for answer A, the SPRT margin ε = 0.05, and the theory line, which uses the stopping threshold 1/(π<sub>1</sub>α) = 2/α and the growth rate of the capped Kelly bet (equal to d<sub>KL</sub>(θ‖½) whenever the cap does not bind). The paper's experiments use real language models and reward models.</p>
+</main>
+<script>
+"use strict";
+const $=id=>document.getElementById(id);
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const mn=x=>String(x).replace("-","−");
+const PD=0.5,M=4,EPS=0.05,BETA=0.2,N0=4;
+const NAMES="ABCDEFGH";
+const COLS=["--c1","--c2","--c3","--c4","--c5","--c6","--c7","--c8"];
+// ---------- RNG ----------
+function mulberry(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function gauss(r){let u=0;while(u===0)u=r();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*r())}
+function probs(theta,K){const w=[];let s=0;for(let i=0;i<K;i++){w.push(Math.pow(0.6,i));s+=w[i]}return[theta].concat(w.map(x=>x/s*(1-theta)))}
+function drawAns(p,r){let u=r(),c=0;for(let i=0;i<p.length;i++){c+=p[i];if(u<c)return i}return p.length-1}
+// ---------- RWSC (eq. 1) ----------
+function rwsc(ans,rew,n,nA,tau){ // pool = first n replies
+ let mu=0;for(let i=0;i<n;i++)mu+=rew[i];mu/=n;let v=0;for(let i=0;i<n;i++)v+=(rew[i]-mu)**2;const sd=n>1?Math.sqrt(v/n)||1:1;
+ const S=new Float64Array(nA);let tot=0;for(let i=0;i<n;i++){const e=Math.exp((rew[i]-mu)/sd/tau);S[ans[i]]+=e;tot+=e}
+ for(let a=0;a<nA;a++)S[a]/=tot;return S}
+function argmax(S,seen){let b=-1,bv=-1;for(let a=0;a<S.length;a++)if(seen[a]&&S[a]>bv){bv=S[a];b=a}return b}
+// ---------- e-RWSC (eqs. 7, 8, 10) ----------
+function runE(P,seed,Nmax,rec){
+ const r=mulberry(seed),p=probs(P.theta,P.K),nA=p.length,ans=[],rew=[];
+ const sigma=new Array(nA).fill(-1),J=new Array(nA).fill(0),E=new Array(nA).fill(0),Z=new Array(nA).fill(0),seen=new Array(nA).fill(false);
+ let nSeen=0,hist=rec?Array.from({length:nA},()=>[]):null,lam=new Float64Array(nA);
+ for(let n=1;n<=Nmax;n++){
+  // predictable bets from the first n-1 replies
+  if(n>1){const S=rwsc(ans,rew,n-1,nA,P.tau);
+   for(let a=0;a<nA;a++)if(seen[a]&&sigma[a]<n){const k=n-1-sigma[a];const th=(Z[a]+M*S[a])/(k+M);lam[a]=Math.min(Math.max((th-PD)/(PD*(1-PD)),0),P.c/PD)}}
+  const a_n=drawAns(p,r);ans.push(a_n);rew.push(gauss(r)+(a_n===0?P.sig:0));
+  for(let a=0;a<nA;a++)if(seen[a]){const X=a_n===a?1:0;E[a]*=1+lam[a]*(X-PD);Z[a]+=X}
+  if(!seen[a_n]){seen[a_n]=true;nSeen++;sigma[a_n]=n;J[a_n]=nSeen;E[a_n]=1;Z[a_n]=0}
+  let cert=-1;
+  for(let a=0;a<nA;a++)if(seen[a]){const w=E[a]/(J[a]*(J[a]+1));if(rec)hist[a].push([n,w]);if(w>=1/P.alpha&&cert<0)cert=a}
+  if(cert>=0)return{n,cert,ans,rew,hist,J,nA,certified:true};
+ }
+ const S=rwsc(ans,rew,Nmax,nA,P.tau);return{n:Nmax,cert:argmax(S,seen),ans,rew,hist,J,nA,certified:false}}
+// ---------- SPRT-RWSC (eqs. 4, 5) ----------
+function runS(P,seed,Nmax){
+ const r=mulberry(seed),p=probs(P.theta,P.K),nA=p.length,ans=[],rew=[],seen=new Array(nA).fill(false);
+ const A=Math.log(BETA/(1-P.alpha)),B=Math.log((1-BETA)/P.alpha);
+ let L=0,lead=-1,p0=0,p1=0;
+ const est=n=>{const S=rwsc(ans,rew,n,nA,P.tau);lead=argmax(S,seen);const nS=seen.filter(Boolean).length;p0=Math.min(1/nS,0.5-EPS);p1=Math.max(S[lead],0.5+EPS)};
+ for(let n=1;n<=Nmax;n++){
+  const a_n=drawAns(p,r);ans.push(a_n);rew.push(gauss(r)+(a_n===0?P.sig:0));seen[a_n]=true;
+  if(n<N0)continue;if(n===N0){est(n);continue}
+  const X=a_n===lead?1:0;L+=X?Math.log(p1/p0):Math.log((1-p1)/(1-p0));
+  if(L>=B)return{n,cert:lead,certified:true};
+  const old=lead;if(L<=A){L=0;est(n);continue}
+  const S=rwsc(ans,rew,n,nA,P.tau);const nl=argmax(S,seen);if(nl!==old){L=0;est(n)}
+ }
+ return{n:Nmax,cert:lead,certified:false}}
+// ---------- theory ----------
+function growth(theta,c){const ls=(theta-PD)/(PD*(1-PD));const l=Math.min(Math.max(ls,0),c/PD);return theta*Math.log(1+l*(1-PD))+(1-theta)*Math.log(1-l*PD)}
+function theoryN(theta,alpha,c){const g=growth(theta,c);return g>0?Math.log(2/alpha)/g:Infinity}
+// ---------- drawing ----------
+function setup(cv){const b=cv.getBoundingClientRect(),d=window.devicePixelRatio||1;cv.width=Math.max(1,Math.round(b.width*d));cv.height=Math.max(1,Math.round(b.height*d));const g=cv.getContext("2d");g.setTransform(d,0,0,d,0,0);return{g,w:b.width,h:b.height}}
+function axes(g,w,h,pad,xr,yr,xt,yt,xl,yl,fy){
+ const X=x=>pad.l+(x-xr[0])/(xr[1]-xr[0])*(w-pad.l-pad.r),Y=y=>h-pad.b-(y-yr[0])/(yr[1]-yr[0])*(h-pad.t-pad.b);
+ g.font="12px "+css("--font");g.lineWidth=1;g.strokeStyle=css("--grid");g.fillStyle=css("--muted");
+ g.textAlign="center";g.textBaseline="top";xt.forEach(t=>{g.beginPath();g.moveTo(X(t),pad.t);g.lineTo(X(t),h-pad.b);g.stroke();g.fillText(String(t),X(t),h-pad.b+5)});
+ g.textAlign="right";g.textBaseline="middle";yt.forEach(t=>{g.beginPath();g.moveTo(pad.l,Y(t));g.lineTo(w-pad.r,Y(t));g.stroke();g.fillText(fy?fy(t):String(t),pad.l-6,Y(t))});
+ g.textAlign="center";g.textBaseline="bottom";g.fillText(xl,(pad.l+w-pad.r)/2,h-1);
+ g.save();g.translate(12,(pad.t+h-pad.b)/2);g.rotate(-Math.PI/2);g.textBaseline="middle";g.fillText(yl,0,0);g.restore();return{X,Y}}
+const fmtPow=t=>t===0?"1":"10"+(t<0?"⁻":"")+["⁰","¹","²","³","⁴","⁵","⁶","⁷","⁸","⁹"][Math.abs(t)];
+// ---------- Try it 1 ----------
+let seed=75,R=null,shown=Infinity,timer=null;
+function P1(){return{theta:+$("theta").value,K:+$("k").value,sig:+$("sig").value,tau:+$("tau").value,alpha:+$("alpha").value,c:+$("cc").value}}
+function outputs(){$("thetaO").textContent=(+$("theta").value).toFixed(2);$("kO").textContent=$("k").value;$("sigO").textContent=mn((+$("sig").value>0?"+":"")+(+$("sig").value).toFixed(1));
+ $("tauO").textContent=(+$("tau").value).toFixed(1);$("alphaO").textContent=(+$("alpha").value).toFixed(2);$("ccO").textContent=(+$("cc").value).toFixed(2);$("nmaxO").textContent=$("nmax").value;$("nmax2O").textContent=$("nmax2").value}
+function compute1(){outputs();const P=P1(),Nmax=+$("nmax").value;R=runE(P,seed,Nmax,true);
+ const nA=R.nA;const L=$("wealthLegend");L.innerHTML="";for(let a=0;a<nA;a++){if(R.J[a]===0)continue;const s=document.createElement("span");s.style.setProperty("--k","var("+COLS[a]+")");s.textContent="Answer "+NAMES[a]+(a===0?" (θ = "+P.theta.toFixed(2)+")":"");L.appendChild(s)}
+ const s2=document.createElement("span");s2.style.setProperty("--k","var(--muted)");s2.textContent="Stop line 1/α";L.appendChild(s2);
+ const th=theoryN(P.theta,P.alpha,P.c);$("sTheory").textContent=isFinite(th)?"≈ "+Math.ceil(th):"never";
+ if(shown===Infinity)finish1();else draw1()}
+function finish1(){const P=P1(),Nmax=+$("nmax").value;$("sN").textContent=R.n+" / "+Nmax;$("sCert").textContent=NAMES[R.cert]+(R.certified?" ✓ certified":" (fallback)");
+ $("sSave").textContent=Math.round((1-R.n/Nmax)*100)+"%";
+ let v;if(R.certified&&R.cert===0)v=P.theta>PD?"Answer A was certified as the model's majority answer after "+R.n+" replies.":"Answer A was certified although it holds only "+Math.round(P.theta*100)+"% of replies. This is the rare (≤ α) error the guarantee allows. Try a new run.";
+ else if(R.certified)v="Answer "+NAMES[R.cert]+" was certified, but it is not the majority answer. This is the rare (≤ α) error the guarantee allows.";
+ else v="No answer reached the stop line within "+Nmax+" replies, so the method falls back to the uncertified RWSC winner ("+NAMES[R.cert]+")"+(P.theta<=PD?". That is correct behaviour, since no answer holds a majority.":". This question is too close to a tie for this budget.");
+ $("oneVerdict").textContent=v;draw1()}
+function draw1(){if(!R)return;const lim=Math.min(shown,R.n);drawWealth(lim);drawPool(lim)}
+function drawWealth(lim){const cv=$("wealthPlot"),{g,w,h}=setup(cv),P=P1(),Nmax=+$("nmax").value;
+ let lo=-2,hi=Math.max(2,Math.ceil(Math.log10(1/P.alpha))+1);
+ R.hist.forEach(hh=>hh.forEach(([n,v])=>{if(n<=lim){const l=Math.log10(Math.max(v,1e-12));if(l<lo)lo=Math.max(-4,Math.floor(l))}}));
+ const yt=[];for(let t=lo;t<=hi;t++)yt.push(t);const xt=[];const step=Nmax<=30?4:Nmax<=70?10:20;for(let t=0;t<=Nmax;t+=step)xt.push(t);
+ const {X,Y}=axes(g,w,h,{l:52,r:14,t:14,b:36},[0,Nmax],[lo,hi],xt,yt,"Replies sampled","π·E",fmtPow);
+ g.setLineDash([6,4]);g.strokeStyle=css("--muted");g.lineWidth=1.5;g.beginPath();g.moveTo(X(0),Y(Math.log10(1/P.alpha)));g.lineTo(X(Nmax),Y(Math.log10(1/P.alpha)));g.stroke();g.setLineDash([]);
+ g.fillStyle=css("--muted");g.textAlign="left";g.textBaseline="bottom";g.fillText("stop: 1/α = "+(1/P.alpha).toFixed(1),X(0)+6,Y(Math.log10(1/P.alpha))-3);
+ for(let a=R.nA-1;a>=0;a--){const hh=R.hist[a].filter(q=>q[0]<=lim);if(!hh.length)continue;g.strokeStyle=css(COLS[a]);g.lineWidth=a===0?2.6:1.8;g.beginPath();
+  hh.forEach(([n,v],i)=>{const y=Y(Math.max(lo,Math.log10(Math.max(v,1e-12))));i?g.lineTo(X(n),y):g.moveTo(X(n),y)});g.stroke();
+  const last=hh[hh.length-1];g.fillStyle=css(COLS[a]);g.beginPath();g.arc(X(last[0]),Y(Math.max(lo,Math.log10(Math.max(last[1],1e-12)))),3.5,0,7);g.fill()}
+ if(lim>=R.n){g.strokeStyle=css("--accent");g.globalAlpha=.35;g.lineWidth=1;g.beginPath();g.moveTo(X(R.n),Y(lo));g.lineTo(X(R.n),Y(hi));g.stroke();g.globalAlpha=1}}
+function drawPool(lim){const cv=$("poolPlot"),{g,w,h}=setup(cv),P=P1(),nA=R.nA;
+ g.font="12px "+css("--font");g.fillStyle=css("--muted");g.textAlign="left";g.textBaseline="top";g.fillText("Replies (dot = one reply, colour = its answer, size = reward)",12,10);
+ const cols=Math.max(12,Math.floor((w-24)/18)),cell=(w-24)/cols;let rows=Math.ceil(lim/cols);
+ const dotTop=30,maxR=Math.min(cell*0.45,8);
+ let rmin=Infinity,rmax=-Infinity;for(let i=0;i<lim;i++){rmin=Math.min(rmin,R.rew[i]);rmax=Math.max(rmax,R.rew[i])}
+ for(let i=0;i<lim;i++){const cx=12+(i%cols+0.5)*cell,cy=dotTop+(Math.floor(i/cols)+0.5)*cell;const rr=rmax>rmin?2.5+(maxR-2.5)*(R.rew[i]-rmin)/(rmax-rmin):maxR*0.7;
+  g.fillStyle=css(COLS[R.ans[i]]);g.beginPath();g.arc(cx,cy,rr,0,7);g.fill()}
+ const barTop=dotTop+Math.max(rows,1)*cell+18;
+ const seen=new Array(nA).fill(false);const cnt=new Array(nA).fill(0);for(let i=0;i<lim;i++){seen[R.ans[i]]=true;cnt[R.ans[i]]++}
+ const S=lim>0?rwsc(R.ans,R.rew,lim,nA,P.tau):new Float64Array(nA);
+ const list=[];for(let a=0;a<nA;a++)if(seen[a])list.push(a);
+ const avail=h-barTop-8,bh=Math.min(40,avail/Math.max(list.length,1));const bx=70,bw=w-bx-60;
+ g.fillStyle=css("--muted");g.textBaseline="bottom";g.fillText("Vote shares (thin grey = raw share, coloured = RWSC share)",12,barTop-4);
+ const xh=bx+bw*0.5;
+ list.forEach((a,i)=>{const y=barTop+i*bh;g.fillStyle=css("--text");g.textAlign="left";g.textBaseline="middle";g.fillText("Answer "+NAMES[a],12,y+bh/2);
+  g.fillStyle=css(COLS[a]);g.fillRect(bx,y+bh*0.15,bw*S[a],bh*0.45);g.fillStyle=css("--muted");g.fillRect(bx,y+bh*0.68,bw*cnt[a]/lim,Math.max(2,bh*0.14));
+  g.textAlign="left";g.fillStyle=css("--text");g.fillText(Math.round(S[a]*100)+"%",bx+bw*S[a]+6,y+bh*0.38)});
+ if(list.length){g.setLineDash([4,4]);g.strokeStyle=css("--muted");g.beginPath();g.moveTo(xh,barTop-2);g.lineTo(xh,barTop+list.length*bh);g.stroke();g.setLineDash([]);
+  g.fillStyle=css("--muted");g.textAlign="center";g.textBaseline="top";g.fillText("½",xh,barTop+list.length*bh+1)}}
+function play(){if(timer){clearInterval(timer);timer=null;$("play").textContent="Play";shown=Infinity;finish1();return}
+ const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;if(reduce){shown=Infinity;finish1();return}
+ shown=0;$("play").textContent="Pause";["sN","sCert","sSave"].forEach(id=>$(id).textContent="…");$("oneVerdict").textContent="";
+ timer=setInterval(()=>{shown++;draw1();$("sN").textContent=Math.min(shown,R.n)+" / "+$("nmax").value;if(shown>=R.n){clearInterval(timer);timer=null;$("play").textContent="Play";shown=Infinity;finish1()}},Math.max(60,2400/Math.max(R.n,1)))}
+const PRE={easy:{theta:0.85,k:3,sig:0.8,tau:1,alpha:0.1,cc:0.8,nmax:24},paper:{theta:0.7,k:3,sig:0.8,tau:1,alpha:0.1,cc:0.8,nmax:64},tie:{theta:0.55,k:3,sig:0.8,tau:1,alpha:0.1,cc:0.8,nmax:64},
+ none:{theta:0.45,k:3,sig:0.8,tau:1,alpha:0.1,cc:0.8,nmax:64},hacked:{theta:0.7,k:3,sig:-1.2,tau:0.5,alpha:0.1,cc:0.8,nmax:64}};
+function setVals(o){for(const k in o)$(k).value=o[k]}
+function markP(){document.querySelectorAll("[data-p]").forEach(b=>{const o=PRE[b.dataset.p];b.setAttribute("aria-pressed",String(Object.keys(o).every(k=>Math.abs(+$(k).value-o[k])<1e-9)))})}
+// ---------- Try it 2 ----------
+let MANY=null;const THS=[];for(let t=0.30;t<=0.951;t+=0.025)THS.push(+t.toFixed(3));
+function runMany(){const P=P1(),Nmax=+$("nmax2").value,RUNS=200;$("manyStatus").textContent="Simulating…";
+ setTimeout(()=>{const t0=performance.now();const out=THS.map((th,ti)=>{const Q=Object.assign({},P,{theta:th});let sum=0,errE=0,errS=0;
+  for(let i=0;i<RUNS;i++){const sd=1000003*ti+7919*i+11;const e=runE(Q,sd,Nmax,false);sum+=e.n;if(e.certified&&(e.cert!==0||th<=PD))errE++;
+   if(th<=PD+1e-9){const s=runS(Q,sd,Nmax);if(s.certified)errS++}else{const s=runS(Q,sd,Nmax);if(s.certified&&s.cert!==0)errS++}}
+  return{th,mean:sum/RUNS,errE:errE/RUNS,errS:errS/RUNS}});
+  MANY={out,P,Nmax};$("manyStatus").textContent="Done: "+THS.length*RUNS+" games per method in "+Math.round(performance.now()-t0)+" ms.";
+  const nul=out.filter(o=>o.th<=PD+1e-9);$("mErr").textContent=(Math.max(...nul.map(o=>o.errE))*100).toFixed(1)+"%";$("mErrS").textContent=(Math.max(...nul.map(o=>o.errS))*100).toFixed(1)+"%";
+  const hi=out.filter(o=>o.th>=0.6-1e-9);$("mAvg").textContent=(hi.reduce((s,o)=>s+o.mean,0)/hi.length).toFixed(1)+" / "+Nmax;drawMany()},20)}
+function drawMany(){if(!MANY)return;const {out,P,Nmax}=MANY;
+ {const cv=$("costPlot"),{g,w,h}=setup(cv);const yt=[];const st=Nmax<=64?16:Nmax<=128?32:64;for(let t=0;t<=Nmax;t+=st)yt.push(t);
+  const {X,Y}=axes(g,w,h,{l:46,r:14,t:14,b:36},[0.3,0.95],[0,Nmax*1.05],[0.3,0.4,0.5,0.6,0.7,0.8,0.9],yt,"θ (share of replies giving answer A)","Replies used");
+  g.setLineDash([6,4]);g.strokeStyle=css("--muted");g.lineWidth=1.5;g.beginPath();g.moveTo(X(0.3),Y(Nmax));g.lineTo(X(0.95),Y(Nmax));g.stroke();g.setLineDash([]);
+  g.strokeStyle=css("--c2");g.lineWidth=2;g.beginPath();let first=true;for(let t=0.505;t<=0.95;t+=0.0025){const n=theoryN(t,P.alpha,P.c);if(!isFinite(n)||n>Nmax*1.05){first=true;continue}first?g.moveTo(X(t),Y(n)):g.lineTo(X(t),Y(n));first=false}g.stroke();
+  g.strokeStyle=css("--c1");g.lineWidth=2.4;g.beginPath();out.forEach((o,i)=>i?g.lineTo(X(o.th),Y(o.mean)):g.moveTo(X(o.th),Y(o.mean)));g.stroke();
+  g.fillStyle=css("--c1");out.forEach(o=>{g.beginPath();g.arc(X(o.th),Y(o.mean),2.6,0,7);g.fill()})}
+ {const cv=$("errPlot"),{g,w,h}=setup(cv);const nul=out.filter(o=>o.th<=PD+1e-9);const top=Math.max(P.alpha*1.6,...nul.map(o=>Math.max(o.errE,o.errS)))*1.1;
+  const yt=[];const st=top>0.6?0.2:top>0.3?0.1:top>0.12?0.05:0.02;for(let t=0;t<=top+1e-9;t+=st)yt.push(+t.toFixed(2));
+  const {X,Y}=axes(g,w,h,{l:46,r:14,t:14,b:36},[0.3,0.5],[0,top],[0.3,0.35,0.4,0.45,0.5],yt,"θ of the most common answer (no majority)","Wrong stops",v=>Math.round(v*100)+"%");
+  g.setLineDash([6,4]);g.strokeStyle=css("--muted");g.lineWidth=1.5;g.beginPath();g.moveTo(X(0.3),Y(P.alpha));g.lineTo(X(0.5),Y(P.alpha));g.stroke();g.setLineDash([]);
+  g.fillStyle=css("--muted");g.textAlign="left";g.textBaseline="bottom";g.fillText("α = "+P.alpha.toFixed(2),X(0.3)+6,Y(P.alpha)-3);
+  [["errS","--c2"],["errE","--c1"]].forEach(([k,c])=>{g.strokeStyle=css(c);g.lineWidth=2.4;g.beginPath();nul.forEach((o,i)=>i?g.lineTo(X(o.th),Y(o[k])):g.moveTo(X(o.th),Y(o[k])));g.stroke();
+   g.fillStyle=css(c);nul.forEach(o=>{g.beginPath();g.arc(X(o.th),Y(o[k]),3,0,7);g.fill()})})}}
+// ---------- wiring ----------
+function throttle(fn){let pend=false;return()=>{if(pend)return;pend=true;requestAnimationFrame(()=>{pend=false;fn()})}}
+let dT=null;const debMany=()=>{clearTimeout(dT);dT=setTimeout(runMany,400)};
+const r1=throttle(()=>{compute1();markP()});
+["theta","k","sig","tau","alpha","cc","nmax"].forEach(id=>$(id).addEventListener("input",()=>{r1();if(id!=="theta"&&id!=="nmax")debMany()}));
+$("nmax2").addEventListener("input",()=>{outputs();debMany()});
+document.querySelectorAll("[data-p]").forEach(b=>b.addEventListener("click",()=>{setVals(PRE[b.dataset.p]);compute1();markP();debMany()}));
+$("reroll").addEventListener("click",()=>{seed=(seed*1103515245+12345)>>>0;compute1()});
+$("play").addEventListener("click",play);$("runMany").addEventListener("click",runMany);
+function drawAll(){draw1();drawMany()}
+window.addEventListener("resize",throttle(drawAll));matchMedia("(prefers-color-scheme: dark)").addEventListener("change",drawAll);
+compute1();markP();runMany();setTimeout(()=>{document.body.dataset.ready="1"},1500);
+</script>
+</body></html>
