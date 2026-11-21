@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="light dark">
+<title>The shape of the uptake curve decides the best carbon-capture sponge — Research Explorer, 22 Nov 2026</title>
+<link rel="stylesheet" href="../assets/style.css">
+<style>
+canvas#isoPlot,canvas#slopePlot,canvas#qstPlot,canvas#capPlot{height:300px}
+.btnrow{display:flex;flex-wrap:wrap;gap:8px;margin:4px 0 14px;align-items:center}
+.btnrow button{font:500 14px var(--font);color:var(--text);background:var(--accent-soft);border:0;border-radius:8px;padding:7px 14px;min-height:32px;cursor:pointer}
+.btnrow button[aria-pressed="true"]{box-shadow:inset 0 0 0 2px var(--accent)}
+.btnrow .lbl{font-size:13px;color:var(--muted);margin-right:2px}
+.verdict{font-weight:600}
+label span{flex:1} label output{white-space:nowrap}
+#vClass{font-size:22px;line-height:1.25}
+.stat .v.good{color:var(--c3)} .stat .v.bad{color:var(--c2)}
+</style></head><body><main>
+<a class="back" href="../">‹ All demos</a>
+<div class="eyebrow">22 Nov 2026 · Materials</div>
+<h1>The shape of the uptake curve decides the best carbon-capture sponge</h1>
+<p class="lede">Metal–organic frameworks (MOFs) are crystals full of tiny pores that can soak up CO<sub>2</sub> and let it go again when you lower the pressure or heat them. There are thousands of known MOFs, and choosing one has usually meant ranking them by a single number: how strongly they grab CO<sub>2</sub> at very low pressure. This paper computes the <em>whole</em> uptake curve for thousands of real MOFs from first principles, and shows that the curve's shape, not just the grip, decides which material suits which capture process. Below, a simple model of the four shapes runs live, together with the paper's working-capacity and regeneration-energy formulas.</p>
+<p class="authors">Anna T. Bui, Grant M. Rotskoff, Thomas E. Markland</p>
+
+<section class="card why" aria-labelledby="why-h">
+<h2 id="why-h">Why it matters</h2>
+<p>Catching CO<sub>2</sub> from flue gas or air with porous sponges could use less energy than today's amine scrubbing, but picking the right sponge out of thousands has meant slow experiments or simulations too expensive to run with accurate quantum-level forces. This method gets complete first-principles CO<sub>2</sub> uptake curves for thousands of real MOFs in less GPU time than standard simulation, and shows that each capture process needs a different curve shape, with every top-10% material for both heated swings regenerating below amine scrubbing's 3.6 GJ per tonne of CO<sub>2</sub>.</p>
+</section>
+
+<section class="card" aria-labelledby="paper-h">
+<h2 id="paper-h">The paper</h2>
+<p style="margin:0 0 6px"><strong>Characterizing adsorption thermodynamics in carbon capture materials: an efficient first-principles approach</strong></p>
+<p class="cite" style="margin:0">Anna T. Bui, Grant M. Rotskoff and Thomas E. Markland (Department of Chemistry, Stanford University, USA). arXiv:2611.24759 [cond-mat.mtrl-sci], submitted 18 November 2026. <a href="https://arxiv.org/abs/2611.24759">Read on arXiv</a> · <a href="https://arxiv.org/pdf/2611.24759">PDF</a></p>
+<p style="margin-top:14px"><strong>In plain language:</strong> the usual way to get an uptake curve (an <em>isotherm</em>: how much CO<sub>2</sub> the MOF holds against pressure) is a grand canonical Monte Carlo simulation, which keeps adding and removing molecules until things settle. With accurate machine-learned quantum-level forces, that is far too slow to run for thousands of MOFs. The authors instead train a neural <em>classical density functional</em> for CO<sub>2</sub> once, from molecular-dynamics data. For any MOF you then only need the CO<sub>2</sub>–framework energy on a 3-D grid (from a foundation interatomic potential such as UMA-m). Solving one self-consistent equation gives the CO<sub>2</sub> density in the pores, and from that the uptake at any pressure and temperature.</p>
+<p>They sort the curves by their log-slope, which equals 1 when uptake grows in proportion to pressure (Henry's law), falls toward 0 as sites fill, and rises above 1 when CO<sub>2</sub> molecules attract one another and pile in together:</p>
+<div class="eq">s(P) = d ln n / d ln P</div>
+<p>This gives four classes, tested in this order. <strong>Two-step</strong>: s falls and then rises again. <strong>S-shaped</strong>: s clearly exceeds 1 at some pressure of 1 bar or more. Otherwise the curve is Langmuir-like. It is <strong>steep Langmuir</strong> if a dual-site Langmuir fit, n = q<sub>1</sub>b<sub>1</sub>P/(1+b<sub>1</sub>P) + q<sub>2</sub>b<sub>2</sub>P/(1+b<sub>2</sub>P), needs a strong site that binds more than 50 times as tightly (b<sub>1</sub>/b<sub>2</sub> &gt; 50, about 10 kJ mol<sup>−1</sup>) and holds more than 20% of the capacity. Everything else is <strong>gradual Langmuir</strong>. A swing's figure of merit is its working capacity, and the heat of adsorption comes from Clausius–Clapeyron (paper Eq. 7):</p>
+<div class="eq">Δn = n(P<sub>ads</sub>, T<sub>ads</sub>) − n(P<sub>des</sub>, T<sub>des</sub>), &nbsp;&nbsp; Q<sub>st</sub>(n) = −R (∂ ln P / ∂(1/T))<sub>n</sub></div>
+<p>For heated swings, the energy to release one tonne of CO<sub>2</sub> (paper Eq. 8) is the heat to pull the CO<sub>2</sub> off plus the heat to warm the framework, shared over the CO<sub>2</sub> released:</p>
+<div class="eq">E<sub>regen</sub> = Q<sub>des</sub> + Q<sub>sens</sub>/Δn, &nbsp;&nbsp; Q<sub>des</sub> = (1/Δn) ∫<sub>n<sub>des</sub></sub><sup>n<sub>ads</sub></sup> Q<sub>st</sub>(n) dn, &nbsp;&nbsp; Q<sub>sens</sub> = ∫<sub>T<sub>ads</sub></sub><sup>T<sub>des</sub></sup> c<sub>p</sub> dT</div>
+</section>
+
+<section class="card" aria-labelledby="try-h">
+<h2 id="try-h">Try it: build a MOF and run four swings</h2>
+<p class="note" style="margin-top:0">The demo stands in for the paper's neural cDFT with a toy two-component isotherm. One part is a <em>binding site</em> (Langmuir, energy Q<sub>1</sub>, capacity q<sub>1</sub>). The other is the <em>pore</em> (energy Q<sub>2</sub>, capacity q<sub>2</sub>), whose CO<sub>2</sub> molecules can also attract each other with strength ω (Fowler–Guggenheim mean field): b<sub>2</sub>P = θ/(1−θ)·e<sup>−ωθ/RT</sup>. Both use b = b<sub>0</sub>e<sup>Q/RT</sup> with b<sub>0</sub> = 10<sup>−6</sup> bar<sup>−1</sup>. The classification, Clausius–Clapeyron Q<sub>st</sub>, working capacities and E<sub>regen</sub> are computed exactly as the paper defines them, but on this toy curve. The parameters are illustrative, not fitted to any real MOF.</p>
+<div class="btnrow" role="group" aria-label="Presets"><span class="lbl">Preset:</span>
+ <button type="button" data-p="steep">Steep Langmuir</button><button type="button" data-p="grad">Gradual Langmuir</button><button type="button" data-p="s">S-shaped</button><button type="button" data-p="two">Two-step</button></div>
+<div class="controls">
+ <div><label for="Q1"><span>Binding-site energy Q<sub>1</sub></span> <output id="Q1o"></output></label><input type="range" id="Q1" min="15" max="50" step="0.5"></div>
+ <div><label for="q1"><span>Binding-site capacity q<sub>1</sub></span> <output id="q1o"></output></label><input type="range" id="q1" min="0" max="8" step="0.1"></div>
+ <div><label for="Q2"><span>Pore-wall energy Q<sub>2</sub></span> <output id="Q2o"></output></label><input type="range" id="Q2" min="15" max="35" step="0.5"></div>
+ <div><label for="q2"><span>Pore capacity q<sub>2</sub></span> <output id="q2o"></output></label><input type="range" id="q2" min="0" max="30" step="0.5"></div>
+ <div><label for="w"><span>CO<sub>2</sub>–CO<sub>2</sub> attraction ω</span> <output id="wo"></output></label><input type="range" id="w" min="0" max="9.5" step="0.1"></div>
+ <div><label for="cp"><span>Heat capacity c<sub>p</sub></span> <output id="cpo"></output></label><input type="range" id="cp" min="0.5" max="1.5" step="0.05"></div>
+</div>
+<div class="btnrow" role="group" aria-label="Swing to show on the isotherm"><span class="lbl">Show swing:</span>
+ <button type="button" data-s="VSA">VSA</button><button type="button" data-s="TSA">TSA</button><button type="button" data-s="PSA">PSA</button><button type="button" data-s="PTSA">PTSA</button></div>
+<p class="note" id="swingTxt" style="margin-top:0"></p>
+<div class="stats">
+ <div class="stat"><div class="v" id="vClass"></div><div class="l">Isotherm class (paper's tests)</div></div>
+ <div class="stat"><div class="v" id="vKH"></div><div class="l">Henry constant K<sub>H</sub> (mmol g⁻¹ bar⁻¹)</div></div>
+ <div class="stat"><div class="v" id="vDn"></div><div class="l" id="lDn">Working capacity Δn (mmol g⁻¹)</div></div>
+ <div class="stat"><div class="v" id="vET"></div><div class="l">E<sub>regen</sub> TSA (GJ t⁻¹ CO₂)</div></div>
+ <div class="stat"><div class="v" id="vEP"></div><div class="l">E<sub>regen</sub> PTSA (GJ t⁻¹ CO₂)</div></div>
+</div>
+<p class="note verdict" id="verdict" aria-live="polite"></p>
+<div class="grid" style="margin-top:14px">
+ <div class="plot"><div class="plot-title">Uptake n against CO<sub>2</sub> pressure (log scale)</div>
+  <canvas id="isoPlot" role="img" aria-label="Adsorption isotherms at 298 and 373 kelvin with the chosen swing marked"></canvas>
+  <div class="legend"><span style="--k:var(--c1)">298 K</span><span style="--k:var(--c2)">373 K</span><span style="--k:var(--cx)">Swing: ● adsorb, ○ release</span></div></div>
+ <div class="plot"><div class="plot-title">Log-slope s = d ln n / d ln P at 298 K</div>
+  <canvas id="slopePlot" role="img" aria-label="Log-slope of the isotherm against pressure"></canvas>
+  <div class="legend"><span style="--k:var(--c4)">s(P)</span><span style="--k:var(--muted)">s = 1 (Henry's law); shaded: P ≥ 1 bar</span></div></div>
+ <div class="plot"><div class="plot-title">Isosteric heat Q<sub>st</sub>(n) from Clausius–Clapeyron, 298 K</div>
+  <canvas id="qstPlot" role="img" aria-label="Isosteric heat of adsorption against uptake"></canvas>
+  <div class="legend"><span style="--k:var(--c3)">Q<sub>st</sub>(n)</span></div></div>
+ <div class="plot"><div class="plot-title">Working capacity Δn for each swing</div>
+  <canvas id="capPlot" role="img" aria-label="Bar chart of working capacity for the four swings"></canvas>
+  <div class="legend"><span style="--k:var(--c1)">Δn (mmol g⁻¹)</span><span style="--k:var(--accent)">outlined: shown swing</span></div></div>
+</div>
+</section>
+
+<section class="card" aria-labelledby="res-h">
+<h2 id="res-h">What the paper found</h2>
+<ul>
+ <li>The authors screened the 5,591 experimentally made MOFs in the CoRE MOF 2025 database. With UMA-m, the most accurate potential, they computed 4,004 of them (72%).</li>
+ <li>Against measured isotherms of 20 well-known MOFs, UMA-m matched experiment to within a factor of about 1.5. uMOF-MH came close at about a tenth of the cost. The classical UFF force field underestimated uptake 5–7 times in MOFs with strong binding sites, such as Mn-MOF-74, CALF-20 and NOTT-300.</li>
+ <li>Even counting the energy-grid calculation, a cDFT isotherm takes less GPU time than grand canonical Monte Carlo.</li>
+ <li>At 10 bar, MOFs with the same Henry constant can differ in uptake by nearly a hundredfold, so ranking by the Henry constant alone cannot tell the four mechanisms apart.</li>
+ <li>Steep Langmuir MOFs have strong sites (median 40 kJ mol⁻¹) in narrow pores (about 4.2 Å). Gradual Langmuir MOFs have similar pores (4.6 Å) but weaker sites (28 kJ mol⁻¹). S-shaped MOFs have the weakest sites (20 kJ mol⁻¹) in wider pores (6.6 Å). Two-step MOFs combine strong sites (38 kJ mol⁻¹) with large cavities (9.6 Å). Most MOFs are gradual Langmuir, and about 13% are steep Langmuir with UMA-m.</li>
+ <li>Swings tested: VSA 0.1 → 0.01 bar and PSA 10 → 0.1 bar at 298 K, TSA 298 → 373 K at 0.1 bar, and PTSA 10 bar/298 K → 0.1 bar/373 K. Steep Langmuir MOFs win VSA and TSA. S-shaped and two-step MOFs win PSA and PTSA. Gradual Langmuir MOFs, the majority, are rarely top performers.</li>
+ <li>For TSA and PTSA, every MOF in the top 10% by Δn regenerates below the 3.6 GJ t⁻¹ amine-scrubbing benchmark. About half of all MOFs beat it in TSA, and nearly all do in PTSA, although that comparison ignores the work of compressing the feed to 10 bar. Mg-MOF-74 is the top TSA candidate.</li>
+</ul>
+<p class="note">Limits the authors note: working capacity is only a first screening metric (full process models rank materials better), the frameworks are treated as rigid, and the CO<sub>2</sub> is pure, so N<sub>2</sub> and water are not yet included.</p>
+</section>
+
+<section class="card" aria-labelledby="how-h">
+<h2 id="how-h">How to use it</h2>
+<ul>
+ <li>Tap a <strong>preset</strong> to load one of the four isotherm shapes, then watch the class label, the log-slope curve and the bar chart change.</li>
+ <li>Pick a <strong>swing</strong> to mark its adsorb (●) and release (○) points on the isotherm. The vertical gap between them is the working capacity Δn.</li>
+ <li>Compare <strong>Steep Langmuir</strong> and <strong>S-shaped</strong>: the first wins VSA/TSA and the second wins PSA/PTSA, as in the paper's Fig. 5.</li>
+ <li>Raise <strong>ω</strong> to make CO<sub>2</sub> molecules attract each other. The log-slope climbs above 1 and Q<sub>st</sub> rises as the pore fills (the paper sees this rise in IRMOF-1).</li>
+ <li>Lower <strong>c<sub>p</sub></strong> or raise Δn to see the heating term Q<sub>sens</sub>/Δn shrink. This is why PTSA, with its far larger Δn, regenerates more cheaply than TSA.</li>
+ <li>The Henry constant K<sub>H</sub> = q<sub>1</sub>b<sub>1</sub> + q<sub>2</sub>b<sub>2</sub> is the usual screening number. Notice how different curves can share a similar K<sub>H</sub>.</li>
+</ul>
+</section>
+<p class="note" style="margin-top:24px">Demo maths: toy dual-component isotherm (Langmuir site + Fowler–Guggenheim pore) solved by bisection; Q<sub>st</sub> by central difference of ln P at fixed n (±2 K); Q<sub>des</sub> by Simpson's rule; E<sub>regen</sub> in GJ per tonne = kJ per gram of CO<sub>2</sub> (M = 44.01 g mol⁻¹). Class thresholds follow the paper's SI. All numbers in the stats come from the toy model, not the paper.</p>
+</main>
+<script>
+"use strict";
+const $=id=>document.getElementById(id);
+const css=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim()||"#888";
+const R=8.314462618e-3, B0=1e-6, TA=298, TD=373, M_CO2=44.01;
+const SW={VSA:{pa:0.1,ta:TA,pd:0.01,td:TA,txt:"Vacuum swing: adsorb at 0.1 bar, release at 0.01 bar, both at 298 K."},
+ TSA:{pa:0.1,ta:TA,pd:0.1,td:TD,txt:"Temperature swing: adsorb at 0.1 bar and 298 K, release by heating to 373 K at 0.1 bar."},
+ PSA:{pa:10,ta:TA,pd:0.1,td:TA,txt:"Pressure swing: adsorb at 10 bar, release at 0.1 bar, both at 298 K."},
+ PTSA:{pa:10,ta:TA,pd:0.1,td:TD,txt:"Pressure–temperature swing: adsorb at 10 bar and 298 K, release at 0.1 bar and 373 K."}};
+const PRE={steep:{Q1:40,q1:2.5,Q2:24,q2:4,w:0},grad:{Q1:34,q1:2,Q2:30,q2:3,w:0},s:{Q1:22,q1:0,Q2:24,q2:18,w:8},two:{Q1:38,q1:2,Q2:24,q2:15,w:8}};
+const P={Q1:40,q1:2.5,Q2:24,q2:4,w:0,cp:0.9,swing:"TSA",preset:"steep"};
+// ---------- model ----------
+function thetaFG(x,c){ // solve ln(t/(1-t)) - c t = ln x ; monotone for c<4
+ if(x<=0)return 0;const lx=Math.log(x);if(c<1e-9)return x/(1+x);
+ let lo=0,hi=1;for(let i=0;i<60;i++){const t=(lo+hi)/2;const f=Math.log(t/(1-t))-c*t;if(f<lx)lo=t;else hi=t}return (lo+hi)/2}
+function n(p,T){const b1=B0*Math.exp(P.Q1/(R*T)),b2=B0*Math.exp(P.Q2/(R*T));return P.q1*b1*p/(1+b1*p)+P.q2*thetaFG(b2*p,P.w/(R*T))}
+function pOf(nt,T){let lo=-30,hi=25;for(let i=0;i<70;i++){const m=(lo+hi)/2;if(n(Math.exp(m),T)<nt)lo=m;else hi=m}return (lo+hi)/2} // returns ln P
+function qst(nt,T){const d=2,a=pOf(nt,T+d),b=pOf(nt,T-d);return -R*(a-b)/(1/(T+d)-1/(T-d))}
+function dn(s){return n(s.pa,s.ta)-n(s.pd,s.td)}
+function eregen(s){const D=dn(s);if(!(D>1e-6))return NaN;const na=n(s.pa,s.ta),nd=n(s.pd,s.td);const K=40,h=(na-nd)/K;let I=0;
+ for(let i=0;i<=K;i++){const wgt=(i===0||i===K)?1:(i%2?4:2);I+=wgt*qst(nd+i*h,TA)}I*=h/3;const Qdes=I/D;const Qsens=P.cp*(s.td-s.ta)/1000; // kJ per g MOF
+ return (Qdes*D/1000+Qsens)/(D/1000*M_CO2)}
+const LP0=Math.log(1e-3),LP1=Math.log(30);
+function slopes(){const out=[];const N=160;for(let i=0;i<=N;i++){const lp=LP0+(LP1-LP0)*i/N,h=0.01;const a=n(Math.exp(lp+h),TA),b=n(Math.exp(lp-h),TA);out.push([lp,(a>0&&b>0)?(Math.log(a)-Math.log(b))/(2*h):1])}return out}
+function classify(sl){ // two-step: slope drops (to a local minimum) and then rises again
+ let two=false;const v=sl.map(e=>e[1]);
+ for(let i=1;i<v.length-1&&!two;i++){if(v[i]<v[i-1]&&v[i]<=v[i+1]){const before=Math.max(...v.slice(0,i)),after=Math.max(...v.slice(i+1));if(before-v[i]>0.25&&after-v[i]>0.25)two=true}}
+ if(two)return "Two-step";
+ if(sl.some(e=>e[0]>=0&&e[1]>1.05))return "S-shaped";
+ const b1=Math.exp(P.Q1/(R*TA)),b2=Math.exp(P.Q2/(R*TA)),Q=P.q1+P.q2;
+ if(P.q1>0&&P.q2>0&&b1/b2>50&&P.q1/Q>0.2)return "Steep Langmuir";
+ return "Gradual Langmuir"}
+// ---------- drawing ----------
+function setup(cv){const b=cv.getBoundingClientRect(),d=window.devicePixelRatio||1;cv.width=Math.max(1,Math.round(b.width*d));cv.height=Math.max(1,Math.round(b.height*d));const g=cv.getContext("2d");g.setTransform(d,0,0,d,0,0);return{g,w:b.width,h:b.height}}
+function axes(g,w,h,pad,xr,yr,xt,yt,xl,yl,fx,fy){
+ const X=x=>pad.l+(x-xr[0])/(xr[1]-xr[0])*(w-pad.l-pad.r),Y=y=>h-pad.b-(y-yr[0])/(yr[1]-yr[0])*(h-pad.t-pad.b);
+ g.font="12px "+css("--font");g.lineWidth=1;g.strokeStyle=css("--grid");g.fillStyle=css("--muted");
+ g.textAlign="center";g.textBaseline="top";xt.forEach(t=>{g.beginPath();g.moveTo(X(t),pad.t);g.lineTo(X(t),h-pad.b);g.stroke();g.fillText(fx?fx(t):String(t),X(t),h-pad.b+5)});
+ g.textAlign="right";g.textBaseline="middle";yt.forEach(t=>{g.beginPath();g.moveTo(pad.l,Y(t));g.lineTo(w-pad.r,Y(t));g.stroke();g.fillText(fy?fy(t):String(t),pad.l-6,Y(t))});
+ g.textAlign="center";g.textBaseline="bottom";g.fillText(xl,(pad.l+w-pad.r)/2,h-2);
+ g.save();g.translate(12,(pad.t+h-pad.b)/2);g.rotate(-Math.PI/2);g.textBaseline="middle";g.fillText(yl,0,0);g.restore();return{X,Y}}
+function niceTicks(top){const st=top>40?10:top>20?5:top>8?2:top>4?1:top>2?0.5:0.2;const t=[];for(let v=0;v<=top+1e-9;v+=st)t.push(+v.toFixed(2));return t}
+const fP=v=>{const p=Math.exp(v);return p>=1?String(Math.round(p)):String(+p.toPrecision(1))};
+const ptick=[0.001,0.01,0.1,1,10].map(Math.log);
+function line(g,pts,X,Y,col,wd){g.strokeStyle=col;g.lineWidth=wd||2.4;g.beginPath();pts.forEach((p,i)=>i?g.lineTo(X(p[0]),Y(p[1])):g.moveTo(X(p[0]),Y(p[1])));g.stroke()}
+function drawIso(){const cv=$("isoPlot"),{g,w,h}=setup(cv);const N=150,c1=[],c2=[];
+ for(let i=0;i<=N;i++){const lp=LP0+(LP1-LP0)*i/N;c1.push([lp,n(Math.exp(lp),TA)]);c2.push([lp,n(Math.exp(lp),TD)])}
+ const top=Math.max(0.5,...c1.map(e=>e[1]))*1.1;const {X,Y}=axes(g,w,h,{l:46,r:14,t:14,b:36},[LP0,LP1],[0,top],ptick,niceTicks(top),"CO₂ pressure P (bar)","n (mmol g⁻¹)",fP);
+ line(g,c2,X,Y,css("--c2"));line(g,c1,X,Y,css("--c1"));
+ const s=SW[P.swing],xa=X(Math.log(s.pa)),ya=Y(n(s.pa,s.ta)),xd=X(Math.log(s.pd)),yd=Y(n(s.pd,s.td));
+ g.setLineDash([5,4]);g.strokeStyle=css("--cx");g.lineWidth=1.5;g.beginPath();g.moveTo(xa,ya);g.lineTo(xd,yd);g.stroke();g.setLineDash([]);
+ g.fillStyle=css("--cx");g.beginPath();g.arc(xa,ya,5.5,0,7);g.fill();g.fillStyle=css("--card-solid");g.strokeStyle=css("--cx");g.lineWidth=2;g.beginPath();g.arc(xd,yd,5.5,0,7);g.fill();g.stroke();
+ g.fillStyle=css("--cx");g.font="600 12px "+css("--font");g.textAlign="left";g.textBaseline="bottom";g.fillText(P.swing+"  Δn = "+dn(s).toFixed(2),Math.min(xa,xd)+8,Math.min(ya,yd)-8)}
+let SL=[];
+function drawSlope(){const cv=$("slopePlot"),{g,w,h}=setup(cv);const top=Math.max(1.6,...SL.map(e=>e[1]))*1.1;
+ const pad={l:46,r:14,t:14,b:36};const {X,Y}=axes(g,w,h,pad,[LP0,LP1],[0,top],ptick,niceTicks(top),"CO₂ pressure P (bar)","s",fP);
+ g.fillStyle=css("--accent-soft");g.fillRect(X(0),pad.t,X(LP1)-X(0),h-pad.b-pad.t);
+ g.setLineDash([6,4]);g.strokeStyle=css("--muted");g.lineWidth=1.5;g.beginPath();g.moveTo(X(LP0),Y(1));g.lineTo(X(LP1),Y(1));g.stroke();g.setLineDash([]);
+ line(g,SL,X,Y,css("--c4"))}
+function drawQst(){const cv=$("qstPlot"),{g,w,h}=setup(cv);const nmax=n(30,TA);const pts=[];const K=60;
+ for(let i=1;i<=K;i++){const nt=nmax*i/K*0.999;pts.push([nt,qst(nt,TA)])}
+ const ys=pts.map(e=>e[1]);const lo=Math.max(0,Math.floor(Math.min(...ys)/5)*5-5),hi=Math.ceil(Math.max(...ys)/5)*5+5;const yt=[];for(let v=lo;v<=hi;v+=5)yt.push(v);
+ const xt=niceTicks(nmax);const {X,Y}=axes(g,w,h,{l:46,r:14,t:14,b:36},[0,Math.max(nmax,0.1)],[lo,hi],xt,yt,"Uptake n at 298 K (mmol g⁻¹)","Qst (kJ mol⁻¹)");
+ line(g,pts,X,Y,css("--c3"))}
+function drawCap(){const cv=$("capPlot"),{g,w,h}=setup(cv);const keys=["VSA","TSA","PSA","PTSA"],v=keys.map(k=>Math.max(0,dn(SW[k])));
+ const top=Math.max(0.5,...v)*1.15;const pad={l:46,r:14,t:14,b:36};const {X,Y}=axes(g,w,h,pad,[0,4],[0,top],[],niceTicks(top),"Swing","Δn (mmol g⁻¹)");
+ const bw=(X(1)-X(0))*0.56;g.font="600 13px "+css("--font");
+ keys.forEach((k,i)=>{const x=X(i+0.5)-bw/2,y=Y(v[i]);g.fillStyle=css("--c1");g.globalAlpha=k===P.swing?1:0.55;g.fillRect(x,y,bw,Y(0)-y);g.globalAlpha=1;
+  if(k===P.swing){g.strokeStyle=css("--accent");g.lineWidth=2.5;g.strokeRect(x-3,y-3,bw+6,Y(0)-y+3)}
+  g.fillStyle=css("--muted");g.textAlign="center";g.textBaseline="top";g.fillText(k,X(i+0.5),Y(0)+5);
+  g.fillStyle=css("--text");g.textBaseline="bottom";g.fillText(v[i].toFixed(2),X(i+0.5),y-5)})}
+// ---------- wiring ----------
+const fmt={Q1:v=>v.toFixed(1)+" kJ/mol",q1:v=>v.toFixed(1)+" mmol/g",Q2:v=>v.toFixed(1)+" kJ/mol",q2:v=>v.toFixed(1)+" mmol/g",w:v=>v.toFixed(1)+" kJ/mol",cp:v=>v.toFixed(2)+" J/g·K"};
+function syncInputs(){Object.keys(fmt).forEach(k=>{$(k).value=P[k];$(k+"o").textContent=fmt[k](P[k])})}
+function setPressed(){document.querySelectorAll("[data-p]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.p===P.preset)));document.querySelectorAll("[data-s]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.s===P.swing)))}
+function update(){SL=slopes();const cls=classify(SL);const s=SW[P.swing];
+ $("vClass").textContent=cls;const KH=P.q1*B0*Math.exp(P.Q1/(R*TA))+P.q2*B0*Math.exp(P.Q2/(R*TA));$("vKH").textContent=KH>=100?KH.toFixed(0):KH.toPrecision(3);
+ $("vDn").textContent=dn(s).toFixed(2);$("lDn").textContent="Working capacity Δn, "+P.swing+" (mmol g⁻¹)";
+ const eT=eregen(SW.TSA),eP=eregen(SW.PTSA);[["vET",eT],["vEP",eP]].forEach(([id,e])=>{const el=$(id);el.textContent=isFinite(e)?e.toFixed(2):"—";el.className="v "+(isFinite(e)?(e<3.6?"good":"bad"):"")});
+ $("swingTxt").textContent=SW[P.swing].txt;
+ $("verdict").textContent=cls+". "+(cls==="Steep Langmuir"?"Strong sites fill at low pressure, so among MOFs this shape ranks highest for VSA and TSA (paper's Fig. 5).":cls==="S-shaped"?"The pore fills late and all at once, so among MOFs this shape ranks highest for PSA and PTSA (paper's Fig. 5).":cls==="Two-step"?"Strong sites stay full during release while the large pore empties, which pays off in PSA and PTSA.":"Uptake spreads over a wide pressure range, so in the paper this common shape rarely tops any swing.")+" Benchmark for amine scrubbing: 3.6 GJ t⁻¹; green = below it.";
+ drawAll()}
+function drawAll(){drawIso();drawSlope();drawQst();drawCap()}
+Object.keys(fmt).forEach(k=>$(k).addEventListener("input",e=>{P[k]=+e.target.value;$(k+"o").textContent=fmt[k](P[k]);if(k!=="cp")P.preset="";setPressed();update()}));
+document.querySelectorAll("[data-p]").forEach(b=>b.addEventListener("click",()=>{Object.assign(P,PRE[b.dataset.p]);P.preset=b.dataset.p;syncInputs();setPressed();update()}));
+document.querySelectorAll("[data-s]").forEach(b=>b.addEventListener("click",()=>{P.swing=b.dataset.s;setPressed();update()}));
+let rt=0;window.addEventListener("resize",()=>{cancelAnimationFrame(rt);rt=requestAnimationFrame(drawAll)});
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change",drawAll);
+syncInputs();setPressed();update();
+</script>
+</body></html>
