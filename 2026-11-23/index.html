@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="light dark">
+<title>Finding where a seizure starts by how brain signals switch, not just how loud they get — Research Explorer, 23 Nov 2026</title>
+<link rel="stylesheet" href="../assets/style.css">
+<style>
+:root{--st0:#dfe7f2;--st1:#f5b041;--st2:#8944ab;--ez:#d70015}
+@media (prefers-color-scheme:dark){:root{--st0:#2c3440;--st1:#c98a1b;--st2:#da8fff;--ez:#ff453a}}
+canvas#rasterPlot{height:340px} canvas#klPlot,canvas#rocPlot,canvas#barPlot{height:300px}
+.btnrow{display:flex;flex-wrap:wrap;gap:8px;margin:4px 0 14px;align-items:center}
+.btnrow button{font:500 14px var(--font);color:var(--text);background:var(--accent-soft);border:0;border-radius:8px;padding:7px 14px;min-height:32px;cursor:pointer}
+.btnrow button[aria-pressed="true"]{box-shadow:inset 0 0 0 2px var(--accent)}
+.btnrow .lbl{font-size:13px;color:var(--muted);margin-right:2px}
+label span{flex:1} label output{white-space:nowrap}
+.stat .v.good{color:var(--c3)} .stat .v.bad{color:var(--c2)}
+.mats{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media(max-width:600px){.mats{grid-template-columns:1fr}}
+.mats td,.mats th{text-align:center} .mats th:first-child,.mats td:first-child{text-align:left}
+</style></head><body><main>
+<a class="back" href="../">‹ All demos</a>
+<div class="eyebrow">23 Nov 2026 · Medicine</div>
+<h1>Finding where a seizure starts by how brain signals switch, not just how loud they get</h1>
+<p class="lede">Before epilepsy surgery, doctors often put thin needle electrodes deep into the brain (stereo-EEG, or SEEG) and wait for a seizure. They then have to work out which of a hundred or more recording sites belong to the <em>epileptogenic zone</em>, the patch of brain that starts the seizures and has to be removed. This paper models each channel as a hidden Markov chain moving between a few brain "states". It flags the channels whose <em>pattern of switching</em> between states changes most at seizure onset. Below, the whole method (constrained Baum–Welch, both KL scores and the single-state benchmark) runs live on simulated SEEG recordings.</p>
+<p class="authors">Giulia Tacconi, Federico Mason, Lorenzo Ferri, Elena Pasini, Lidia Di Vito, Matteo Martinoni, Lara Alvisi, Anna Scarabello, Luca Zanuttini, Francesca Bisulli, Andrea Zanella</p>
+
+<section class="card why" aria-labelledby="why-h">
+<h2 id="why-h">Why it matters</h2>
+<p>For about a third of people with epilepsy, medicines don't stop the seizures. Surgery can cure them, but only if doctors remove the right patch of brain, and today they find it mostly by reading hundreds of SEEG traces by eye. Across 30 patients, scoring how each channel's switching between hidden states changes at seizure onset picked out the surgeons' target channels with a mean AUROC of about 0.8. A comparable method that ignored the order of states over time scored 0.53–0.65.</p>
+</section>
+
+<section class="card" aria-labelledby="paper-h">
+<h2 id="paper-h">The paper</h2>
+<p style="margin:0 0 6px"><strong>Transition Dynamics Matter: Hidden Markov Scoring of Epileptogenic Channels in SEEG</strong></p>
+<p class="cite" style="margin:0">Giulia Tacconi, Federico Mason, Lorenzo Ferri, Elena Pasini, Lidia Di Vito, Matteo Martinoni, Lara Alvisi, Anna Scarabello, Luca Zanuttini, Francesca Bisulli and Andrea Zanella (Department of Information Engineering, University of Padova; Institut de Neurosciences des Systèmes, Aix-Marseille University; IRCCS Institute of Neurological Sciences of Bologna; Department of Neuromotor and Biomedical Sciences, University of Bologna). arXiv:2611.26142 [eess.SP], submitted 19 November 2026; submitted to IEEE ICC 2027. <a href="https://arxiv.org/abs/2611.26142">Read on arXiv</a> · <a href="https://arxiv.org/pdf/2611.26142">PDF</a></p>
+<p style="margin-top:14px"><strong>In plain language:</strong> each SEEG channel is cut into 1-second windows (shifted by 0.25 s). Each window becomes a feature vector o<sub>i</sub>[w]: the energy, phase entropy and connectivity strength in seven frequency bands. The authors assume every channel moves through the <em>same</em> small set of hidden states, each producing features from its own Gaussian. What differs between channels is <em>how often they jump</em> from one state to another, captured by a transition matrix A<sub>i</sub>. Baum–Welch is first run on all channels together to learn the shared Gaussians. It is then rerun on each channel alone, with the Gaussians held fixed, to learn a baseline matrix A<sub>i</sub><sup>base</sup> from the interictal period (between seizures). The same step on windows after onset gives the ictal (seizure) matrices A<sub>i,w</sub><sup>ictal</sup>, using either a <em>cumulative</em> window (from onset up to w) or a <em>sliding</em> window (w − L … w + L).</p>
+<p>A channel's change is measured in two ways. <strong>Transition KL</strong> (paper Eq. 8) compares the rows of the two matrices, weighted by how often the channel sat in each state at baseline (the stationary distribution π<sup>base</sup>):</p>
+<div class="eq">D<sub>i</sub><sup>tr</sup>(w) = Σ<sub>z</sub> π<sub>i</sub><sup>base</sup>(z) Σ<sub>q</sub> A<sub>i,w</sub><sup>ictal</sup>(z,q) log [ A<sub>i,w</sub><sup>ictal</sup>(z,q) / A<sub>i</sub><sup>base</sup>(z,q) ]</div>
+<p><strong>Occupancy KL</strong> (Eq. 9) compares only the long-run share of time spent in each state:</p>
+<div class="eq">D<sub>i</sub><sup>occ</sup>(w) = Σ<sub>z</sub> π<sub>i,w</sub><sup>ictal</sup>(z) log [ π<sub>i,w</sub><sup>ictal</sup>(z) / π<sub>i</sub><sup>base</sup>(z) ], &nbsp;&nbsp; D<sub>i</sub> = Σ<sub>w ≥ w*</sub> D<sub>i</sub>(w)</div>
+<p>The higher D<sub>i</sub>, the more likely channel i is in the epileptogenic zone. The benchmark is the same model with a single state (Z = 1): each channel is just one Gaussian, so the order in which windows occur is ignored.</p>
+</section>
+
+<section class="card" aria-labelledby="try-h">
+<h2 id="try-h">Try it: find the seizure-onset channels</h2>
+<p class="note" style="margin-top:0">The demo makes 16 simulated channels, each 200 s long: 170 s of baseline and then 30 s of seizure, in windows every 0.25 s (W = 797, onset at w* = 680, as in the paper). There are three hidden states, <em>normal</em>, <em>busy</em> and <em>critical</em>, and each window yields one feature (log high-frequency energy). That feature is Gaussian with means 0, 1.5 and 3 and the spread σ you set. At onset, the epileptogenic channels switch to a new transition matrix A<sup>ictal</sup> = (1−s)A<sup>base</sup> + s[mA<sup>flicker</sup> + (1−m)A<sup>crit</sup>]. A<sup>crit</sup> makes them sit in the critical state. A<sup>flicker</sup> = 1π<sup>base</sup> has the <em>same</em> long-run state shares as baseline but no memory, so the channel flickers between states. "Spread" gives some healthy channels a weaker critical shift, like a seizure spreading to them. The demo then estimates everything blind with the paper's constrained Baum–Welch, holding the shared Gaussians fixed (we skip stage 1 and use the true ones).</p>
+<div class="btnrow" role="group" aria-label="Score"><span class="lbl">Score:</span>
+ <button type="button" data-k="tr">Transition KL</button><button type="button" data-k="occ">Occupancy KL</button></div>
+<div class="btnrow" role="group" aria-label="Ictal estimation window"><span class="lbl">Ictal window:</span>
+ <button type="button" data-e="slide">Sliding (±L)</button><button type="button" data-e="cum">Cumulative</button>
+ <span class="lbl" style="margin-left:12px">Patient:</span><button type="button" id="reseed">New random patient</button></div>
+<div class="controls">
+ <div><label for="nez"><span>Epileptogenic channels</span> <output id="nezo"></output></label><input type="range" id="nez" min="1" max="8" step="1" value="4"></div>
+ <div><label for="s"><span>Change at onset s</span> <output id="so"></output></label><input type="range" id="s" min="0" max="1" step="0.05" value="0.7"></div>
+ <div><label for="m"><span>Share that is rhythm-only m</span> <output id="mo"></output></label><input type="range" id="m" min="0" max="1" step="0.05" value="0.5"></div>
+ <div><label for="sig"><span>Feature noise σ</span> <output id="sigo"></output></label><input type="range" id="sig" min="0.3" max="1.6" step="0.05" value="0.7"></div>
+ <div><label for="spr"><span>Spread to healthy channels</span> <output id="spro"></output></label><input type="range" id="spr" min="0" max="0.6" step="0.05" value="0.2"></div>
+ <div><label for="L"><span>Sliding horizon L</span> <output id="Lo"></output></label><input type="range" id="L" min="5" max="40" step="1" value="20"></div>
+</div>
+<div class="stats">
+ <div class="stat"><div class="v" id="vAuc"></div><div class="l" id="lAuc">AUROC, hidden Markov score</div></div>
+ <div class="stat"><div class="v" id="vAucB"></div><div class="l">AUROC, single-Gaussian benchmark</div></div>
+ <div class="stat"><div class="v" id="vF1"></div><div class="l">Best F1, hidden Markov score</div></div>
+ <div class="stat"><div class="v" id="vTop"></div><div class="l">Epileptogenic channels in the top k</div></div>
+</div>
+<p class="note" id="verdict" aria-live="polite"></p>
+<div class="plot" style="margin-top:14px"><div class="plot-title">Decoded hidden state per channel (Viterbi), last 60 s; red labels = epileptogenic zone</div>
+ <canvas id="rasterPlot" role="img" aria-label="Raster of decoded hidden states for 16 channels with the seizure onset marked"></canvas>
+ <div class="legend"><span style="--k:var(--st0)">normal</span><span style="--k:var(--st1)">busy</span><span style="--k:var(--st2)">critical</span><span style="--k:var(--cx)">dashed: seizure onset</span></div></div>
+<div class="grid" style="margin-top:20px">
+ <div class="plot"><div class="plot-title">Abnormality score D<sub>i</sub>(w) after onset</div>
+  <canvas id="klPlot" role="img" aria-label="KL divergence over time for each channel"></canvas>
+  <div class="legend"><span style="--k:var(--ez)">epileptogenic</span><span style="--k:var(--muted)">healthy</span></div></div>
+ <div class="plot"><div class="plot-title">ROC: epileptogenic vs healthy channels</div>
+  <canvas id="rocPlot" role="img" aria-label="ROC curves of the hidden Markov score and the benchmark"></canvas>
+  <div class="legend"><span style="--k:var(--c1)">hidden Markov score D<sub>i</sub></span><span style="--k:var(--c4)">single-Gaussian benchmark</span></div></div>
+ <div class="plot"><div class="plot-title">Total score D<sub>i</sub> per channel, ranked</div>
+  <canvas id="barPlot" role="img" aria-label="Bar chart of channel scores ranked"></canvas>
+  <div class="legend"><span style="--k:var(--ez)">epileptogenic</span><span style="--k:var(--muted)">healthy</span></div></div>
+ <div class="plot"><div class="plot-title" id="matTitle">Estimated transition matrices, top channel</div>
+  <div class="mats"><div><div class="note">A<sup>base</sup> (interictal)</div><table id="tBase"></table></div><div><div class="note">A<sup>ictal</sup> (cumulative, whole seizure)</div><table id="tIct"></table></div></div>
+  <p class="note" id="piTxt"></p></div>
+</div>
+</section>
+
+<section class="card" aria-labelledby="res-h">
+<h2 id="res-h">What the paper found</h2>
+<ul>
+ <li>Data: 30 patients with drug-resistant epilepsy recorded at the IRCCS Institute of Neurological Sciences of Bologna. For each, one seizure was cut as a 200 s epoch (170 s before onset, 30 s after). The reference was the channels later treated by radiofrequency thermocoagulation, the clinicians' first surgical target.</li>
+ <li>With energy features only, the hidden Markov variants reached a mean AUROC of about 0.79. The single-Gaussian benchmark scored 0.529, close to chance, and only reached 0.653 when all 21 features were used. The temporal model barely needed the extra features.</li>
+ <li>With energy plus mutual information (F = 21), <em>occupancy KL – cumulative</em> did best (mean AUROC 0.797, AUPRC 0.437, best F1 0.511), closely followed by <em>transition KL – sliding</em> and <em>occupancy KL – sliding</em>. All three beat the benchmark (paired t-test, p &lt; 0.01). <em>Transition KL – cumulative</em> did not clearly beat it.</li>
+ <li>In an example patient, some epileptogenic channels already visited "critical" states before the seizure. Others joined at different times after onset, so channels leave their baseline at different moments.</li>
+</ul>
+<p class="note">Limits the authors note: the Gaussians assume features are independent within a state, even though features from the same band are correlated. Only one seizure per patient and the first 30 s of the seizure were used, so channels recruited later can be missed. Thermocoagulated channels are only a stand-in for the true epileptogenic zone.</p>
+</section>
+
+<section class="card" aria-labelledby="how-h">
+<h2 id="how-h">How to use it</h2>
+<ul>
+ <li>Start with <strong>m = 1</strong> (rhythm-only change). The epileptogenic channels spend the same share of time in each state as before, but stop "remembering" their state and flicker. The single-Gaussian benchmark sees the same mix of feature values, so it does no better than chance. It often does worse, because healthy channels, which keep their state longer, swing more within a short window. <strong>Transition KL</strong> still finds the channels, but <strong>occupancy KL</strong> can't, because it only looks at the state shares.</li>
+ <li>Set <strong>m = 0</strong> so the channels instead sit in the critical state. Now all three scores work, and occupancy KL is often the sharpest, as in the paper's best variant.</li>
+ <li>Raise <strong>spread</strong> to recruit healthy channels into the seizure. Watch false alarms rise in the ranked bar chart.</li>
+ <li>Raise <strong>σ</strong> until the three states overlap. The hidden states get harder to tell apart, and every method degrades.</li>
+ <li>Switch between <strong>sliding</strong> and <strong>cumulative</strong> windows, and change <strong>L</strong>. A short sliding window reacts fast but is noisy. A cumulative window builds up evidence steadily.</li>
+ <li>Click <strong>New random patient</strong> to redraw the recordings and check how much the result depends on luck.</li>
+</ul>
+</section>
+<p class="note" style="margin-top:24px">Demo maths: 3-state HMM with 1-D Gaussian emissions shared by all channels and held fixed. Channel-specific transition matrices come from scaled forward–backward Baum–Welch (baseline: 20 iterations on windows 0…679; ictal: 6 iterations warm-started from A<sup>base</sup>, with a 0.5 pseudo-count per transition so logs stay finite). Stationary distributions are found by power iteration. The benchmark is KL(𝒩<sub>ictal</sub> ‖ 𝒩<sub>base</sub>) between per-channel Gaussians fitted on the same windows (our reading of the Z = 1 case). AUROC uses the Mann–Whitney rank formula. All numbers in the stats come from the simulation, not the paper.</p>
+</main>
+<script>
+"use strict";
+const $=id=>document.getElementById(id);
+const css=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim()||"#888";
+const NAMES=["A1","A4","B2","B4","B12","C2","C4","H3","I4","O1","P5","Q1","R2","S7","T12","U6"],NC=16,W=797,WS=680,Z=3,MU=[0,1.5,3];
+const ABASE=[[0.965,0.03,0.005],[0.15,0.8,0.05],[0.1,0.3,0.6]];
+const ACRIT=[[0.6,0.25,0.15],[0.05,0.55,0.4],[0.01,0.07,0.92]];
+const P={nez:4,s:0.7,m:0.5,sig:0.7,spr:0.2,L:20,k:"tr",e:"slide",seed:7};
+let R=null;
+function rng(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function gauss(r){let u=0;while(u===0)u=r();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*r())}
+function stat(A){let p=[1/Z,1/Z,1/Z];for(let it=0;it<500;it++){const q=[0,0,0];for(let z=0;z<Z;z++)for(let j=0;j<Z;j++)q[j]+=p[z]*A[z][j];p=q}return p}
+const mix=(A,B,t)=>A.map((r,i)=>r.map((v,j)=>(1-t)*v+t*B[i][j]));
+function sample(r,A,z){const u=r();let c=0;for(let j=0;j<Z;j++){c+=A[z][j];if(u<c)return j}return Z-1}
+// ---------- simulate ----------
+function simulate(){
+ const r=rng(P.seed*7919+13),pi=stat(ABASE),AFL=[pi,pi,pi];
+ const order=NAMES.map((_,i)=>i);for(let i=NC-1;i>0;i--){const j=Math.floor(r()*(i+1));[order[i],order[j]]=[order[j],order[i]]}
+ const ez=new Array(NC).fill(false);order.slice(0,P.nez).forEach(i=>ez[i]=true);
+ const spreadSet=order.slice(P.nez,P.nez+4);// up to 4 healthy channels can be recruited
+ const Aez=mix(ABASE,mix(ACRIT,AFL,P.m),P.s),Asp=mix(ABASE,ACRIT,P.spr);
+ const ch=[];
+ for(let i=0;i<NC;i++){const st=new Int8Array(W),o=new Float64Array(W);let z=sample(r,[pi],0);
+  const onsetDelay=Math.floor(r()*40);// windows (0-10 s) before this channel joins
+  for(let w=0;w<W;w++){if(w>0){const ict=w>=WS+(ez[i]?Math.floor(onsetDelay/2):onsetDelay+20);const A=!ict?ABASE:ez[i]?Aez:(spreadSet.includes(i)&&P.spr>0?Asp:ABASE);z=sample(r,A,z)}
+   st[w]=z;o[w]=MU[z]+P.sig*gauss(r)}
+  ch.push({st,o})}
+ return{ez,ch,pi}}
+// ---------- HMM ----------
+function emis(o){const s=P.sig,out=new Float64Array(o.length*Z);for(let w=0;w<o.length;w++)for(let z=0;z<Z;z++){const d=(o[w]-MU[z])/s;out[w*Z+z]=Math.exp(-0.5*d*d)+1e-300}return out}
+function baumWelch(B,a,b,A0,iters,rho){ // B emission probs, window range [a,b)
+ let A=A0.map(r=>r.slice());const T=b-a;const al=new Float64Array(T*Z),be=new Float64Array(T*Z),c=new Float64Array(T);
+ for(let it=0;it<iters;it++){
+  for(let z=0;z<Z;z++)al[z]=rho[z]*B[a*Z+z];c[0]=al[0]+al[1]+al[2];for(let z=0;z<Z;z++)al[z]/=c[0];
+  for(let t=1;t<T;t++){let s=0;for(let q=0;q<Z;q++){let v=0;for(let z=0;z<Z;z++)v+=al[(t-1)*Z+z]*A[z][q];v*=B[(a+t)*Z+q];al[t*Z+q]=v;s+=v}c[t]=s;for(let q=0;q<Z;q++)al[t*Z+q]/=s}
+  for(let z=0;z<Z;z++)be[(T-1)*Z+z]=1;
+  for(let t=T-2;t>=0;t--)for(let z=0;z<Z;z++){let v=0;for(let q=0;q<Z;q++)v+=A[z][q]*B[(a+t+1)*Z+q]*be[(t+1)*Z+q];be[t*Z+z]=v/c[t+1]}
+  const X=[[0.5,0.5,0.5],[0.5,0.5,0.5],[0.5,0.5,0.5]];
+  for(let t=0;t<T-1;t++)for(let z=0;z<Z;z++)for(let q=0;q<Z;q++)X[z][q]+=al[t*Z+z]*A[z][q]*B[(a+t+1)*Z+q]*be[(t+1)*Z+q]/c[t+1];
+  A=X.map(r=>{const s=r[0]+r[1]+r[2];return r.map(v=>v/s)})}
+ return A}
+function viterbi(B,A1,A2){const lA1=A1.map(r=>r.map(Math.log)),lA2=A2.map(r=>r.map(Math.log));const d=new Float64Array(W*Z),bp=new Int8Array(W*Z);
+ for(let z=0;z<Z;z++)d[z]=Math.log(1/Z)+Math.log(B[z]);
+ for(let w=1;w<W;w++){const lA=w<WS?lA1:lA2;for(let q=0;q<Z;q++){let best=-Infinity,bi=0;for(let z=0;z<Z;z++){const v=d[(w-1)*Z+z]+lA[z][q];if(v>best){best=v;bi=z}}d[w*Z+q]=best+Math.log(B[w*Z+q]);bp[w*Z+q]=bi}}
+ const s=new Int8Array(W);let bz=0;for(let z=1;z<Z;z++)if(d[(W-1)*Z+z]>d[(W-1)*Z+bz])bz=z;s[W-1]=bz;for(let w=W-1;w>0;w--)s[w-1]=bp[w*Z+s[w]];return s}
+const klTr=(Ai,Ab,pb)=>{let s=0;for(let z=0;z<Z;z++)for(let q=0;q<Z;q++)s+=pb[z]*Ai[z][q]*Math.log(Ai[z][q]/Ab[z][q]);return s};
+const klOcc=(pi,pb)=>{let s=0;for(let z=0;z<Z;z++)s+=pi[z]*Math.log(pi[z]/pb[z]);return s};
+function gfit(o,a,b){let m=0;for(let w=a;w<b;w++)m+=o[w];m/=(b-a);let v=0;for(let w=a;w<b;w++)v+=(o[w]-m)**2;v=Math.max(v/(b-a),1e-4);return[m,v]}
+const klG=([m1,v1],[m0,v0])=>0.5*(Math.log(v0/v1)+(v1+(m1-m0)**2)/v0-1);
+function analyse(sim){
+ const out=[];
+ for(let i=0;i<NC;i++){const o=sim.ch[i].o,B=emis(o);
+  const Ab=baumWelch(B,0,WS,ABASE.map(r=>r.map(()=>1/Z)),20,sim.pi),pb=stat(Ab),g0=gfit(o,0,WS);
+  const Dw=[],Bw=[];
+  for(let w=WS;w<W;w++){let a,b;if(P.e==="cum"){a=WS;b=w+1}else{a=Math.max(WS,w-P.L);b=Math.min(W,w+P.L+1)}
+   if(b-a<3){Dw.push(0);Bw.push(0);continue}
+   const Ai=baumWelch(B,a,b,Ab,6,pb);Dw.push(P.k==="tr"?klTr(Ai,Ab,pb):klOcc(stat(Ai),pb));Bw.push(klG(gfit(o,a,b),g0))}
+  const Afull=baumWelch(B,WS,W,Ab,8,pb);
+  out.push({Ab,pb,Afull,pf:stat(Afull),Dw,D:Dw.reduce((x,y)=>x+y,0),Bs:Bw.reduce((x,y)=>x+y,0),vit:viterbi(B,Ab,Afull)})}
+ return out}
+function auroc(sc,lab){let pos=0,neg=0,u=0;for(let i=0;i<sc.length;i++)if(lab[i]){pos++;for(let j=0;j<sc.length;j++)if(!lab[j]){u+=sc[i]>sc[j]?1:sc[i]===sc[j]?0.5:0}}else neg++;return pos&&neg?u/(pos*neg):NaN}
+function roc(sc,lab){const idx=sc.map((_,i)=>i).sort((a,b)=>sc[b]-sc[a]);const P1=lab.filter(x=>x).length,N1=lab.length-P1;let tp=0,fp=0;const pts=[[0,0]];idx.forEach(i=>{lab[i]?tp++:fp++;pts.push([fp/N1,tp/P1])});return pts}
+function bestF1(sc,lab){const idx=sc.map((_,i)=>i).sort((a,b)=>sc[b]-sc[a]);const P1=lab.filter(x=>x).length;let tp=0,best=0;idx.forEach((i,k)=>{if(lab[i])tp++;const f=2*tp/(k+1+P1);if(f>best)best=f});return best}
+// ---------- drawing ----------
+function setup(cv){const b=cv.getBoundingClientRect(),d=window.devicePixelRatio||1;cv.width=Math.max(1,Math.round(b.width*d));cv.height=Math.max(1,Math.round(b.height*d));const g=cv.getContext("2d");g.setTransform(d,0,0,d,0,0);return{g,w:b.width,h:b.height}}
+function axes(g,w,h,pad,xr,yr,xt,yt,xl,yl,fx,fy){
+ const X=x=>pad.l+(x-xr[0])/(xr[1]-xr[0])*(w-pad.l-pad.r),Y=y=>h-pad.b-(y-yr[0])/(yr[1]-yr[0])*(h-pad.t-pad.b);
+ g.font="12px "+css("--font");g.lineWidth=1;g.strokeStyle=css("--grid");g.fillStyle=css("--muted");
+ g.textAlign="center";g.textBaseline="top";xt.forEach(t=>{g.beginPath();g.moveTo(X(t),pad.t);g.lineTo(X(t),h-pad.b);g.stroke();g.fillText(fx?fx(t):String(t),X(t),h-pad.b+5)});
+ g.textAlign="right";g.textBaseline="middle";yt.forEach(t=>{g.beginPath();g.moveTo(pad.l,Y(t));g.lineTo(w-pad.r,Y(t));g.stroke();g.fillText(fy?fy(t):String(t),pad.l-6,Y(t))});
+ g.textAlign="center";g.textBaseline="bottom";g.fillText(xl,(pad.l+w-pad.r)/2,h-2);
+ g.save();g.translate(12,(pad.t+h-pad.b)/2);g.rotate(-Math.PI/2);g.textBaseline="middle";g.fillText(yl,0,0);g.restore();return{X,Y}}
+function niceTicks(top){const raw=top/4,p=Math.pow(10,Math.floor(Math.log10(raw))),st=[1,2,5,10].map(k=>k*p).find(k=>k>=raw);const t=[];for(let v=0;v<=top+1e-9;v+=st)t.push(+v.toPrecision(3));return t}
+function stColors(){return[css("--st0"),css("--st1"),css("--st2")]}
+function drawRaster(){const cv=$("rasterPlot"),{g,w,h}=setup(cv),pad={l:46,r:12,t:8,b:34};const w0=W-240,cols=stColors();
+ const {X}=axes(g,w,h,pad,[w0,W],[0,1],[w0,w0+40,w0+80,w0+120,w0+160,w0+200,W-1].map(v=>Math.min(v,W)),[],"Time (s)","",v=>(v*0.25).toFixed(0));
+ const rh=(h-pad.t-pad.b)/NC,cw=(w-pad.l-pad.r)/(W-w0);
+ for(let i=0;i<NC;i++){const s=R.res[i].vit,y=pad.t+i*rh;for(let t=w0;t<W;t++){g.fillStyle=cols[s[t]];g.fillRect(X(t),y+1,cw+0.6,rh-2)}
+  g.fillStyle=R.sim.ez[i]?css("--ez"):css("--muted");g.font=(R.sim.ez[i]?"600 ":"")+"11px "+css("--font");g.textAlign="right";g.textBaseline="middle";g.fillText(NAMES[i],pad.l-6,y+rh/2)}
+ g.setLineDash([5,4]);g.strokeStyle=css("--cx");g.lineWidth=1.5;g.beginPath();g.moveTo(X(WS),pad.t);g.lineTo(X(WS),h-pad.b);g.stroke();g.setLineDash([])}
+function drawKL(){const cv=$("klPlot"),{g,w,h}=setup(cv);let top=0;R.res.forEach(r=>r.Dw.forEach(v=>top=Math.max(top,v)));top=Math.max(top*1.1,0.01);
+ const {X,Y}=axes(g,w,h,{l:52,r:12,t:12,b:36},[0,(W-WS-1)*0.25],[0,top],[0,5,10,15,20,25],niceTicks(top),"Time from seizure onset (s)",P.k==="tr"?"Transition KL (nats)":"Occupancy KL (nats)");
+ const ord=R.res.map((_,i)=>i).sort((a,b)=>R.sim.ez[a]-R.sim.ez[b]);
+ ord.forEach(i=>{const ez=R.sim.ez[i];g.strokeStyle=ez?css("--ez"):css("--muted");g.globalAlpha=ez?1:0.55;g.lineWidth=ez?2.2:1.2;g.beginPath();R.res[i].Dw.forEach((v,t)=>t?g.lineTo(X(t*0.25),Y(v)):g.moveTo(X(0),Y(v)));g.stroke()});g.globalAlpha=1}
+function drawROC(){const cv=$("rocPlot"),{g,w,h}=setup(cv);const {X,Y}=axes(g,w,h,{l:46,r:14,t:12,b:36},[0,1],[0,1],[0,0.25,0.5,0.75,1],[0,0.25,0.5,0.75,1],"False positive rate","True positive rate");
+ g.setLineDash([4,4]);g.strokeStyle=css("--muted");g.lineWidth=1;g.beginPath();g.moveTo(X(0),Y(0));g.lineTo(X(1),Y(1));g.stroke();g.setLineDash([]);
+ [[R.rocB,css("--c4")],[R.rocH,css("--c1")]].forEach(([pts,col])=>{g.strokeStyle=col;g.lineWidth=2.4;g.beginPath();pts.forEach((p,i)=>{if(!i){g.moveTo(X(p[0]),Y(p[1]));return}const q=pts[i-1];if(p[0]!==q[0])g.lineTo(X(p[0]),Y(q[1]));g.lineTo(X(p[0]),Y(p[1]))});g.stroke()})}
+function drawBars(){const cv=$("barPlot"),{g,w,h}=setup(cv);const idx=R.res.map((_,i)=>i).sort((a,b)=>R.res[b].D-R.res[a].D);const top=Math.max(R.res[idx[0]].D*1.1,0.01);
+ const pad={l:52,r:10,t:12,b:40};const {Y}=axes(g,w,h,pad,[0,1],[0,top],[],niceTicks(top),"","Total score Dᵢ");const bw=(w-pad.l-pad.r)/NC;
+ idx.forEach((i,k)=>{const x=pad.l+k*bw;g.fillStyle=R.sim.ez[i]?css("--ez"):css("--muted");g.globalAlpha=R.sim.ez[i]?1:0.5;g.fillRect(x+2,Y(R.res[i].D),bw-4,Y(0)-Y(R.res[i].D));g.globalAlpha=1;
+  g.save();g.translate(x+bw/2,h-pad.b+6);g.rotate(-Math.PI/4);g.fillStyle=R.sim.ez[i]?css("--ez"):css("--muted");g.font="11px "+css("--font");g.textAlign="right";g.textBaseline="middle";g.fillText(NAMES[i],0,0);g.restore()});
+ const k=P.nez;g.setLineDash([4,4]);g.strokeStyle=css("--cx");g.lineWidth=1;g.beginPath();g.moveTo(pad.l+k*bw,pad.t);g.lineTo(pad.l+k*bw,h-pad.b);g.stroke();g.setLineDash([]);
+ g.fillStyle=css("--cx");g.font="600 11px "+css("--font");g.textAlign="left";g.textBaseline="top";g.fillText(" top "+k,pad.l+k*bw,pad.t)}
+function mat(id,A){const n=["normal","busy","critical"];$(id).innerHTML="<tr><th>from \\ to</th>"+n.map(x=>"<th>"+x+"</th>").join("")+"</tr>"+A.map((r,i)=>"<tr><td>"+n[i]+"</td>"+r.map(v=>"<td>"+v.toFixed(2)+"</td>").join("")+"</tr>").join("")}
+function drawAll(){if(!R)return;drawRaster();drawKL();drawROC();drawBars()}
+// ---------- update ----------
+const fmt={nez:v=>v+" of 16",s:v=>v.toFixed(2),m:v=>v.toFixed(2),sig:v=>v.toFixed(2),spr:v=>v.toFixed(2),L:v=>v+" windows ("+(v*0.25).toFixed(1)+" s)"};
+function setPressed(){document.querySelectorAll("[data-k]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.k===P.k));document.querySelectorAll("[data-e]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.e===P.e));$("L").disabled=P.e==="cum"}
+function update(){const sim=simulate(),res=analyse(sim);const lab=sim.ez,sc=res.map(r=>r.D),bs=res.map(r=>r.Bs);
+ R={sim,res,rocH:roc(sc,lab),rocB:roc(bs,lab)};const a=auroc(sc,lab),ab=auroc(bs,lab),f1=bestF1(sc,lab);
+ const idx=sc.map((_,i)=>i).sort((x,y)=>sc[y]-sc[x]);const hits=idx.slice(0,P.nez).filter(i=>lab[i]).length;
+ const cls=v=>"v "+(v>=0.8?"good":v<0.65?"bad":"");
+ $("vAuc").textContent=a.toFixed(2);$("vAuc").className=cls(a);$("vAucB").textContent=ab.toFixed(2);$("vAucB").className=cls(ab);$("vF1").textContent=f1.toFixed(2);$("vTop").textContent=hits+" / "+P.nez;
+ $("lAuc").textContent="AUROC, "+(P.k==="tr"?"transition":"occupancy")+" KL – "+(P.e==="cum"?"cumulative":"sliding");
+ const t=idx[0];$("matTitle").textContent="Estimated transition matrices, top channel "+NAMES[t]+(lab[t]?" (epileptogenic)":" (healthy)");mat("tBase",res[t].Ab);mat("tIct",res[t].Afull);
+ $("piTxt").textContent="Long-run state shares π: baseline "+res[t].pb.map(v=>(100*v).toFixed(0)+"%").join(" / ")+"  →  seizure "+res[t].pf.map(v=>(100*v).toFixed(0)+"%").join(" / ")+" (normal / busy / critical).";
+ const diff=a-ab;$("verdict").textContent=(diff>0.1?"The hidden Markov score beats the single-Gaussian benchmark by "+diff.toFixed(2)+" AUROC here: the change is in how channels move between states, which a one-Gaussian summary can't see.":diff<-0.1?"Here the benchmark wins. Try transition KL, or a larger change s.":"Both scores perform similarly here, because the change shows up in the feature values themselves.")+(P.m>0.8&&P.k==="occ"?" With a rhythm-only change, the state shares barely move, so occupancy KL struggles. Switch to transition KL.":"");
+ drawAll()}
+let pend=0;function schedule(){cancelAnimationFrame(pend);pend=requestAnimationFrame(update)}
+Object.keys(fmt).forEach(k=>{$(k).value=P[k];$(k+"o").textContent=fmt[k](P[k]);$(k).addEventListener("input",e=>{P[k]=+e.target.value;$(k+"o").textContent=fmt[k](P[k]);schedule()})});
+document.querySelectorAll("[data-k]").forEach(b=>b.addEventListener("click",()=>{P.k=b.dataset.k;setPressed();schedule()}));
+document.querySelectorAll("[data-e]").forEach(b=>b.addEventListener("click",()=>{P.e=b.dataset.e;setPressed();schedule()}));
+$("reseed").addEventListener("click",()=>{P.seed=Math.floor(Math.random()*1e6);schedule()});
+let rt=0;window.addEventListener("resize",()=>{cancelAnimationFrame(rt);rt=requestAnimationFrame(drawAll)});
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change",drawAll);
+setPressed();update();
+</script>
+</body></html>
