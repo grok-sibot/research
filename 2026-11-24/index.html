@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="light dark">
+<title>Hidden fate boundaries in the wind decide which way a typhoon turns — Research Explorer, 24 Nov 2026</title>
+<link rel="stylesheet" href="../assets/style.css">
+<style>
+:root{--fate:215,0,21;--colr:137,68,171;--hi:#5c5c61}
+@media (prefers-color-scheme:dark){:root{--fate:255,69,58;--colr:218,143,255;--hi:#a1a1a6}}
+canvas#map{height:auto;aspect-ratio:6/5;cursor:crosshair;touch-action:none}
+canvas#gPlot,canvas#hPlot{height:260px}
+.btnrow{display:flex;flex-wrap:wrap;gap:8px;margin:4px 0 14px;align-items:center}
+.btnrow button{font:500 14px var(--font);color:var(--text);background:var(--accent-soft);border:0;border-radius:8px;padding:7px 14px;min-height:32px;cursor:pointer}
+.btnrow button[aria-pressed="true"]{box-shadow:inset 0 0 0 2px var(--accent)}
+.btnrow .lbl{font-size:13px;color:var(--muted);margin-right:2px}
+label span{flex:1} label output{white-space:nowrap}
+.legend .sw{display:inline-block;width:14px;height:14px;border-radius:4px;vertical-align:-2px;margin-right:6px}
+.stat .v.good{color:var(--c3)} .stat .v.bad{color:var(--c2)}
+.toggles{display:flex;flex-wrap:wrap;gap:6px 22px;margin:-6px 0 14px}
+</style></head><body><main>
+<a class="back" href="../">‹ All demos</a>
+<div class="eyebrow">24 Nov 2026 · Climate &amp; Weather</div>
+<h1>Hidden fate boundaries in the wind decide which way a typhoon turns</h1>
+<p class="lede">Sometimes a tropical cyclone's forecast tracks split into two branches, one heading for one coast and one for another. This paper says the split is caused by hidden lines in the steering winds, which the authors call <em>fate boundaries</em>. Storms that start on opposite sides of one of these lines, even 50 km apart, end up far apart. The authors find these lines as ridges of a new <em>directional finite-time Lyapunov exponent</em>. Below, their minimal two-high-pressure model runs live: move the storm, change the highs, and watch the ensemble split exactly where it straddles a ridge.</p>
+<p class="authors">Wei Zou, Jizhou Li, Xurui He, Lei Liu, Pinaki Chakraborty, Lin Li</p>
+
+<section class="card why" aria-labelledby="why-h">
+<h2 id="why-h">Why it matters</h2>
+<p>When a typhoon's forecast tracks split, emergency managers can't tell which coast to warn, and today's ensembles often show the second branch only a day or two before the turn, or miss it entirely. In all 61 strongly split forecasts among 1,179 Northern Hemisphere storms from 2011–2025, a fate boundary in the steering winds explained the split, and for Typhoon Khanun (2023) it revealed the surprise turn toward Japan three days before the ECMWF ensemble did.</p>
+</section>
+
+<section class="card" aria-labelledby="paper-h">
+<h2 id="paper-h">The paper</h2>
+<p style="margin:0 0 6px"><strong>Solving the puzzle of tropical cyclone track bifurcation</strong></p>
+<p class="cite" style="margin:0">Wei Zou, Jizhou Li, Xurui He, Lei Liu, Pinaki Chakraborty and Lin Li (Department of Mechanics, Sichuan University, Chengdu; Research Institute for Electronic Science, Hokkaido University, Sapporo; Fluid Mechanics Unit, Okinawa Institute of Science and Technology Graduate University, Onna). arXiv:2611.25674 [physics.ao-ph], submitted 19 November 2026. <a href="https://arxiv.org/abs/2611.25674">Read on arXiv</a> · <a href="https://arxiv.org/pdf/2611.25674">PDF</a></p>
+<p style="margin-top:14px"><strong>In plain language:</strong> a tropical cyclone is pushed along by the large-scale winds around it, the <em>steering flow</em>. Forecasters run ensembles, many copies of the forecast started from slightly different storm positions. Usually the tracks fan out smoothly, but sometimes they split into separate branches. The textbook explanation is the <em>col</em>, a weak-wind gap between two competing high-pressure systems. The authors show that starting inside the col is neither necessary nor sufficient for a split. Because the winds change over time, what matters is where nearby paths <em>end up</em>, not the wind map at one moment.</p>
+<p>So they borrow a tool from studies of pollution and oil-spill transport: repelling <em>Lagrangian coherent structures</em>, found as ridges of the finite-time Lyapunov exponent (FTLE). Release a tracer at every point x<sub>0</sub>, follow it for a window T to get the flow map Φ, and measure how fast neighbours stretch apart:</p>
+<div class="eq">FTLE(x<sub>0</sub>) = (1 / 2T) ln λ<sub>max</sub>(C), &nbsp;&nbsp; C = (∇Φ)<sup>T</sup>∇Φ</div>
+<p>In the real atmosphere, plain FTLE also lights up wherever wind shear just stretches tracers along the same path. The paper's <strong>directional FTLE</strong> keeps only separations onto <em>different headings</em>. At each point it finds the direction n = ∇θ/|∇θ| in which the tracer's net heading θ changes fastest. It releases a pair x<sub>±</sub> = x<sub>0</sub> ± (d<sub>0</sub>/2)n with d<sub>0</sub> = 50 km and follows both:</p>
+<div class="eq">dFTLE(x<sub>0</sub>) = |θ<sub>+</sub> − θ<sub>−</sub>| · [ ln(d<sub>min</sub> / d<sub>0</sub>) ]<sub>+</sub>, &nbsp;&nbsp; d<sub>min</sub> = min(d<sub>+</sub>, d<sub>−</sub>)</div>
+<p>Here d<sub>+</sub> is the closest distance from the end of the x<sub>+</sub> path to <em>anywhere</em> on the x<sub>−</sub> path (and the reverse for d<sub>−</sub>). If one path just slides along the other, d<sub>min</sub> stays small. Ridges of this field are the fate boundaries. The minimal model behind Fig. 2 uses two clockwise point vortices standing in for the continental and oceanic highs around Khanun, 2,000 km apart. Each has a core radius a = 200 km and circulation Γ<sub>0</sub> = 9.3×10<sup>7</sup> m²/s. Between hours 8 and 24 the strengths ramp linearly to 0.6Γ<sub>0</sub> (north-west) and 1.4Γ<sub>0</sub> (south-east):</p>
+<div class="eq">u(x, t) = Σ<sub>i</sub> Γ<sub>i</sub>(t) ẑ × (x − x<sub>i</sub>) / [ 2π ( |x − x<sub>i</sub>|² + a² ) ] + V<sub>β</sub></div>
+<p>For real storms (ERA5 and ECMWF fields), the storm's own vortex is removed and the wind is averaged over its depth. A constant <em>beta drift</em> V<sub>β</sub> is then added, the north-westward self-propulsion of a cyclone. The paper fits that drift per storm. Here it is an optional slider.</p>
+</section>
+
+<section class="card" aria-labelledby="try-h">
+<h2 id="try-h">Try it: find the fate boundary, then straddle it</h2>
+<p class="note" style="margin-top:0">The map spans 4,800 × 4,000 km. The two highs (H) spin clockwise and are fixed in place. The shading is computed live on a 108 × 90 grid: a tracer and a 50 km probe pair at every point, integrated with 4th-order Runge–Kutta. <strong>Click or drag on the map</strong> (or focus it and use the arrow keys) to move the storm. Its ensemble members start scattered around it by the position error you set.</p>
+<div class="btnrow" role="group" aria-label="Field shown"><span class="lbl">Shading:</span>
+ <button type="button" data-m="dir">Directional FTLE (fate boundaries)</button><button type="button" data-m="ftle">Standard FTLE</button><button type="button" data-m="none">None</button>
+ <span class="lbl" style="margin-left:12px">Tracks:</span><button type="button" id="play">▶ Play forecast</button><button type="button" id="snap">Put storm on the boundary</button></div>
+<div class="controls">
+ <div><label for="fnw"><span>North-west high, final strength</span> <output id="fnwo"></output></label><input type="range" id="fnw" min="0.2" max="1.8" step="0.05"></div>
+ <div><label for="fse"><span>South-east high, final strength</span> <output id="fseo"></output></label><input type="range" id="fse" min="0.2" max="1.8" step="0.05"></div>
+ <div><label for="T"><span>Forecast window T</span> <output id="To"></output></label><input type="range" id="T" min="16" max="96" step="4"></div>
+ <div><label for="beta"><span>Beta drift toward north-west</span> <output id="betao"></output></label><input type="range" id="beta" min="0" max="2" step="0.1"></div>
+ <div><label for="spread"><span>Ensemble position error (1σ)</span> <output id="spreado"></output></label><input type="range" id="spread" min="10" max="250" step="5"></div>
+ <div><label for="n"><span>Ensemble members</span> <output id="no"></output></label><input type="range" id="n" min="10" max="100" step="5"></div>
+</div>
+<div class="toggles">
+ <label class="toggle"><input type="checkbox" id="col" checked> Show col (steering wind &lt; 5 m/s at t = 0)</label>
+ <label class="toggle"><input type="checkbox" id="probe" checked> Show the 50 km probe pair at the storm</label>
+</div>
+<div class="stats">
+ <div class="stat"><div class="v" id="vSplit"></div><div class="l">Ensemble branches (share of members)</div></div>
+ <div class="stat"><div class="v" id="vDist"></div><div class="l">Distance from storm to nearest fate boundary</div></div>
+ <div class="stat"><div class="v" id="vEnd"></div><div class="l">Gap between the two end-point clusters</div></div>
+ <div class="stat"><div class="v" id="vCol"></div><div class="l">Col framework says</div></div>
+</div>
+<p class="note" id="verdict" aria-live="polite"></p>
+<div class="plot" style="margin-top:10px"><div class="plot-title" id="mapTitle">Steering flow, fate boundaries and ensemble tracks</div>
+ <canvas id="map" tabindex="0" role="img" aria-label="Map of the two highs, the directional FTLE field and the storm ensemble tracks. Click to move the storm."></canvas>
+ <div class="legend"><span><i class="sw" style="background:rgba(var(--fate),.75)"></i>fate boundary (high directional FTLE)</span><span><i class="sw" style="background:rgba(var(--colr),.35)"></i>col region</span><span style="--k:var(--c1)">branch A</span><span style="--k:var(--c4)">branch B</span><span style="--k:var(--cx)">probe pair</span></div></div>
+<div class="grid" style="margin-top:20px">
+ <div class="plot"><div class="plot-title">Strength of each high over time, |Γ<sub>i</sub>| / Γ<sub>0</sub></div>
+  <canvas id="gPlot" role="img" aria-label="Circulation strength of the two highs versus time, with the forecast window shaded"></canvas>
+  <div class="legend"><span style="--k:var(--c2)">north-west high</span><span style="--k:var(--c3)">south-east high</span><span style="--k:var(--accent-soft)">forecast window</span></div></div>
+ <div class="plot"><div class="plot-title">Where the members head: net heading after T (15° bins)</div>
+  <canvas id="hPlot" role="img" aria-label="Histogram of ensemble member headings coloured by branch"></canvas>
+  <div class="legend"><span style="--k:var(--c1)">branch A</span><span style="--k:var(--c4)">branch B</span><span style="--k:var(--muted)">0° = east, 90° = north</span></div></div>
+</div>
+<p class="plot-title" style="margin-top:20px">Under the hood at the storm's position</p>
+<div class="math" id="probeTxt"></div>
+</section>
+
+<section class="card" aria-labelledby="how-h">
+<h2 id="how-h">How to use it</h2>
+<ul>
+ <li>Start with the defaults, the paper's Khanun-like set-up: the north-west high weakens to 0.6 and the south-east high strengthens to 1.4 over hours 8–24. The red ridge is the fate boundary. The storm starts inside the purple col, where the textbook says tracks should split, yet all members stay together, because the ridge runs about 200 km to the west.</li>
+ <li>Click <strong>Put storm on the boundary</strong>. The members straddle the ridge and split into two branches that end over 1,000 km apart. Then drag it a couple of hundred km off the ridge, even deeper into the col, and the split vanishes. Being in the col is not what matters; straddling the ridge is.</li>
+ <li>Switch to <strong>Standard FTLE</strong>. It highlights separation of every kind. Compare where it and the directional version disagree, and check which one predicts the split.</li>
+ <li>Make the two highs equal (both 1.0), or swap their trends. The boundary moves and reshapes, because it depends on how the flow <em>changes</em> during the window, not just on today's map.</li>
+ <li>Shrink the <strong>position error</strong> to 20 km near the ridge: a small ensemble can sit entirely on one side and miss the other branch, as happened to Khanun. Seeding members on both sides of the ridge, as the authors propose, would catch it.</li>
+ <li>Add <strong>beta drift</strong> (the paper fits 0–2 m/s per storm) and change <strong>T</strong> to see the boundaries move and sharpen with longer windows.</li>
+</ul>
+</section>
+<p class="note" style="margin-top:24px">Demo maths: the paper's minimal model in its own units (length l<sub>0</sub> = 1,000 km, time τ<sub>0</sub> = 16 h, so Γ<sub>0</sub> = 5.4, a = 0.2, highs at (∓0.71, ±0.71), ramp t = 0.5–1.5). RK4 with a step of about 24 minutes (the paper uses 30 s). Headings are net displacements measured anticlockwise from east, and ∇θ is taken by wrapped central differences on the grid. The col is shaded where the steering wind at t = 0 is below 5 m/s (our choice; the paper shades it by eye). "Fate boundary" here means a directional FTLE of at least 40% of the field's 99th percentile; points within 300 km of a high's centre are ignored. Branches come from 2-means clustering of member end points. A split is counted when the centroids are more than 1,000 km apart (closer branches are usually one group smeared out by shear) and the smaller branch holds at least 10% of members. Beta drift splits the slider value equally between west and north. All numbers on this page come from the simulation, not the paper.</p>
+</main>
+<script>
+"use strict";
+const $=id=>document.getElementById(id);
+const G0=5.4,A2=0.04,U0=1e6/57600,L0=1000,TAU=16,D0=0.05;
+const PV=[[-Math.SQRT1_2,Math.SQRT1_2],[Math.SQRT1_2,-Math.SQRT1_2]];
+const XR=[-2.4,2.4],YR=[-2,2],NX=108,NY=90,HX=(XR[1]-XR[0])/(NX-1),HY=(YR[1]-YR[0])/(NY-1);
+const P={fnw:0.6,fse:1.4,T:48,beta:0,spread:40,n:40,mode:"dir",sx:0.15,sy:0.0,seed:7};
+const fmt={fnw:v=>v.toFixed(2)+" Γ₀",fse:v=>v.toFixed(2)+" Γ₀",T:v=>v+" h",beta:v=>v.toFixed(1)+" m/s",spread:v=>v+" km",n:v=>String(v)};
+let NS=120,DT=0.025,BX=0,BY=0;
+function setTime(){const Tn=P.T/TAU;NS=Math.max(20,Math.round(Tn/0.025));DT=Tn/NS;const b=P.beta/U0/Math.SQRT2;BX=-b;BY=b}
+const gb=[0,0];
+function gamma(t,o){const s=t<=0.5?0:t>=1.5?1:t-0.5;o[0]=-G0*(1+(P.fnw-1)*s);o[1]=-G0*(1+(P.fse-1)*s)}
+function vel(x,y,t,o,beta){gamma(t,gb);let u=beta?BX:0,v=beta?BY:0;for(let i=0;i<2;i++){const dx=x-PV[i][0],dy=y-PV[i][1],k=gb[i]/(2*Math.PI*(dx*dx+dy*dy+A2));u-=k*dy;v+=k*dx}o[0]=u;o[1]=v}
+const k1=[0,0],k2=[0,0],k3=[0,0],k4=[0,0];
+function step(p,t,h){const x=p[0],y=p[1];vel(x,y,t,k1,1);vel(x+.5*h*k1[0],y+.5*h*k1[1],t+.5*h,k2,1);vel(x+.5*h*k2[0],y+.5*h*k2[1],t+.5*h,k3,1);vel(x+h*k3[0],y+h*k3[1],t+h,k4,1);
+ p[0]=x+h/6*(k1[0]+2*k2[0]+2*k3[0]+k4[0]);p[1]=y+h/6*(k1[1]+2*k2[1]+2*k3[1]+k4[1])}
+function traj(x,y,st){const p=[x,y];if(st){st[0]=x;st[1]=y}for(let s=0;s<NS;s++){step(p,s*DT,DT);if(st){st[2*s+2]=p[0];st[2*s+3]=p[1]}}return p}
+const wrap=a=>Math.atan2(Math.sin(a),Math.cos(a));
+function closest(px,py,tr){let m=Infinity;for(let j=0;j<tr.length;j+=2){const dx=px-tr[j],dy=py-tr[j+1],d=dx*dx+dy*dy;if(d<m)m=d}return Math.sqrt(m)}
+// pair probe: returns {val,thp,thm,dmin,trP,trM,xp,xm}
+function probe(x0,y0,nx,ny,keep){const trP=new Float64Array(2*NS+2),trM=new Float64Array(2*NS+2);
+ const xp=[x0+D0/2*nx,y0+D0/2*ny],xm=[x0-D0/2*nx,y0-D0/2*ny];
+ const ep=traj(xp[0],xp[1],trP),em=traj(xm[0],xm[1],trM);
+ const thp=Math.atan2(ep[1]-xp[1],ep[0]-xp[0]),thm=Math.atan2(em[1]-xm[1],em[0]-xm[0]);
+ const dth=Math.abs(wrap(thp-thm)),dmin=Math.min(closest(ep[0],ep[1],trM),closest(em[0],em[1],trP));
+ const val=dth*Math.max(0,Math.log(dmin/D0));return keep?{val,thp,thm,dth,dmin,trP,trM}:val}
+// ---------- field ----------
+let F=null;
+function computeField(){setTime();const N=NX*NY,ex=new Float64Array(N),ey=new Float64Array(N),th=new Float64Array(N),dsp=new Float64Array(N);
+ for(let j=0;j<NY;j++)for(let i=0;i<NX;i++){const x=XR[0]+i*HX,y=YR[0]+j*HY,e=traj(x,y),k=j*NX+i;ex[k]=e[0];ey[k]=e[1];th[k]=Math.atan2(e[1]-y,e[0]-x);dsp[k]=Math.hypot(e[0]-x,e[1]-y)}
+ const ftle=new Float64Array(N),dir=new Float64Array(N),Td=P.T/24;
+ for(let j=0;j<NY;j++)for(let i=0;i<NX;i++){const k=j*NX+i,iL=Math.max(0,i-1),iR=Math.min(NX-1,i+1),jD=Math.max(0,j-1),jU=Math.min(NY-1,j+1),wx=(iR-iL)*HX,wy=(jU-jD)*HY;
+  const a=(ex[j*NX+iR]-ex[j*NX+iL])/wx,b=(ex[jU*NX+i]-ex[jD*NX+i])/wy,c=(ey[j*NX+iR]-ey[j*NX+iL])/wx,d=(ey[jU*NX+i]-ey[jD*NX+i])/wy;
+  const c11=a*a+c*c,c22=b*b+d*d,c12=a*b+c*d,tr=c11+c22,det=c11*c22-c12*c12,lam=tr/2+Math.sqrt(Math.max(0,tr*tr/4-det));
+  ftle[k]=Math.max(0,Math.log(Math.max(lam,1e-12))/(2*Td));
+  const gx=wrap(th[j*NX+iR]-th[j*NX+iL])/wx,gy=wrap(th[jU*NX+i]-th[jD*NX+i])/wy,g=Math.hypot(gx,gy);
+  const x=XR[0]+i*HX,y=YR[0]+j*HY;
+  dir[k]=(g<1e-9||dsp[k]<0.02)?0:probe(x,y,gx/g,gy/g,false)}
+ const p99=arr=>{const s=Array.from(arr).filter(v=>v>0).sort((p,q)=>p-q);return s.length?s[Math.floor(0.99*(s.length-1))]:1};
+ const nearV=(x,y)=>PV.some(v=>Math.hypot(x-v[0],y-v[1])<0.3);
+ const vD=p99(dir),ridge=[];for(let j=0;j<NY;j++)for(let i=0;i<NX;i++){const x=XR[0]+i*HX,y=YR[0]+j*HY;if(dir[j*NX+i]>=0.4*vD&&!nearV(x,y))ridge.push([x,y,dir[j*NX+i]])}
+ F={ex,ey,th,ftle,dir,vD,vF:p99(ftle),ridge};buildLayers()}
+// ---------- ensemble ----------
+function rng(s){return()=>{s|=0;s=s+0x6D2B79F5|0;let t=Math.imul(s^s>>>15,1|s);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+let E=null;
+function computeEnsemble(){setTime();const r=rng(P.seed),sd=P.spread/L0,m=[];
+ for(let q=0;q<P.n;q++){const u=Math.max(r(),1e-12),v=r(),R=Math.sqrt(-2*Math.log(u)),x=P.sx+sd*R*Math.cos(2*Math.PI*v),y=P.sy+sd*R*Math.sin(2*Math.PI*v);
+  const tr=new Float64Array(2*NS+2),e=traj(x,y,tr);m.push({tr,ex:e[0],ey:e[1],h:Math.atan2(e[1]-y,e[0]-x),g:0})}
+ // 2-means on end points, init with farthest pair
+ let a=0,b=0,best=-1;for(let i=0;i<m.length;i++)for(let j=i+1;j<m.length;j++){const d=Math.hypot(m[i].ex-m[j].ex,m[i].ey-m[j].ey);if(d>best){best=d;a=i;b=j}}
+ let C=[[m[a].ex,m[a].ey],[m[b].ex,m[b].ey]];
+ for(let it=0;it<30;it++){const s=[[0,0,0],[0,0,0]];m.forEach(o=>{const d0=Math.hypot(o.ex-C[0][0],o.ey-C[0][1]),d1=Math.hypot(o.ex-C[1][0],o.ey-C[1][1]);o.g=d1<d0?1:0;s[o.g][0]+=o.ex;s[o.g][1]+=o.ey;s[o.g][2]++});
+  C=C.map((c,g)=>s[g][2]?[s[g][0]/s[g][2],s[g][1]/s[g][2]]:c)}
+ const cnt=[0,1].map(g=>m.filter(o=>o.g===g).length),gap=Math.hypot(C[0][0]-C[1][0],C[0][1]-C[1][1]);
+ const split=gap>1.0&&Math.min(cnt[0],cnt[1])>=0.1*m.length;
+ if(split&&C[0][0]>C[1][0]){m.forEach(o=>o.g=1-o.g);cnt.reverse()} // branch A = western end
+ if(!split)m.forEach(o=>o.g=0);
+ // probe at storm
+ const h=0.02,hd=(dx,dy)=>{const e=traj(P.sx+dx,P.sy+dy);return Math.atan2(e[1]-P.sy-dy,e[0]-P.sx-dx)};
+ const gx=wrap(hd(h,0)-hd(-h,0))/(2*h),gy=wrap(hd(0,h)-hd(0,-h))/(2*h),g=Math.hypot(gx,gy);
+ const pr=g>1e-9?probe(P.sx,P.sy,gx/g,gy/g,true):null;
+ const e0=traj(P.sx,P.sy),e1=traj(P.sx+h,P.sy),e2=traj(P.sx,P.sy+h),e3=traj(P.sx-h,P.sy),e4=traj(P.sx,P.sy-h);
+ const fa=(e1[0]-e3[0])/(2*h),fb=(e2[0]-e4[0])/(2*h),fc=(e1[1]-e3[1])/(2*h),fd=(e2[1]-e4[1])/(2*h),c11=fa*fa+fc*fc,c22=fb*fb+fd*fd,c12=fa*fb+fc*fd,tr=c11+c22,det=c11*c22-c12*c12;
+ const ftl=Math.log(Math.max(tr/2+Math.sqrt(Math.max(0,tr*tr/4-det)),1e-12))/(2*P.T/24);
+ let dist=Infinity;F.ridge.forEach(p=>{const d=Math.hypot(p[0]-P.sx,p[1]-P.sy);if(d<dist)dist=d});
+ const sp=[0,0];vel(P.sx,P.sy,0,sp,0);
+ E={m,cnt,gap,split,pr,ftl,dist,speed:Math.hypot(sp[0],sp[1])*U0,e0}}
+// ---------- drawing ----------
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+function setup(c){const dpr=window.devicePixelRatio||1,w=c.clientWidth,h=c.clientHeight;if(c.width!==Math.round(w*dpr)||c.height!==Math.round(h*dpr)){c.width=Math.round(w*dpr);c.height=Math.round(h*dpr)}const g=c.getContext("2d");g.setTransform(dpr,0,0,dpr,0,0);g.clearRect(0,0,w,h);return{g,w,h}}
+let LAY={};
+function buildLayers(){const mk=()=>{const c=document.createElement("canvas");c.width=NX;c.height=NY;return c};
+ const fate=css("--fate").split(",").map(Number),colr=css("--colr").split(",").map(Number);
+ ["dir","ftle","col"].forEach(kind=>{const c=mk(),g=c.getContext("2d"),im=g.createImageData(NX,NY);
+  for(let j=0;j<NY;j++)for(let i=0;i<NX;i++){const k=j*NX+i,o=((NY-1-j)*NX+i)*4;let a=0,rgb=fate;
+   if(kind==="col"){const s=[0,0];vel(XR[0]+i*HX,YR[0]+j*HY,0,s,0);a=Math.hypot(s[0],s[1])*U0<5?0.32:0;rgb=colr}
+   else{const v=kind==="dir"?F.dir[k]/F.vD:F.ftle[k]/F.vF;a=0.88*Math.pow(Math.min(1,Math.max(0,v)),kind==="dir"?0.9:1.6)}
+   im.data[o]=rgb[0];im.data[o+1]=rgb[1];im.data[o+2]=rgb[2];im.data[o+3]=Math.round(255*a)}
+  g.putImageData(im,0,0);LAY[kind]=c})}
+let anim=-1;
+function drawMap(){const c=$("map"),{g,w,h}=setup(c),X=x=>(x-XR[0])/(XR[1]-XR[0])*w,Y=y=>(YR[1]-y)/(YR[1]-YR[0])*h;
+ const ix=w/(NX-1),iy=h/(NY-1);g.imageSmoothingEnabled=true;
+ if(P.mode!=="none")g.drawImage(LAY[P.mode],-ix/2,-iy/2,w+ix,h+iy);
+ if($("col").checked)g.drawImage(LAY.col,-ix/2,-iy/2,w+ix,h+iy);
+ // grid every 500 km
+ g.strokeStyle=css("--grid");g.lineWidth=1;for(let x=-2;x<=2.01;x+=0.5){g.beginPath();g.moveTo(X(x),0);g.lineTo(X(x),h);g.stroke()}for(let y=-1.5;y<=1.51;y+=0.5){g.beginPath();g.moveTo(0,Y(y));g.lineTo(w,Y(y));g.stroke()}
+ // highs
+ const fin=[P.fnw,P.fse];g.font="600 15px "+css("--font");g.textAlign="center";g.textBaseline="middle";
+ PV.forEach((p,i)=>{const R=10+10*fin[i];g.strokeStyle=css("--hi");g.lineWidth=2;const rr=R+8,a1=Math.PI*1.35;g.beginPath();g.arc(X(p[0]),Y(p[1]),rr,-0.3,a1);g.stroke();
+  const ax=X(p[0])+rr*Math.cos(a1),ay=Y(p[1])+rr*Math.sin(a1),tx=-Math.sin(a1),ty=Math.cos(a1),nx=Math.cos(a1),ny=Math.sin(a1);g.fillStyle=css("--hi");g.beginPath();g.moveTo(ax+8*tx,ay+8*ty);g.lineTo(ax+5*nx,ay+5*ny);g.lineTo(ax-5*nx,ay-5*ny);g.fill();
+  g.fillStyle=css("--text");g.fillText("H",X(p[0]),Y(p[1]));g.font="13px "+css("--font");const lb=(i?"SE high → ":"NW high → ")+fin[i].toFixed(2)+"Γ₀";g.strokeStyle=css("--card-solid");g.lineWidth=4;g.lineJoin="round";g.strokeText(lb,X(p[0]),Y(p[1])+R+24);g.fillStyle=css("--muted");g.fillText(lb,X(p[0]),Y(p[1])+R+24);g.font="600 15px "+css("--font")});
+ // tracks
+ const lim=anim>=0?Math.min(NS,Math.floor(anim)):NS,cols=[css("--c1"),css("--c4")];
+ g.lineWidth=1.3;g.globalAlpha=0.75;E.m.forEach(o=>{g.strokeStyle=cols[o.g];g.beginPath();g.moveTo(X(o.tr[0]),Y(o.tr[1]));for(let s=1;s<=lim;s++)g.lineTo(X(o.tr[2*s]),Y(o.tr[2*s+1]));g.stroke()});
+ g.globalAlpha=1;E.m.forEach(o=>{g.fillStyle=cols[o.g];g.beginPath();g.arc(X(o.tr[2*lim]),Y(o.tr[2*lim+1]),2.6,0,7);g.fill()});
+ if($("probe").checked&&E.pr){g.strokeStyle=css("--cx");g.lineWidth=2;g.setLineDash([5,4]);[E.pr.trP,E.pr.trM].forEach(t=>{g.beginPath();g.moveTo(X(t[0]),Y(t[1]));for(let s=1;s<=lim;s++)g.lineTo(X(t[2*s]),Y(t[2*s+1]));g.stroke()});g.setLineDash([])}
+ // storm + spread ring
+ g.strokeStyle=css("--cx");g.lineWidth=1.5;g.setLineDash([3,3]);g.beginPath();g.arc(X(P.sx),Y(P.sy),P.spread/L0/(XR[1]-XR[0])*w,0,7);g.stroke();g.setLineDash([]);
+ g.fillStyle=css("--cx");g.beginPath();g.arc(X(P.sx),Y(P.sy),5,0,7);g.fill();g.strokeStyle=css("--card-solid");g.lineWidth=2;g.stroke();
+ // scale bar & clock
+ g.fillStyle=css("--muted");g.strokeStyle=css("--muted");g.lineWidth=2;g.beginPath();g.moveTo(14,h-16);g.lineTo(14+w/4.8,h-16);g.stroke();g.textAlign="left";g.font="12px "+css("--font");g.fillText("1,000 km",14,h-28);
+ g.textAlign="right";g.fillText("t = "+Math.round(lim*DT*TAU)+" h of "+P.T+" h",w-12,h-16)}
+function drawG(){const {g,w,h}=setup($("gPlot")),pl=40,pr=12,pt=12,pb=30,tmax=96,X=t=>pl+t/tmax*(w-pl-pr),Y=v=>pt+(2-v)/2*(h-pt-pb);
+ g.fillStyle=css("--accent-soft");g.fillRect(X(0),pt,X(P.T)-X(0),h-pt-pb);
+ g.strokeStyle=css("--grid");g.fillStyle=css("--muted");g.font="12px "+css("--font");g.lineWidth=1;
+ for(let v=0;v<=2;v+=0.5){g.beginPath();g.moveTo(pl,Y(v));g.lineTo(w-pr,Y(v));g.stroke();g.textAlign="right";g.fillText(v.toFixed(1),pl-6,Y(v)+4)}
+ g.textAlign="center";for(let t=0;t<=96;t+=24)g.fillText(t+" h",X(t),h-10);
+ const o=[0,0];[["--c2",0],["--c3",1]].forEach(([c,i])=>{g.strokeStyle=css(c);g.lineWidth=2.5;g.beginPath();for(let t=0;t<=96;t+=1){gamma(t/TAU,o);const v=-o[i]/G0;t?g.lineTo(X(t),Y(v)):g.moveTo(X(t),Y(v))}g.stroke()})}
+function drawH(){const {g,w,h}=setup($("hPlot")),pl=34,pr=12,pt=12,pb=30,nb=24,bins=[new Array(nb).fill(0),new Array(nb).fill(0)];
+ E.m.forEach(o=>{let a=(o.h*180/Math.PI+360)%360;bins[o.g][Math.min(nb-1,Math.floor(a/15))]++});
+ const mx=Math.max(1,...bins[0].map((v,i)=>v+bins[1][i])),bw=(w-pl-pr)/nb,Y=v=>h-pb-v/mx*(h-pt-pb);
+ g.strokeStyle=css("--grid");g.fillStyle=css("--muted");g.font="12px "+css("--font");g.textAlign="center";
+ for(let a=0;a<=360;a+=90)g.fillText(a+"°",pl+a/15*bw,h-10);
+ g.textAlign="right";g.fillText(String(mx),pl-6,pt+4);g.fillText("0",pl-6,h-pb+4);
+ g.beginPath();g.moveTo(pl,h-pb);g.lineTo(w-pr,h-pb);g.stroke();
+ for(let i=0;i<nb;i++){g.fillStyle=css("--c1");g.fillRect(pl+i*bw+1,Y(bins[0][i]),bw-2,h-pb-Y(bins[0][i]));g.fillStyle=css("--c4");g.fillRect(pl+i*bw+1,Y(bins[0][i]+bins[1][i]),bw-2,Y(bins[0][i])-Y(bins[0][i]+bins[1][i]))}}
+const km=v=>Math.round(v*L0).toLocaleString("en-AU")+" km",deg=a=>((a*180/Math.PI+360)%360).toFixed(0)+"°";
+function stats(){const n=E.m.length;
+ $("vSplit").textContent=E.split?"2: "+Math.round(100*E.cnt[0]/n)+"% / "+Math.round(100*E.cnt[1]/n)+"%":"1 (no split)";$("vSplit").className="v"+(E.split?" bad":" good");
+ $("vDist").textContent=isFinite(E.dist)?km(E.dist):"–";
+ $("vEnd").textContent=km(E.gap);
+ const inCol=E.speed<5;$("vCol").textContent=inCol?"in col: may split":"outside col: no split";
+ const near=E.dist<=2*P.spread/L0+0.03;
+ let s="The storm is "+(isFinite(E.dist)?km(E.dist):"far")+" from the nearest fate boundary, "+(near?"within":"beyond")+" about two ensemble standard deviations ("+(2*P.spread)+" km). ";
+ s+=E.split?(near?"Members straddle the ridge, so the ensemble splits into two branches ending "+km(E.gap)+" apart.":"The ensemble splits anyway, so a weaker ridge nearby is doing the work. Try Standard FTLE to see it."):(near?"The ensemble is mostly on one side or the ridge is weak here, so members stay together.":"All members sit on one side of every ridge, so they move together.");
+ s+=inCol!==E.split?" Note the col test gets this case wrong (steering speed at the storm "+E.speed.toFixed(1)+" m/s).":" Here the col test happens to agree (steering speed "+E.speed.toFixed(1)+" m/s).";
+ $("verdict").textContent=s;
+ const p=E.pr;$("probeTxt").textContent=p?
+ "storm at ("+km(P.sx)+" E, "+km(P.sy)+" N of map centre), window T = "+P.T+" h, "+NS+" RK4 steps\n"+
+ "probe pair x± = x0 ± 25 km along ∇θ/|∇θ|\n"+
+ "headings θ+ = "+deg(p.thp)+", θ− = "+deg(p.thm)+"  →  |Δθ| = "+p.dth.toFixed(2)+" rad\n"+
+ "d_min = "+km(p.dmin)+"  →  [ln(d_min/d0)]+ = "+Math.max(0,Math.log(p.dmin/D0)).toFixed(2)+"\n"+
+ "directional FTLE = "+p.val.toFixed(2)+"   (boundary threshold "+(0.4*F.vD).toFixed(2)+", field 99th pct "+F.vD.toFixed(2)+")\n"+
+ "standard FTLE = "+E.ftl.toFixed(2)+" per day (field 99th pct "+F.vF.toFixed(2)+")":"heading field is flat here, so the probe is undefined"}
+function drawAll(){drawMap();drawG();drawH()}
+function refreshEnsemble(){computeEnsemble();stats();drawAll()}
+function refreshAll(){computeField();refreshEnsemble()}
+let pend=0;function schedule(full){cancelAnimationFrame(pend);pend=requestAnimationFrame(()=>full?refreshAll():refreshEnsemble())}
+Object.keys(fmt).forEach(k=>{$(k).value=P[k];$(k+"o").textContent=fmt[k](P[k]);$(k).addEventListener("input",e=>{P[k]=+e.target.value;$(k+"o").textContent=fmt[k](P[k]);schedule(["fnw","fse","T","beta"].includes(k))})});
+function setPressed(){document.querySelectorAll("[data-m]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.m===P.mode)));
+ $("mapTitle").textContent=P.mode==="dir"?"Steering flow, fate boundaries (directional FTLE) and ensemble tracks":P.mode==="ftle"?"Standard FTLE (any separation, including shear) and ensemble tracks":"Ensemble tracks only"}
+document.querySelectorAll("[data-m]").forEach(b=>b.addEventListener("click",()=>{P.mode=b.dataset.m;setPressed();drawMap()}));
+["col","probe"].forEach(id=>$(id).addEventListener("change",drawMap));
+const map=$("map");
+function toWorld(ev){const r=map.getBoundingClientRect();return[XR[0]+(ev.clientX-r.left)/r.width*(XR[1]-XR[0]),YR[1]-(ev.clientY-r.top)/r.height*(YR[1]-YR[0])]}
+let drag=false;
+map.addEventListener("pointerdown",ev=>{drag=true;map.setPointerCapture(ev.pointerId);[P.sx,P.sy]=toWorld(ev);anim=-1;schedule(false)});
+map.addEventListener("pointermove",ev=>{if(!drag)return;[P.sx,P.sy]=toWorld(ev);schedule(false)});
+map.addEventListener("pointerup",()=>drag=false);map.addEventListener("pointercancel",()=>drag=false);
+map.addEventListener("keydown",ev=>{const d=0.025,m={ArrowLeft:[-d,0],ArrowRight:[d,0],ArrowUp:[0,d],ArrowDown:[0,-d]}[ev.key];if(!m)return;ev.preventDefault();P.sx=Math.min(XR[1],Math.max(XR[0],P.sx+m[0]));P.sy=Math.min(YR[1],Math.max(YR[0],P.sy+m[1]));schedule(false)});
+$("snap").addEventListener("click",()=>{// strongest ridge point within 800 km of map centre region, else global max
+ let best=null;F.ridge.forEach(p=>{const sc=p[2]-0.5*Math.hypot(p[0],p[1]);if(!best||sc>best[3])best=[p[0],p[1],p[2],sc]});if(best){P.sx=best[0];P.sy=best[1];anim=-1;refreshEnsemble()}});
+const reduce=matchMedia("(prefers-reduced-motion: reduce)");
+$("play").addEventListener("click",()=>{if(reduce.matches){anim=-1;drawMap();return}anim=0;const t0=performance.now();
+ const tick=now=>{if(anim<0)return;anim=(now-t0)/3000*NS;if(anim>=NS){anim=-1;drawMap();return}drawMap();requestAnimationFrame(tick)};requestAnimationFrame(tick)});
+let rt=0;window.addEventListener("resize",()=>{cancelAnimationFrame(rt);rt=requestAnimationFrame(drawAll)});
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change",()=>{buildLayers();drawAll()});
+setPressed();refreshAll();
+</script>
+</body></html>
