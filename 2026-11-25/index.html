@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="light dark">
+<title>Read only the parts of an AI's memory that matter for this word — Research Explorer, 25 Nov 2026</title>
+<link rel="stylesheet" href="../assets/style.css">
+<style>
+canvas#strip{height:190px}
+canvas#scat,canvas#trade,canvas#uni{height:290px}
+.btnrow{display:flex;flex-wrap:wrap;gap:8px;margin:4px 0 14px;align-items:center}
+.btnrow button{font:500 14px var(--font);color:var(--text);background:var(--accent-soft);border:0;border-radius:8px;padding:7px 14px;min-height:32px;cursor:pointer}
+.btnrow button[aria-pressed="true"]{box-shadow:inset 0 0 0 2px var(--accent)}
+.btnrow .lbl{font-size:13px;color:var(--muted);margin-right:2px}
+label span{flex:1} label output{white-space:nowrap}
+.legend .sw{display:inline-block;width:14px;height:14px;border-radius:4px;vertical-align:-2px;margin-right:6px}
+</style></head><body><main>
+<a class="back" href="../">‹ All demos</a>
+<div class="eyebrow">25 Nov 2026 · AI</div>
+<h1>Read only the parts of an AI's memory that matter for this word</h1>
+<p class="lede">Every time a language model writes a word, it looks back over its whole memory of the conversation (the <em>KV cache</em>). With long documents that re-reading is the slow part. RefineKV splits the memory into blocks and keeps a one-line summary of each. For every new word it asks, block by block, "would the summary change the answer?" It opens the full block only when the answer could be yes. Below, the paper's error bound runs live on a simulated attention head: change the threshold and watch which blocks get opened, how much is read, and how far the answer drifts.</p>
+<p class="authors">Kewei Lian, Jiayi Zhai, Anji Liu</p>
+
+<section class="card why" aria-labelledby="why-h">
+<h2 id="why-h">Why it matters</h2>
+<p>Long-context chatbots, coding agents and reasoning models spend most of their time re-reading a huge memory for every word they write, which makes them slow and expensive to run. By opening only the blocks a provable error bound says are risky, RefineKV made the attention step up to 7.6× faster and decoding up to 1.66× faster on Llama-3.1 and Qwen-2.5, while matching full-attention quality at its cautious setting.</p>
+</section>
+
+<section class="card" aria-labelledby="paper-h">
+<h2 id="paper-h">The paper</h2>
+<p style="margin:0 0 6px"><strong>RefineKV: Query-Adaptive KV Cache Compression via Attention-Error Bounds</strong></p>
+<p class="cite" style="margin:0">Kewei Lian, Jiayi Zhai and Anji Liu (National University of Singapore). arXiv:2611.28171 [cs.LG], submitted 20 November 2026. <a href="https://arxiv.org/abs/2611.28171">Read on arXiv</a> · <a href="https://arxiv.org/pdf/2611.28171">PDF</a> · <a href="https://kevin-lkw.github.io/RefineKV-release/">Project page</a></p>
+<p style="margin-top:14px"><strong>In plain language:</strong> attention mixes stored <em>value</em> vectors v<sub>i</sub>. Each is weighted by how well the current <em>query</em> q matches that token's stored <em>key</em> k<sub>i</sub>:</p>
+<div class="eq">o = Σ<sub>i</sub> α<sub>i</sub> v<sub>i</sub>, &nbsp;&nbsp; α<sub>i</sub> = exp(q·k<sub>i</sub>/√d) / Σ<sub>j</sub> exp(q·k<sub>j</sub>/√d)</div>
+<p>The authors first measured how much of the cache each query really needs. On their data, keeping 90% of a query's attention weight needed only 17.6% of the cache. But the needed pieces were different for every query, and together they covered 96.4% of it. So throwing parts of the cache away for good (eviction) is bound to hurt some later word. The choice of what to read has to be made fresh for every query.</p>
+<p>RefineKV cuts the cache into contiguous blocks C and stores each block's mean key k̄<sub>C</sub> and mean value v̄<sub>C</sub>. A summarised block acts like |C| copies of its mean, so it gets weight p̂<sub>C</sub> ∝ |C| exp(q·k̄<sub>C</sub>/√d). The output error splits into attention moving between blocks plus value blur inside them. Both are controlled by the block's <em>distortion</em> δ<sub>C</sub> = max<sub>i∈C</sub> |q·(k<sub>i</sub> − k̄<sub>C</sub>)|/√d, which says how differently the block's tokens respond to <em>this</em> query. The paper proves (Eq. 4):</p>
+<div class="eq">‖o − ô‖ ≤ 2 Σ<sub>C</sub> R<sub>C</sub>, &nbsp;&nbsp; R<sub>C</sub> = p̂<sub>C</sub> [ V<sub>max</sub> (cosh δ<sub>C</sub> − 1) / Σ<sub>C′</sub> p̂<sub>C′</sub> cosh δ<sub>C′</sub> + V<sub>C</sub> tanh(δ<sub>C</sub>/2) ]</div>
+<p>Here V<sub>C</sub> is the largest value norm in the block and V<sub>max</sub> the largest overall. Blocks with R<sub>C</sub> &gt; τ are opened and read token by token. The rest are read as their single summary. The risk mixes <em>importance</em> (p̂<sub>C</sub>) with <em>distortion</em> (δ<sub>C</sub>). An important block must be very uniform to stay summarised, while an unimportant one can be messy. Computing δ<sub>C</sub> exactly would mean reading the block, so the paper uses cheap upper bounds from stored per-block extremes. One is the axis-aligned box bound (Eq. 83), from each block's coordinate-wise min and max keys. The other is a diagonal-ellipsoid bound (Eq. 87).</p>
+</section>
+
+<section class="card" aria-labelledby="try-h">
+<h2 id="try-h">Try it: one attention head over a 1,024-token document</h2>
+<p class="note" style="margin-top:0">The "document" is a string of topics, each 20–120 tokens long. A token's key is its topic's direction plus some scatter (head size d = 32). Each decoding step's query drifts from one topic to the next, the way a model's focus moves while it writes. Everything below is recomputed live: exact attention, the paper's risk score R<sub>C</sub> for every block, the mixed exact-plus-summary attention, and its error.</p>
+<div class="btnrow" role="group" aria-label="Distortion bound"><span class="lbl">δ<sub>C</sub> from:</span>
+ <button type="button" data-b="box">Box bound (Eq. 83)</button><button type="button" data-b="ell">Ellipsoid bound (Eq. 87)</button><button type="button" data-b="exact">Exact (oracle)</button>
+ <span class="lbl" style="margin-left:12px">Decoding:</span><button type="button" id="play">▶ Play</button><button type="button" id="regen">New document</button></div>
+<div class="controls">
+ <div><label for="tau"><span>Risk threshold τ</span> <output id="tauo"></output></label><input type="range" id="tau" min="-4" max="0" step="0.05"></div>
+ <div><label for="B"><span>Block size |C|</span> <output id="Bo"></output></label><input type="range" id="B" min="0" max="3" step="1"></div>
+ <div><label for="g"><span>Query sharpness |q|</span> <output id="go"></output></label><input type="range" id="g" min="2" max="20" step="0.5"></div>
+ <div><label for="sn"><span>Key scatter within a topic</span> <output id="sno"></output></label><input type="range" id="sn" min="0.1" max="1.5" step="0.05"></div>
+ <div><label for="step"><span>Decoding step</span> <output id="stepo"></output></label><input type="range" id="step" min="0" max="159" step="1"></div>
+</div>
+<div class="stats">
+ <div class="stat"><div class="v" id="vRead"></div><div class="l">Cache entries read this step (opened tokens + summaries)</div></div>
+ <div class="stat"><div class="v" id="vErr"></div><div class="l">Output error ‖o − ô‖ / ‖o‖</div></div>
+ <div class="stat"><div class="v" id="vOpen"></div><div class="l">Blocks opened this step</div></div>
+ <div class="stat"><div class="v" id="vUni"></div><div class="l">Blocks opened at least once, steps 0 → now</div></div>
+</div>
+<p class="note" id="verdict" aria-live="polite"></p>
+<div class="plot" style="margin-top:10px"><div class="plot-title">The cache this step: exact attention per token, and what RefineKV reads</div>
+ <canvas id="strip" role="img" aria-label="Strip of 1024 tokens showing exact attention weights, which blocks are opened, and which have been opened at any step so far"></canvas>
+ <div class="legend"><span style="--k:var(--cx)">exact attention α<sub>i</sub> (√ scale)</span><span><i class="sw" style="background:var(--c2)"></i>opened (read token by token)</span><span><i class="sw" style="background:var(--grid)"></i>summarised (read as 1 entry)</span><span><i class="sw" style="background:var(--c4)"></i>opened at some step so far</span><span><i class="sw" style="background:var(--c3);opacity:.6"></i>topic boundaries</span></div></div>
+<div class="grid" style="margin-top:20px">
+ <div class="plot"><div class="plot-title">Importance vs distortion (cf. the paper's Fig. 2)</div>
+  <canvas id="scat" role="img" aria-label="Scatter of blocks by distortion bound and importance, over a shaded map of the risk score with the threshold line"></canvas>
+  <div class="legend"><span><i class="sw" style="background:var(--c2)"></i>opened</span><span><i class="sw" style="background:var(--c1)"></i>summarised</span><span style="--k:var(--cx)">R<sub>C</sub> = τ (typical V<sub>C</sub>)</span></div></div>
+ <div class="plot"><div class="plot-title">Error vs share of cache read, this query</div>
+  <canvas id="trade" role="img" aria-label="Trade-off curves of output error versus fraction of the cache read for RefineKV, importance-only block selection, and oracle token top-k"></canvas>
+  <div class="legend"><span style="--k:var(--c2)">RefineKV (sweep τ)</span><span style="--k:var(--c1)">open top blocks by p̂<sub>C</sub> only</span><span style="--k:var(--muted)">oracle: top tokens only, rest dropped</span><span style="--k:var(--cx)">● current τ</span></div></div>
+</div>
+<div class="grid" style="margin-top:20px">
+ <div class="plot"><div class="plot-title">Per-step reads vs everything ever needed</div>
+  <canvas id="uni" role="img" aria-label="Line chart over decoding steps of tokens read per step and cumulative union of opened blocks"></canvas>
+  <div class="legend"><span style="--k:var(--c2)">tokens read this step</span><span style="--k:var(--c4)">union of opened blocks so far</span></div></div>
+ <div class="plot"><div class="plot-title">Under the hood this step</div>
+  <div class="math" id="hood" style="margin-top:0;font-size:13px"></div></div>
+</div>
+</section>
+
+<section class="card" aria-labelledby="how-h">
+<h2 id="how-h">How to use it</h2>
+<ul>
+ <li>Start at the defaults: τ = 0.01 (the paper's cautious setting), 32-token blocks and the box bound. Only a few orange blocks are opened, mostly where attention is high <em>and</em> the block straddles a topic change. The error stays well under a percent, while only a small share of the cache is read (12% at step 0, about a third on average over the run).</li>
+ <li>Press <strong>▶ Play</strong>. The query's focus wanders and different blocks open at each step, while the purple "opened at least once" band keeps growing. This is the paper's motivating finding: small per-query sets, a large union. That is why a fixed eviction rule fails and per-query selection works.</li>
+ <li>Look at the <strong>importance–distortion</strong> plot. The threshold line is tilted: important blocks (high p̂<sub>C</sub>) must have tiny distortion to stay summarised, while unimportant ones can be messy.</li>
+ <li>In the trade-off plot, compare orange (RefineKV) with blue (open blocks by importance only). At the same reading budget, accounting for distortion usually gives lower error. In this simulation it won on 30 of 32 sampled steps. Grey is an idealised oracle that knows the exact top tokens without reading anything. RefineKV gets close to it without that knowledge.</li>
+ <li>Switch to <strong>Exact (oracle)</strong> δ<sub>C</sub>. On average slightly fewer blocks open (in this simulation about 10 of 32 per step instead of 10.5), because the box bound is loose: its coordinate-wise extremes can come from different keys. The ellipsoid bound sits in between in some settings.</li>
+ <li>Raise <strong>key scatter</strong> or <strong>query sharpness</strong> and more blocks become risky. Try larger blocks: cheaper summaries, but blurrier ones.</li>
+</ul>
+</section>
+<p class="note" style="margin-top:24px">Demo maths: a synthetic single head (no grouped-query attention). N = 1,024 tokens, d = d<sub>v</sub> = 32. There are 24 topic vectors with N(0, 1) components, and keys k = t + σ·N(0, I). Values are a per-topic mean plus noise, scaled so that a typical ‖v‖ ≈ 1. The query is |q| · unit(a blend of two topic vectors that hops every 8 steps, + 0.5·N(0, I) noise). Blocks are contiguous. Opened tokens enter the softmax with exp(q·k<sub>i</sub>/√d); each summarised block enters once with weight |C| exp(q·k̄<sub>C</sub>/√d) and value v̄<sub>C</sub>, as in the paper. "Entries read" counts opened tokens plus one per summarised block. The selection pass also reads per-block metadata (k̄<sub>C</sub>, plus min/max keys for the box bound), which is not counted. On these synthetic keys the summed bound 2ΣR<sub>C</sub> is loose, and can exceed the trivial bound 2V<sub>max</sub>. The paper reports how often that happens on real models (its Table 11). RefineKV only uses the per-block terms to rank and threshold blocks. The oracle curve keeps the top-n tokens by exact α<sub>i</sub> and renormalises. The 17.6% / 96.4% figures, τ = 0.01 and the speed-ups are from the paper; every other number on this page comes from the simulation.</p>
+</main>
+<script>
+"use strict";
+const $=id=>document.getElementById(id);
+const N=1024,D=32,NT=24,STEPS=160,BS=[8,16,32,64];
+const P={tau:-2,B:2,g:12,sn:0.4,step:0,bound:"box",seed:11};
+const fmt={tau:v=>{const t=Math.pow(10,v);return t<0.01?t.toExponential(1):t.toPrecision(2)},B:v=>BS[v]+" tokens",g:v=>v.toFixed(1),sn:v=>v.toFixed(2),step:v=>String(v)};
+function rng(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+let R=rng(1);const gauss=()=>{let u=0,v=0;while(!u)u=R();v=R();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v)};
+// ---------- document ----------
+let T,U,seg,Kn,V,QB,segStarts; // topic vecs, value means, token->segment topic, key noise, values, query bases
+function gen(){R=rng(P.seed);
+ T=[];U=[];for(let t=0;t<NT;t++){const a=new Float64Array(D),b=new Float64Array(D);for(let j=0;j<D;j++){a[j]=gauss();b[j]=gauss()}T.push(a);U.push(b)}
+ seg=new Int32Array(N);segStarts=[];let i=0,last=-1;while(i<N){let t;do{t=Math.floor(R()*NT)}while(t===last);last=t;const L=20+Math.floor(R()*101);segStarts.push(i);for(let k=0;k<L&&i<N;k++,i++)seg[i]=t}
+ Kn=new Float64Array(N*D);V=new Float64Array(N*D);
+ for(let n=0;n<N;n++)for(let j=0;j<D;j++){Kn[n*D+j]=gauss();V[n*D+j]=(U[seg[n]][j]+0.7*gauss())/Math.sqrt(D*1.49)}
+ // query plan: sequence of topics, noise per step
+ const order=[];for(let s=0;s<=STEPS/8+1;s++)order.push(Math.floor(R()*NT));
+ QB=[];for(let s=0;s<STEPS;s++){const k=Math.floor(s/8),f0=(s%8)/8,f=f0*f0*(3-2*f0),q=new Float64Array(D);
+  for(let j=0;j<D;j++)q[j]=(1-f)*T[order[k]][j]+f*T[order[k+1]][j]+0.5*gauss();QB.push(q)}
+}
+let K=new Float64Array(N*D);
+function buildKeys(){for(let n=0;n<N;n++){const t=T[seg[n]];for(let j=0;j<D;j++)K[n*D+j]=t[j]+P.sn*Kn[n*D+j]}}
+// ---------- block summaries ----------
+let Bk,M,kbar,vbar,kmin,kmax,wC,rhoC,VC,Vmax;
+function buildBlocks(){Bk=BS[P.B];M=N/Bk;kbar=new Float64Array(M*D);vbar=new Float64Array(M*D);kmin=new Float64Array(M*D).fill(Infinity);kmax=new Float64Array(M*D).fill(-Infinity);
+ wC=new Float64Array(M*D);rhoC=new Float64Array(M);VC=new Float64Array(M);Vmax=0;
+ for(let c=0;c<M;c++){for(let n=c*Bk;n<(c+1)*Bk;n++){let vn=0;for(let j=0;j<D;j++){const k=K[n*D+j];kbar[c*D+j]+=k/Bk;vbar[c*D+j]+=V[n*D+j]/Bk;if(k<kmin[c*D+j])kmin[c*D+j]=k;if(k>kmax[c*D+j])kmax[c*D+j]=k;vn+=V[n*D+j]**2}VC[c]=Math.max(VC[c],Math.sqrt(vn))}
+  Vmax=Math.max(Vmax,VC[c]);
+  for(let n=c*Bk;n<(c+1)*Bk;n++)for(let j=0;j<D;j++)wC[c*D+j]=Math.max(wC[c*D+j],Math.abs(K[n*D+j]-kbar[c*D+j]));
+  for(let n=c*Bk;n<(c+1)*Bk;n++){let s=0;for(let j=0;j<D;j++){const w=wC[c*D+j];if(w>0)s+=((K[n*D+j]-kbar[c*D+j])/w)**2}rhoC[c]=Math.max(rhoC[c],Math.sqrt(s))}}
+}
+// ---------- per-query evaluation ----------
+function query(s){const qb=QB[s];let nn=0;for(let j=0;j<D;j++)nn+=qb[j]*qb[j];const q=new Float64Array(D),sc=P.g/Math.sqrt(nn);for(let j=0;j<D;j++)q[j]=qb[j]*sc;return q}
+const SD=Math.sqrt(D);
+function analyse(q){
+ const sl=new Float64Array(N);let mx=-Infinity;for(let n=0;n<N;n++){let s=0;for(let j=0;j<D;j++)s+=q[j]*K[n*D+j];sl[n]=s/SD;if(sl[n]>mx)mx=sl[n]}
+ const ex=new Float64Array(N);let Z=0;for(let n=0;n<N;n++){ex[n]=Math.exp(sl[n]-mx);Z+=ex[n]}
+ const al=new Float64Array(N);const o=new Float64Array(D);for(let n=0;n<N;n++){al[n]=ex[n]/Z;for(let j=0;j<D;j++)o[j]+=al[n]*V[n*D+j]}
+ const sb=new Float64Array(M),dl=new Float64Array(M);
+ for(let c=0;c<M;c++){let s=0,up=0,lo=0,ew=0;for(let j=0;j<D;j++){const qj=q[j];s+=qj*kbar[c*D+j];const a=qj*kmin[c*D+j],b=qj*kmax[c*D+j];up+=Math.max(a,b);lo+=Math.min(a,b);ew+=qj*qj*wC[c*D+j]**2}
+  sb[c]=s/SD;
+  if(P.bound==="box")dl[c]=Math.max(Math.abs(up/SD-sb[c]),Math.abs(lo/SD-sb[c]));
+  else if(P.bound==="ell")dl[c]=rhoC[c]/SD*Math.sqrt(ew);
+  else{let m=0;for(let n=c*Bk;n<(c+1)*Bk;n++)m=Math.max(m,Math.abs(sl[n]-sb[c]));dl[c]=m}}
+ let mb=-Infinity;for(let c=0;c<M;c++)mb=Math.max(mb,sb[c]);
+ const ph=new Float64Array(M);let Zb=0;for(let c=0;c<M;c++){ph[c]=Bk*Math.exp(sb[c]-mb);Zb+=ph[c]}for(let c=0;c<M;c++)ph[c]/=Zb;
+ let den=0;for(let c=0;c<M;c++)den+=ph[c]*Math.cosh(Math.min(dl[c],300));
+ const Rc=new Float64Array(M);let bound=0;for(let c=0;c<M;c++){const d=Math.min(dl[c],300);Rc[c]=ph[c]*(Vmax*(Math.cosh(d)-1)/den+VC[c]*Math.tanh(d/2));bound+=2*Rc[c]}
+ const on=new Float64Array(D);let no=0;for(let j=0;j<D;j++)no+=o[j]*o[j];
+ return {sl,mx,al,o,no:Math.sqrt(no),sb,mb,dl,ph,den,Rc,bound};
+}
+// mixed attention with open mask -> relative error
+function mixed(A,open){let mxl=Math.max(A.mx,A.mb+Math.log(Bk));const out=new Float64Array(D);let Z=0;
+ for(let c=0;c<M;c++){if(open[c]){for(let n=c*Bk;n<(c+1)*Bk;n++){const w=Math.exp(A.sl[n]-mxl);Z+=w;for(let j=0;j<D;j++)out[j]+=w*V[n*D+j]}}
+  else{const w=Bk*Math.exp(A.sb[c]-mxl);Z+=w;for(let j=0;j<D;j++)out[j]+=w*vbar[c*D+j]}}
+ let e=0;for(let j=0;j<D;j++){const d=out[j]/Z-A.o[j];e+=d*d}return Math.sqrt(e)/A.no}
+function reads(open){let r=0;for(let c=0;c<M;c++)r+=open[c]?Bk:1;return r}
+function select(A,tau){const op=new Uint8Array(M);for(let c=0;c<M;c++)op[c]=A.Rc[c]>tau?1:0;return op}
+// ---------- state ----------
+let cur,curOpen,hist,unionMask;
+function compute(){const tau=Math.pow(10,P.tau);
+ hist=[];unionMask=new Uint8Array(M);let cnt=0;
+ for(let s=0;s<=P.step;s++){const A=analyse(query(s)),op=select(A,tau);let k=0;for(let c=0;c<M;c++)if(op[c]){k++;if(!unionMask[c]){unionMask[c]=1;cnt++}}
+  hist.push({read:reads(op)/N,tok:k*Bk/N,uni:cnt/M});if(s===P.step){cur=A;curOpen=op}}
+}
+function trade(){const A=cur,out={rk:[],imp:[],orc:[]};
+ for(let i=0;i<=44;i++){const lt=-6+i*0.15,op=select(A,Math.pow(10,lt));out.rk.push([reads(op)/N,mixed(A,op),lt])}
+ const idx=[...Array(M).keys()].sort((a,b)=>A.ph[b]-A.ph[a]);const op=new Uint8Array(M);out.imp.push([reads(op)/N,mixed(A,op)]);
+ for(let k=0;k<M;k++){op[idx[k]]=1;if(k<16||k%2===1||k===M-1)out.imp.push([reads(op)/N,mixed(A,op)])}
+ const ti=[...Array(N).keys()].sort((a,b)=>A.al[b]-A.al[a]);const o2=new Float64Array(D);let Z=0;
+ for(let n=0;n<N;n++){const t=ti[n],w=A.al[t];Z+=w;for(let j=0;j<D;j++)o2[j]+=w*V[t*D+j];
+  if(n<64||n%16===15){let e=0;for(let j=0;j<D;j++)e+=(o2[j]/Z-A.o[j])**2;out.orc.push([(n+1)/N,Math.sqrt(e)/A.no])}}
+ return out}
+// ---------- drawing ----------
+let C={};function cols(){const cs=getComputedStyle(document.documentElement);for(const k of["c1","c2","c3","c4","cx","muted","grid","line","accent","card-solid","text"])C[k]=cs.getPropertyValue("--"+k).trim()}
+function setup(cv){const r=cv.getBoundingClientRect(),dpr=window.devicePixelRatio||1;cv.width=Math.round(r.width*dpr);cv.height=Math.round(r.height*dpr);const x=cv.getContext("2d");x.setTransform(dpr,0,0,dpr,0,0);x.clearRect(0,0,r.width,r.height);return [x,r.width,r.height]}
+function rgba(hex,a){const c=document.createElement("canvas").getContext("2d");c.fillStyle=hex;const h=c.fillStyle;if(h[0]==="#"){const n=parseInt(h.slice(1),16);return`rgba(${n>>16&255},${n>>8&255},${n&255},${a})`}return h.replace(/rgba?\(([^)]+)\)/,(m,p)=>{const v=p.split(",");return`rgba(${v[0]},${v[1]},${v[2]},${a})`})}
+const font="12px -apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif";
+function drawStrip(){const [x,W,H]=setup($("strip"));const L=36,Rr=10,w=W-L-Rr,cw=w/N;
+ x.font=font;x.fillStyle=C.muted;x.textBaseline="middle";
+ const top=12,hA=96,yB=top+hA+10,hB=26,yU=yB+hB+8,hU=10;
+ x.fillText("α",8,top+hA/2);x.fillText("read",4,yB+hB/2);x.fillText("ever",4,yU+hU/2);
+ // topic boundaries
+ x.fillStyle=rgba(C.c3,.6);for(const s of segStarts)if(s>0)x.fillRect(L+s*cw-0.5,top,1,hA);
+ let amax=0;for(let n=0;n<N;n++)amax=Math.max(amax,cur.al[n]);const sa=Math.sqrt(amax);
+ x.fillStyle=C.cx;for(let n=0;n<N;n++){const h=hA*Math.sqrt(cur.al[n])/sa;if(h>0.3)x.fillRect(L+n*cw,top+hA-h,Math.max(cw,0.8),h)}
+ for(let c=0;c<M;c++){const x0=L+c*Bk*cw,bw=Bk*cw-(Bk*cw>3?1:0);
+  if(curOpen[c]){x.fillStyle=C.c2;x.fillRect(x0,yB,bw,hB)}else{x.fillStyle=C.grid;x.fillRect(x0,yB,bw,hB);x.fillStyle=rgba(C.c1,Math.min(1,0.15+3*Math.sqrt(cur.ph[c])));x.fillRect(x0+bw/2-1.5,yB+hB/2-1.5,3,3)}
+  x.fillStyle=unionMask[c]?C.c4:C.grid;x.fillRect(x0,yU,bw,hU)}
+ x.fillStyle=C.muted;x.textBaseline="top";x.fillText("token 0",L,yU+hU+4);x.textAlign="right";x.fillText("token "+(N-1),L+w,yU+hU+4);x.textAlign="left"}
+function axes(x,W,H,L,B,xl,yl){x.strokeStyle=C.line;x.lineWidth=1;x.beginPath();x.moveTo(L,8);x.lineTo(L,H-B);x.lineTo(W-10,H-B);x.stroke();x.fillStyle=C.muted;x.font=font;x.textAlign="center";x.fillText(xl,L+(W-10-L)/2,H-6);x.save();x.translate(12,(H-B)/2+4);x.rotate(-Math.PI/2);x.fillText(yl,0,0);x.restore();x.textAlign="left"}
+function drawScat(){const [x,W,H]=setup($("scat"));const L=50,B=36,Wp=W-L-10,Hp=H-B-8;
+ let dm=0;for(let c=0;c<M;c++)dm=Math.max(dm,cur.dl[c]);dm=Math.max(0.5,dm*1.08);const ymin=-8;
+ const X=d=>L+d/dm*Wp,Y=lp=>8+(1-(lp-ymin)/(-ymin))*Hp;
+ const Vs=[...VC].sort((a,b)=>a-b),Vm=Vs[Vs.length>>1],tau=Math.pow(10,P.tau);
+ const Rf=(p,d)=>p*(Vmax*(Math.cosh(d)-1)/cur.den+Vm*Math.tanh(d/2));
+ const nx=60,ny=40;for(let i=0;i<nx;i++)for(let j=0;j<ny;j++){const d=(i+.5)/nx*dm,lp=ymin*(1-(j+.5)/ny),r=Rf(Math.pow(10,lp),d);const a=Math.max(0,Math.min(1,(Math.log10(r)-P.tau+3)/5));
+  x.fillStyle=rgba(C.c2,0.03+0.22*a);x.fillRect(Math.floor(L+i*Wp/nx),Math.floor(8+j*Hp/ny),Math.ceil(Wp/nx)+1,Math.ceil(Hp/ny)+1)}
+ // boundary R=tau: for each d solve p
+ x.strokeStyle=C.cx;x.setLineDash([6,4]);x.lineWidth=1.5;x.beginPath();let st=false;
+ for(let i=1;i<=200;i++){const d=i/200*dm,f=Rf(1,d);if(f<=0)continue;const lp=Math.log10(tau/f);if(lp>0||lp<ymin){st=false;continue}if(!st){x.moveTo(X(d),Y(lp));st=true}else x.lineTo(X(d),Y(lp))}
+ x.stroke();x.setLineDash([]);
+ for(let c=0;c<M;c++){const lp=Math.max(ymin,Math.log10(cur.ph[c]));x.fillStyle=curOpen[c]?C.c2:C.c1;x.beginPath();x.arc(X(cur.dl[c]),Y(lp),curOpen[c]?4:3,0,7);x.fill()}
+ axes(x,W,H,L,B,"distortion bound δ_C (logit units)","importance p̂_C");
+ x.fillStyle=C.muted;x.font=font;x.textAlign="right";for(let e=0;e>=ymin;e-=2)x.fillText("1e"+e,L-4,Y(e)+4);x.textAlign="center";
+ const stp=dm>8?2:dm>3?1:0.5;for(let d=0;d<=dm;d+=stp)x.fillText(d.toFixed(stp<1?1:0),X(d),H-B+14);x.textAlign="left"}
+let TR;
+function drawTrade(){const [x,W,H]=setup($("trade"));const L=50,B=36,Wp=W-L-10,Hp=H-B-8,ymin=-4,ymax=0.3;
+ const X=f=>L+f*Wp,Y=e=>{const l=Math.max(ymin,Math.min(ymax,Math.log10(Math.max(e,1e-9))));return 8+(1-(l-ymin)/(ymax-ymin))*Hp};
+ x.strokeStyle=C.grid;x.lineWidth=1;for(let e=ymin;e<=0;e++){x.beginPath();x.moveTo(L,Y(10**e));x.lineTo(W-10,Y(10**e));x.stroke()}
+ const line=(pts,col,w)=>{x.strokeStyle=col;x.lineWidth=w;x.beginPath();pts.forEach((p,i)=>i?x.lineTo(X(p[0]),Y(p[1])):x.moveTo(X(p[0]),Y(p[1])));x.stroke()};
+ line(TR.orc,C.muted,1.5);line(TR.imp,C.c1,2);line(TR.rk.slice().sort((a,b)=>a[0]-b[0]),C.c2,2.5);
+ const cr=reads(curOpen)/N,ce=mixed(cur,curOpen);x.fillStyle=C.cx;x.beginPath();x.arc(X(cr),Y(ce),5,0,7);x.fill();
+ axes(x,W,H,L,B,"share of cache entries read","relative output error");
+ x.fillStyle=C.muted;x.font=font;x.textAlign="right";for(let e=ymin;e<=0;e++)x.fillText(e===0?"100%":(100*10**e)+"%",L-4,Y(10**e)+4);
+ x.textAlign="center";for(let f=0;f<=1.001;f+=0.25)x.fillText(Math.round(f*100)+"%",X(f),H-B+14);x.textAlign="left"}
+function drawUni(){const [x,W,H]=setup($("uni"));const L=50,B=36,Wp=W-L-10,Hp=H-B-8;
+ const X=s=>L+s/(STEPS-1)*Wp,Y=v=>8+(1-v)*Hp;
+ x.strokeStyle=C.grid;for(let v=0;v<=1;v+=0.25){x.beginPath();x.moveTo(L,Y(v));x.lineTo(W-10,Y(v));x.stroke()}
+ const ln=(k,col)=>{x.strokeStyle=col;x.lineWidth=2.5;x.beginPath();hist.forEach((h,i)=>i?x.lineTo(X(i),Y(h[k])):x.moveTo(X(i),Y(h[k])));x.stroke()};
+ ln("tok",C.c2);ln("uni",C.c4);
+ axes(x,W,H,L,B,"decoding step","share of cache");x.fillStyle=C.muted;x.font=font;x.textAlign="right";for(let v=0;v<=1;v+=0.25)x.fillText(Math.round(v*100)+"%",L-4,Y(v)+4);
+ x.textAlign="center";for(let s=0;s<STEPS;s+=40)x.fillText(s,X(s),H-B+14);x.textAlign="left"}
+function stats(){const r=reads(curOpen),e=mixed(cur,curOpen);let k=0;for(let c=0;c<M;c++)k+=curOpen[c];const u=hist[hist.length-1].uni;
+ const all=mixed(cur,new Uint8Array(M));
+ $("vRead").textContent=(100*r/N).toFixed(1)+"%";$("vErr").textContent=(100*e).toFixed(e<0.001?3:2)+"%";$("vOpen").textContent=k+" / "+M;$("vUni").textContent=(100*u).toFixed(0)+"%";
+ let top=0;{const s=[...cur.al].sort((a,b)=>b-a);let acc=0;for(const a of s){acc+=a;top++;if(acc>=0.9)break}}
+ $("verdict").textContent=`This step reads ${r} of ${N} entries (${(N/r).toFixed(1)}× less than full attention) with ${(100*e).toFixed(2)}% output error. Summarising every block would give ${(100*all).toFixed(1)}% error. The exact top ${top} tokens (${(100*top/N).toFixed(1)}%) carry 90% of this query's attention.`;
+ const ord=[...Array(M).keys()].sort((a,b)=>cur.Rc[b]-cur.Rc[a]).slice(0,4);
+ let s=`τ = ${fmt.tau(P.tau)}   M = ${M} blocks × ${Bk}\nV_max = ${Vmax.toFixed(2)}   ‖o‖ = ${cur.no.toFixed(3)}\nΣ p̂_C cosh δ_C = ${cur.den.toExponential(2)}\nAll blocks summarised:\n  Eq. 4 bound  2ΣR_C = ${cur.bound.toExponential(2)}\n  actual ‖o − ô‖     = ${(all*cur.no).toExponential(2)}\n\nHighest-risk blocks (✓ = opened):\nblock tokens      p̂_C    δ_C   R_C\n`;
+ for(const c of ord)s+=`${String(c).padStart(5)} ${(c*Bk+"–"+((c+1)*Bk-1)).padEnd(10)} ${cur.ph[c].toExponential(1).padStart(7)} ${cur.dl[c].toFixed(1).padStart(5)} ${cur.Rc[c].toExponential(1)}${curOpen[c]?" ✓":""}\n`;
+ $("hood").textContent=s}
+function drawAll(){cols();drawStrip();drawScat();drawTrade();drawUni()}
+function update(level){if(level>=3)gen();if(level>=2){buildKeys();buildBlocks()}compute();TR=trade();stats();drawAll()}
+// ---------- UI ----------
+const lvl={tau:1,B:2,g:1,sn:2,step:1};
+for(const k of Object.keys(lvl)){const el=$(k);el.value=P[k];$(k+"o").textContent=fmt[k](P[k]);el.addEventListener("input",()=>{P[k]=+el.value;$(k+"o").textContent=fmt[k](P[k]);update(lvl[k])})}
+document.querySelectorAll("[data-b]").forEach(b=>{b.setAttribute("aria-pressed",b.dataset.b===P.bound);b.addEventListener("click",()=>{P.bound=b.dataset.b;document.querySelectorAll("[data-b]").forEach(o=>o.setAttribute("aria-pressed",o===b));update(1)})});
+$("regen").addEventListener("click",()=>{P.seed=(P.seed*7919+13)%100000;update(3)});
+let timer=null;$("play").addEventListener("click",()=>{if(timer){clearInterval(timer);timer=null;$("play").textContent="▶ Play";return}
+ if(P.step>=STEPS-1)P.step=0;$("play").textContent="❚❚ Pause";timer=setInterval(()=>{P.step++;if(P.step>=STEPS-1){P.step=STEPS-1;clearInterval(timer);timer=null;$("play").textContent="▶ Play"}$("step").value=P.step;$("stepo").textContent=P.step;update(1)},120)});
+window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change",drawAll);
+let rt;window.addEventListener("resize",()=>{clearTimeout(rt);rt=setTimeout(drawAll,100)});
+update(3);
+</script>
+</body></html>
