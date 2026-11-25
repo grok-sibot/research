@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="light dark">
+<title>Welding flat molecular sheets together makes a film tougher than Kevlar — Research Explorer, 26 Nov 2026</title>
+<link rel="stylesheet" href="../assets/style.css">
+<style>
+canvas#impact{height:280px}
+canvas#esp,canvas#stop,canvas#link{height:300px}
+.btnrow{display:flex;flex-wrap:wrap;gap:8px;margin:4px 0 14px;align-items:center}
+.btnrow button{font:500 14px var(--font);color:var(--text);background:var(--accent-soft);border:0;border-radius:8px;padding:7px 14px;min-height:32px;cursor:pointer}
+.btnrow button[aria-pressed="true"]{box-shadow:inset 0 0 0 2px var(--accent)}
+.btnrow .lbl{font-size:13px;color:var(--muted);margin-right:2px}
+label span{flex:1} label output{white-space:nowrap}
+.legend .sw{display:inline-block;width:14px;height:14px;border-radius:4px;vertical-align:-2px;margin-right:6px}
+.stat .v.good{color:var(--c3)} .stat .v.bad{color:var(--c2)}
+</style></head><body><main>
+<a class="back" href="../">‹ All demos</a>
+<div class="eyebrow">26 Nov 2026 · Materials</div>
+<h1>Welding flat molecular sheets together makes a film as strong as Kevlar and far tougher</h1>
+<p class="lede">Almost every plastic, including Kevlar, is made of long one-dimensional chains, and a chain carries load only along its own length. This team started instead from flat, two-dimensional polyaramid sheets, each a rigid molecular net. Stacked up, such sheets hold together only by hydrogen bonds, which makes the films stiff but brittle. The trick here is to graft short flexible "linker" arms onto the sheet edges, stack the sheets into a film, and then heat it to 280 °C so the arms bond covalently to the next sheets. That "welds" the stack into one network. Below, a live model of the paper's microprojectile impact test shows what that does to a supersonic glass bead.</p>
+<p class="authors">Xiaoli Gong, Guohu Luo, Jiaxin Wu, Jiayu Chen, Zhengqiao Yin, Zhipeng Yan, Jingran Chen, Bowen Tang, Le Tang, Yuxiao Wu, Guanling Wu, Li Peng, Qihang Wang, Yinglong Hu, Yue Zhu, Yuan Yu, Keyan Liu, Xiaozhou Liu, Huanhuan Wu, Yakai Lin, Yifei Xu, Zhiliang Pan, Hao Ma, Man Li, Hongjun Zhang, Dacheng Wei, Youpeng Zhang, Yao Fu, Yongxiang Hu, Yuwen Zeng</p>
+
+<section class="card why" aria-labelledby="why-h">
+<h2 id="why-h">Why it matters</h2>
+<p>Body armour, spacecraft shielding and protective films are limited by how much impact energy each kilogram of material can soak up, and the best polymers such as Kevlar are built from one-dimensional chains that pass all of the load through a few bonds at a time. By covalently welding flat 2D polyaramid sheets into one network, these nanofilms match Kevlar 29's stiffness and strength (69.8 GPa and 3.9 GPa) and absorb up to ten times more energy per kilogram than Kevlar composite against supersonic microprojectiles, reaching 5.2 MJ per kg in the thinnest films.</p>
+</section>
+
+<section class="card" aria-labelledby="paper-h">
+<h2 id="paper-h">The paper</h2>
+<p style="margin:0 0 6px"><strong>Covalent Welding of Two-Dimensional Molecular Sheets into Ultra-Stiff, Super-Tough Polymeric Networks</strong></p>
+<p class="cite" style="margin:0">Xiaoli Gong, Guohu Luo, Jiaxin Wu and 27 co-authors; corresponding authors Yongxiang Hu and Yuwen Zeng (Fudan University; Shanghai Jiao Tong University; University of Science and Technology of China; Tsinghua University). arXiv:2611.32291 [cond-mat.soft], submitted 24 November 2026. <a href="https://arxiv.org/abs/2611.32291">Read on arXiv</a> · <a href="https://arxiv.org/pdf/2611.32291">PDF</a></p>
+<p style="margin-top:14px"><strong>In plain language:</strong> in a stack of hydrogen-bonded sheets, load has to cross from one sheet to the next through fragile hydrogen bonds, and those bonds are frozen in place, so the film cracks instead of giving. Welding adds covalent bridges between neighbouring sheets. The bridges share the load, which raises the stiffness from 21.4 to 69.8 GPa and the breaking strength from 0.9 to 3.9 GPa. They also act as soft springs. Under a hit, the sheets can slide past each other with friction (which burns energy) without falling apart, and the linkers finally snap one region at a time.</p>
+<p>To measure toughness at extreme speed, the team fired single 8.11 µm silica beads (2.2 g cm⁻³) with a laser pulse at free-standing films in vacuum, at 300–1,200 m s⁻¹. They filmed each bead's speed before (v<sub>i</sub>) and after (v<sub>r</sub>) it passed through. The energy the film took out of the bead, divided by the mass of film in the bead's path, is the <em>specific dissipated energy</em> (the paper's Eqs. 10–12):</p>
+<div class="eq">E<sub>p</sub> = ½ m<sub>p</sub> (v<sub>i</sub>² − v<sub>r</sub>²), &nbsp;&nbsp; E<sub>p</sub>* = E<sub>p</sub> / (ρ h A<sub>p</sub>) = v<sub>i</sub>²/2 + E<sub>d</sub>*</div>
+<p>Here m<sub>p</sub> is the bead mass, ρ and h the film density and thickness, and A<sub>p</sub> the bead's cross-section. The v<sub>i</sub>²/2 term is the energy needed just to shove the film "plug" up to the bead's speed. E<sub>d</sub>* is everything else the material dissipates: stretching, sliding, cracking and bond breaking. Across 332 impacts on 14 films, welded films reached about 3 MJ kg⁻¹ near 1,000 m s⁻¹, roughly four times the unwelded film (0.53 MJ kg⁻¹ at 600–800 m s⁻¹). Films 33–38 nm thick reached 5.2 MJ kg⁻¹, more than the energy that TNT releases per kilogram (4.2 MJ kg⁻¹), though here it is absorbed rather than released.</p>
+</section>
+
+<section class="card" aria-labelledby="try-h">
+<h2 id="try-h">Try it: fire a silica microbead at a nanofilm</h2>
+<p class="note" style="margin-top:0">The bead is the paper's: 8.11 µm across, 2.2 g cm⁻³, so 0.614 ng. Film density is 1.54 g cm⁻³, the middle of the paper's flotation bracket (1.48–1.595). For each film, E<sub>p</sub>* at your speed comes from a trend line through the values quoted in the paper (see "Demo maths" at the bottom). The demo then inverts Eq. 10–12 to get the energy taken from the bead and its exit speed. If the film can absorb all of the bead's kinetic energy, the bead is caught.</p>
+<div class="btnrow" role="group" aria-label="Film"><span class="lbl">Film:</span>
+ <button type="button" data-m="weld">Welded 2D HOMN-L4</button><button type="button" data-m="unweld">Unwelded 2DPA-L4</button>
+ <span class="lbl" style="margin-left:12px">Animation:</span><button type="button" id="play">❚❚ Pause</button></div>
+<div class="controls">
+ <div><label for="v"><span>Impact speed v<sub>i</sub></span> <output id="vo"></output></label><input type="range" id="v" min="300" max="1200" step="10"></div>
+ <div><label for="h"><span>Thickness of one film</span> <output id="ho"></output></label><input type="range" id="h" min="0" max="1" step="0.005"></div>
+ <div><label for="n"><span>Stacked layers</span> <output id="no"></output></label><input type="range" id="n" min="1" max="6" step="1"></div>
+</div>
+<div class="stats">
+ <div class="stat"><div class="v" id="sE"></div><div class="l">Specific dissipated energy E<sub>p</sub>* (MJ kg⁻¹)</div></div>
+ <div class="stat"><div class="v" id="sEp"></div><div class="l">Energy taken from the bead E<sub>p</sub> (nJ) / bead's kinetic energy</div></div>
+ <div class="stat"><div class="v" id="sVr"></div><div class="l">Exit speed v<sub>r</sub> (m s⁻¹)</div></div>
+ <div class="stat"><div class="v" id="sStop"></div><div class="l" id="lStop">Total film thickness needed to catch it</div></div>
+</div>
+<p class="note" id="verdict" aria-live="polite"></p>
+<div class="grid" style="margin-top:10px">
+ <div class="plot"><div class="plot-title">The impact (side view; film thickness exaggerated)</div>
+  <canvas id="impact" role="img" aria-label="Animation of a silica bead hitting the film and either passing through slower or being caught"></canvas>
+  <div class="legend"><span><i class="sw" style="background:var(--c2)"></i>energy absorbed by the film</span><span><i class="sw" style="background:var(--c1)"></i>energy left in the bead</span></div></div>
+ <div class="plot"><div class="plot-title">Specific energy vs impact speed (cf. Fig. 3b)</div>
+  <canvas id="esp" role="img" aria-label="Log-scale chart of specific dissipated energy against impact speed for welded and unwelded films, with boxes for reference materials and a TNT line"></canvas>
+  <div class="legend"><span style="--k:var(--c2)">welded (≥ 60 nm)</span><span style="--k:var(--c4)">welded, 33–38 nm films</span><span style="--k:var(--c1)">unwelded</span><span><i class="sw" style="background:var(--grid)"></i>reference materials (Suppl. Table 4)</span><span style="--k:var(--muted)">TNT 4.2 MJ kg⁻¹</span></div></div>
+</div>
+<div class="grid" style="margin-top:20px">
+ <div class="plot"><div class="plot-title">Film mass per square metre needed to stop the bead</div>
+  <canvas id="stop" role="img" aria-label="Chart of areal mass needed to stop the bead against speed for welded film, unwelded film, Kevlar composite and stainless steel"></canvas>
+  <div class="legend"><span style="--k:var(--c2)">welded 2D HOMN-L4</span><span style="--k:var(--c1)">unwelded 2DPA-L4</span><span style="--k:var(--c3)">Kevlar/PVP composite</span><span style="--k:var(--muted)">stainless steel (2 µm film)</span></div></div>
+ <div class="plot"><div class="plot-title">Linker length vs stiffness gain (Fig. 2a)</div>
+  <canvas id="link" role="img" aria-label="Bar chart of modulus enhancement for linkers L0, L3, L4, L5 and L8, with L4 the highest at 6.93 times"></canvas>
+  <p class="note" style="margin:8px 0 0">The paper's text gives these five values; the L6 and L7 bars appear only in its figure, so they are left out here. If the linker is too short, few sheet edges can reach each other. If it is too long, the bridges are too floppy. L4 (β-alanine ethyl ester) is the sweet spot.</p></div>
+</div>
+</section>
+
+<section class="card" aria-labelledby="mech-h">
+<h2 id="mech-h">How the welded film compares (from the paper)</h2>
+<table>
+<thead><tr><th>Material</th><th>Young's modulus (GPa)</th><th>Strength (GPa)</th></tr></thead>
+<tbody>
+<tr><td>Unwelded 2DPA-L4 film (nanoindentation)</td><td>21.4 ± 5.4</td><td>0.9 ± 0.1</td></tr>
+<tr><td><strong>Welded 2D HOMN-L4 film</strong></td><td><strong>69.8 ± 13.0</strong></td><td><strong>3.9 ± 0.4</strong></td></tr>
+<tr><td>Kevlar 29 fibre</td><td>~70.5</td><td>~3.6</td></tr>
+<tr><td>E-glass fibre</td><td>~76</td><td>~3.45</td></tr>
+</tbody></table>
+<p class="note">Fibres are strong in only one direction. The welded film is just as strong in every direction within its plane, it can be spin-coated or slot-die coated from solution, and it scales up in area. Other measured properties: it keeps 77% of its stiffness after 1 MeV proton doses far above a year in low Earth orbit. Its hydrogen permeability is three orders of magnitude below EVOH, the benchmark barrier polymer, and its through-plane heat conduction is 64% higher than the unwelded film's (0.25 → 0.41 W m⁻¹ K⁻¹).</p>
+</section>
+
+<section class="card" aria-labelledby="how-h">
+<h2 id="how-h">How to use it</h2>
+<ul>
+ <li>Start at the defaults: a welded film 300 nm thick hit at 800 m s⁻¹. The film takes about 30% of the bead's energy, but the bead still gets through. Raise <strong>Stacked layers</strong>. The paper found that laminated films keep the same specific energy, so stacking about four layers (≈1.2 µm in total) catches the bead.</li>
+ <li>Switch to <strong>Unwelded 2DPA-L4</strong>. The same film is now about four times weaker per kilogram, the bead punches through much faster, and you would need roughly four times as much film to stop it.</li>
+ <li>Drag the thickness below 60 nm. The paper found the thinnest welded films (33–38 nm) were the toughest per kilogram, up to 5.2 MJ kg⁻¹, which it links to amide dipoles lined up by the silica substrate. The demo blends between the two trend lines from 60 nm down to 35 nm.</li>
+ <li>On the speed chart, compare the orange line with the grey boxes for Kevlar composite, steel, polystyrene and multilayer graphene, each drawn over the speed range it was tested at. The welded film sits up to an order of magnitude higher.</li>
+ <li>The bottom-left chart is the practical question: how many grams of film per square metre stop this bead? Lower is lighter armour. It uses KE / (A<sub>p</sub> E<sub>p</sub>*), so a material with 5× the specific energy needs 5× less mass.</li>
+</ul>
+</section>
+<p class="note" style="margin-top:24px">Demo maths: m<sub>p</sub> = 2.2 g cm⁻³ · (π/6) · (8.11 µm)³; A<sub>p</sub> = π (4.055 µm)²; ρ = 1.54 g cm⁻³. E<sub>p</sub>* is modelled as a straight line through the origin, E<sub>p</sub>* = k·v<sub>i</sub>, fitted to the paper's quoted points. Welded, ≥ 60 nm: k = 3.0 kJ kg⁻¹ per m s⁻¹, which gives ≈2.1 MJ kg⁻¹ at 700 m s⁻¹ (≈4× unwelded) and ≈3 MJ kg⁻¹ at 1,000 m s⁻¹. Welded, ≤ 35 nm: k = 5.2 (5.2 MJ kg⁻¹ at ~1,000 m s⁻¹). Unwelded: k = 0.76 (0.53 MJ kg⁻¹ at ~700 m s⁻¹). The lines are linear in log(thickness) between 35 and 60 nm. Captured if k·v<sub>i</sub>·ρ h A<sub>p</sub> ≥ ½ m<sub>p</sub> v<sub>i</sub>²; otherwise v<sub>r</sub> = √(v<sub>i</sub>² − 2E<sub>p</sub>/m<sub>p</sub>). This is a simplification. For example, the paper's 665-nm film caught a bead outright at 646 m s⁻¹, while the trend line predicts it would get through at about 300 m s⁻¹, so real thick films can do better than shown. Reference boxes are ranges from the paper's Supplementary Table 4: Kevlar/PVP composite 298–422 m s⁻¹, 0.445–0.536 MJ kg⁻¹; stainless steel (2 µm) 450–1,000, 0.192–0.534; polystyrene (75–150 nm) 350–800, 0.40–1.50; multilayer graphene 600–900, 1.10–1.26; gold (14–52 nm) 880–900, 0.529–0.578; Ni<sub>60</sub>Ta<sub>40</sub> metallic glass 185–540, 0.33–0.56. The stopping chart holds Kevlar composite and steel at the midpoints of their ranges (0.49 and 0.36 MJ kg⁻¹). Those materials were tested with different projectiles, so treat the comparison as indicative.</p>
+</main>
+<script>
+"use strict";
+const $=id=>document.getElementById(id);
+const RHO_P=2200,D=8.11e-6,R=D/2,MP=RHO_P*Math.PI/6*D**3,AP=Math.PI*R*R,RHO=1540;
+const HMIN=30,HMAX=1250;
+const P={v:800,h:0,n:1,m:"weld"};
+const hFromS=s=>HMIN*Math.pow(HMAX/HMIN,s), sFromH=h=>Math.log(h/HMIN)/Math.log(HMAX/HMIN);
+P.h=sFromH(300);
+// k in J/kg per (m/s)
+function kWeld(hnm){if(hnm>=60)return 3000;if(hnm<=35)return 5200;const f=Math.log(60/hnm)/Math.log(60/35);return 3000+f*2200}
+const K_UN=760;
+function Estar(m,v,hnm){return (m==="weld"?kWeld(hnm):K_UN)*v}
+const REF=[["Kevlar/PVP composite",298,422,0.445,0.536],["Stainless steel 2 µm",450,1000,0.192,0.534],["Polystyrene",350,800,0.40,1.50],["Multilayer graphene",600,900,1.10,1.26],["Gold",880,900,0.529,0.578],["Ni₆₀Ta₄₀ glass",185,540,0.33,0.56]];
+const LINK=[["L0",4.63],["L3",3.00],["L4",6.93],["L5",4.17],["L8",2.57]];
+let S={};
+function compute(){
+ const hnm=hFromS(P.h),htot=hnm*P.n*1e-9,v=P.v;
+ const E=Estar(P.m,v,hnm),KE=0.5*MP*v*v,cap=E*RHO*htot*AP;
+ const caught=cap>=KE,Ep=caught?KE:cap,vr=caught?0:Math.sqrt(v*v-2*Ep/MP);
+ const hStop=KE/(AP*E*RHO); // m, assuming same E*
+ S={hnm,htot,v,E,KE,Ep,vr,caught,hStop};
+}
+function css(n){return getComputedStyle(document.documentElement).getPropertyValue(n).trim()}
+function setup(c){const r=c.getBoundingClientRect(),d=window.devicePixelRatio||1;c.width=Math.round(r.width*d);c.height=Math.round(r.height*d);const x=c.getContext("2d");x.setTransform(d,0,0,d,0,0);return [x,r.width,r.height]}
+const font=(s,w)=>`${w||400} ${s}px -apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Arial,sans-serif`;
+function fmtH(m){const nm=m*1e9;return nm<1000?Math.round(nm)+" nm":(nm/1000).toFixed(nm<10000?2:1)+" µm"}
+function update(){
+ compute();
+ $("vo").textContent=P.v+" m s⁻¹";$("ho").textContent=Math.round(S.hnm)+" nm";$("no").textContent=P.n+(P.n>1?` (${fmtH(S.htot)} total)`:"");
+ $("sE").textContent=(S.E/1e6).toFixed(2);
+ $("sEp").textContent=(S.Ep*1e9).toFixed(0)+" / "+(S.KE*1e9).toFixed(0);
+ const vr=$("sVr");vr.textContent=S.caught?"caught":Math.round(S.vr);vr.className="v "+(S.caught?"good":"bad");
+ $("sStop").textContent=fmtH(S.hStop);$("lStop").textContent="Total film thickness needed to catch it ("+Math.ceil(S.hStop/(S.hnm*1e-9)-1e-9)+" of your layers)";
+ const name=P.m==="weld"?"welded":"unwelded";
+ $("verdict").textContent=S.caught?`Caught. ${fmtH(S.htot)} of ${name} film can absorb up to ${(S.E*RHO*S.htot*AP*1e9).toFixed(0)} nJ, more than the bead's ${(S.KE*1e9).toFixed(0)} nJ of kinetic energy.`:`Perforated. The ${name} film took ${Math.round(100*S.Ep/S.KE)}% of the bead's energy and slowed it from ${S.v} to ${Math.round(S.vr)} m s⁻¹. The film in the bead's path weighs only ${(RHO*S.htot*AP*1e15).toFixed(1)} pg, against the bead's ${(MP*1e12).toFixed(3)} ng.`;
+ drawStatic();
+}
+function drawStatic(){drawEsp();drawStop();drawLink()}
+function axes(x,W,H,pad,xr,yr,logy,xl,yl,yt){
+ const X=v=>pad.l+(v-xr[0])/(xr[1]-xr[0])*(W-pad.l-pad.r);
+ const Y=logy?v=>H-pad.b-(Math.log10(v)-Math.log10(yr[0]))/(Math.log10(yr[1])-Math.log10(yr[0]))*(H-pad.t-pad.b):v=>H-pad.b-(v-yr[0])/(yr[1]-yr[0])*(H-pad.t-pad.b);
+ x.strokeStyle=css("--grid");x.fillStyle=css("--muted");x.lineWidth=1;x.font=font(12);
+ for(const t of yt){const y=Y(t);x.beginPath();x.moveTo(pad.l,y);x.lineTo(W-pad.r,y);x.stroke();x.textAlign="right";x.textBaseline="middle";x.fillText(String(t),pad.l-6,y)}
+ const step=xr[1]-xr[0]>800?200:100;
+ for(let t=Math.ceil(xr[0]/step)*step;t<=xr[1];t+=step){const xx=X(t);x.beginPath();x.moveTo(xx,pad.t);x.lineTo(xx,H-pad.b);x.stroke();x.textAlign="center";x.textBaseline="top";x.fillText(String(t),xx,H-pad.b+5)}
+ x.textAlign="center";x.textBaseline="bottom";x.fillText(xl,(pad.l+W-pad.r)/2,H-2);
+ x.save();x.translate(13,(pad.t+H-pad.b)/2);x.rotate(-Math.PI/2);x.textBaseline="middle";x.fillText(yl,0,0);x.restore();
+ return [X,Y];
+}
+function line(x,X,Y,f,xr,col,w,dash){x.strokeStyle=col;x.lineWidth=w||2.5;x.setLineDash(dash||[]);x.beginPath();for(let i=0;i<=120;i++){const v=xr[0]+(xr[1]-xr[0])*i/120,y=f(v);i?x.lineTo(X(v),Y(y)):x.moveTo(X(v),Y(y))}x.stroke();x.setLineDash([])}
+function drawEsp(){
+ const [x,W,H]=setup($("esp")),pad={l:46,r:12,t:12,b:38},xr=[150,1250],yr=[0.1,8];
+ const [X,Y]=axes(x,W,H,pad,xr,yr,true,"impact speed (m s⁻¹)","Eₚ* (MJ kg⁻¹)",[0.1,0.2,0.5,1,2,5]);
+ x.font=font(11);
+ for(const [nm,a,b,lo,hi] of REF){const x0=X(a),x1=Math.max(X(b),x0+4),y0=Y(hi),y1=Y(lo);x.fillStyle=css("--grid");x.strokeStyle=css("--muted");x.globalAlpha=1;x.fillRect(x0,y0,x1-x0,y1-y0);x.lineWidth=1;x.strokeRect(x0,y0,x1-x0,y1-y0);
+  x.fillStyle=css("--muted");x.textAlign="left";x.textBaseline="top";const lx=nm==="Gold"?x1+3:x0+2,ly=nm.startsWith("Stainless")?y1+2:nm==="Gold"?y0-2:nm.startsWith("Ni")?y1+2:nm.startsWith("Kevlar")?y0-14:y0-14;x.fillText(nm,Math.min(lx,W-pad.r-90),ly)}
+ line(x,X,Y,()=>4.2,[150,1250],css("--muted"),1.5,[6,4]);x.fillStyle=css("--muted");x.textAlign="left";x.textBaseline="bottom";x.fillText("TNT",X(160),Y(4.2)-2);
+ const vr=[300,1200];
+ line(x,X,Y,v=>3000*v/1e6,vr,css("--c2"),2.5);line(x,X,Y,v=>5200*v/1e6,vr,css("--c4"),2.5,[2,3]);line(x,X,Y,v=>K_UN*v/1e6,vr,css("--c1"),2.5);
+ // current point
+ const px=X(S.v),py=Y(S.E/1e6);x.fillStyle=P.m==="weld"?(S.hnm<60?css("--c4"):css("--c2")):css("--c1");x.strokeStyle=css("--card-solid");x.lineWidth=2;x.beginPath();x.arc(px,py,6,0,7);x.fill();x.stroke();
+ x.fillStyle=css("--cx");x.font=font(12,600);x.textAlign=px>W-110?"right":"left";x.textBaseline="bottom";x.fillText("your film",px+(px>W-110?-9:9),py-6);
+}
+function drawStop(){
+ const [x,W,H]=setup($("stop")),pad={l:46,r:22,t:12,b:38},xr=[300,1200],yr=[0.1,50];
+ const [X,Y]=axes(x,W,H,pad,xr,yr,true,"impact speed (m s⁻¹)","g per m²",[0.1,0.2,0.5,1,2,5,10,20,50]);
+ const mA=E=>v=>MP*v*v/2/(AP*E(v))*1000;
+ line(x,X,Y,mA(v=>3000*v),xr,css("--c2"));line(x,X,Y,mA(v=>K_UN*v),xr,css("--c1"));line(x,X,Y,mA(()=>0.49e6),xr,css("--c3"));line(x,X,Y,mA(()=>0.36e6),xr,css("--muted"),2,[6,4]);
+ const f=P.m==="weld"?mA(v=>kWeld(S.hnm)*v):mA(v=>K_UN*v),val=f(S.v),px=X(S.v),py=Y(val);
+ x.strokeStyle=css("--cx");x.lineWidth=1;x.setLineDash([3,3]);x.beginPath();x.moveTo(px,pad.t);x.lineTo(px,H-pad.b);x.stroke();x.setLineDash([]);
+ x.fillStyle=P.m==="weld"?css("--c2"):css("--c1");x.beginPath();x.arc(px,py,5.5,0,7);x.fill();
+ x.fillStyle=css("--cx");x.font=font(12,600);x.textAlign=px>W-120?"right":"left";x.textBaseline="bottom";x.fillText(val.toFixed(2)+" g m⁻²",px+(px>W-120?-8:8),py-5);
+}
+function drawLink(){
+ const [x,W,H]=setup($("link")),pad={l:46,r:12,t:22,b:38};
+ const ymax=8,bw=(W-pad.l-pad.r)/LINK.length,Y=v=>H-pad.b-v/ymax*(H-pad.t-pad.b);
+ x.font=font(12);x.strokeStyle=css("--grid");x.fillStyle=css("--muted");
+ for(let t=0;t<=8;t+=2){const y=Y(t);x.beginPath();x.moveTo(pad.l,y);x.lineTo(W-pad.r,y);x.stroke();x.textAlign="right";x.textBaseline="middle";x.fillText(t+"×",pad.l-6,y)}
+ LINK.forEach(([n,v],i)=>{const x0=pad.l+i*bw+bw*0.18,w=bw*0.64;x.fillStyle=n==="L4"?css("--c2"):css("--c1");x.globalAlpha=n==="L4"?1:0.75;
+  const y=Y(v),r=6;x.beginPath();x.moveTo(x0,Y(0));x.lineTo(x0,y+r);x.quadraticCurveTo(x0,y,x0+r,y);x.lineTo(x0+w-r,y);x.quadraticCurveTo(x0+w,y,x0+w,y+r);x.lineTo(x0+w,Y(0));x.fill();x.globalAlpha=1;
+  x.fillStyle=css("--cx");x.font=font(13,600);x.textAlign="center";x.textBaseline="bottom";x.fillText(v.toFixed(2)+"×",x0+w/2,y-4);
+  x.fillStyle=css("--muted");x.font=font(12);x.textBaseline="top";x.fillText(n,x0+w/2,H-pad.b+5)});
+ x.textAlign="center";x.textBaseline="bottom";x.fillText("linker (shorter → longer); unwelded = 1×",(pad.l+W-pad.r)/2,H-2);
+}
+// ---------- impact animation ----------
+const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+let playing=!reduce,t0=performance.now(),tPause=0;
+function drawImpact(now){
+ const [x,W,H]=setup($("impact"));const fy=H*0.5,barW=26,area=W-barW-40,cx=area/2+10,br=13;
+ const ft=Math.max(3,Math.min(18,3+Math.log(S.htot*1e9/30)*3));
+ const T=2600,ph=(((playing?now-t0:tPause)%T)+T)%T/T;// 0..1
+ const vin=S.v/1200,vout=S.vr/1200;
+ const tHit=0.42;let by,bulge=0,hole=false;
+ const yStart=-br,dist=fy-ft/2-br-yStart;
+ if(ph<tHit){by=yStart+dist*ph/tHit}
+ else{const s=(ph-tHit);
+  if(S.caught){const dmax=Math.min(60,10+ (S.KE/(S.E*RHO*S.htot*AP))*40);const e=1-Math.exp(-s*14);bulge=dmax*e;by=fy-ft/2-br+bulge}
+  else{hole=true;const sp=Math.max(vout,0.02)*dist/tHit/vin*vin;by=fy-ft/2-br+s*(dist/tHit)*(vout/vin);bulge=Math.max(0,20*(1-s*6))*(1-vout/vin)}}
+ // film
+ x.fillStyle=P.m==="weld"?css("--c2"):css("--c1");x.globalAlpha=0.35;
+ x.beginPath();x.moveTo(10,fy-ft/2);
+ const bwid=70;
+ for(let xx=10;xx<=area+10;xx+=2){const d=xx-cx;const g=bulge*Math.exp(-(d*d)/(2*(bwid/2)**2));x.lineTo(xx,fy-ft/2+g)}
+ for(let xx=area+10;xx>=10;xx-=2){const d=xx-cx;const g=bulge*Math.exp(-(d*d)/(2*(bwid/2)**2));x.lineTo(xx,fy+ft/2+g)}
+ x.closePath();x.fill();x.globalAlpha=1;
+ if(hole&&ph>=tHit){x.fillStyle=css("--card-solid");x.fillRect(cx-br,fy-ft/2-4+bulge,2*br,ft+8)}
+ // bead
+ x.fillStyle=css("--muted");x.beginPath();x.arc(cx,by,br,0,7);x.fill();
+ x.strokeStyle=css("--cx");x.lineWidth=1;x.stroke();
+ // labels
+ x.fillStyle=css("--cx");x.font=font(13,600);x.textAlign="left";x.textBaseline="middle";
+ x.fillText("in: "+S.v+" m s⁻¹",cx+br+12,Math.max(18,fy-60));
+ x.fillText(S.caught?"caught":"out: "+Math.round(S.vr)+" m s⁻¹",cx+br+12,Math.min(H-18,fy+60));
+ x.fillStyle=css("--muted");x.font=font(12);x.textAlign="left";x.fillText(fmtH(S.htot)+(P.n>1?` (${P.n} layers)`:""),14,fy-ft/2-12);
+ // energy bar
+ const bx=W-barW-14,bt=16,bh=H-32,fa=S.Ep/S.KE;
+ x.fillStyle=css("--c1");x.fillRect(bx,bt,barW,bh*(1-fa));x.fillStyle=css("--c2");x.fillRect(bx,bt+bh*(1-fa),barW,bh*fa);
+ x.strokeStyle=css("--line");x.strokeRect(bx,bt,barW,bh);
+ x.fillStyle=css("--cx");x.font=font(12,600);x.textAlign="right";x.textBaseline="middle";x.fillText(Math.round(fa*100)+"%",bx-6,bt+bh*(1-fa/2));
+}
+function loop(now){drawImpact(now);if(playing)requestAnimationFrame(loop)}
+$("play").addEventListener("click",()=>{if(playing){tPause=performance.now()-t0;playing=false;$("play").textContent="▶ Play";drawImpact(0)}else{t0=performance.now()-tPause;playing=true;$("play").textContent="❚❚ Pause";requestAnimationFrame(loop)}});
+if(!playing){$("play").textContent="▶ Play";tPause=2600*0.75}
+// ---------- UI ----------
+const fmtIn={v:v=>v,h:v=>v,n:v=>v};
+for(const k of ["v","h","n"]){const el=$(k);el.value=P[k];el.addEventListener("input",()=>{P[k]=+el.value;update();if(!playing)drawImpact(0)})}
+function setPressed(){document.querySelectorAll("[data-m]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.m===P.m))}
+document.querySelectorAll("[data-m]").forEach(b=>b.addEventListener("click",()=>{P.m=b.dataset.m;setPressed();update();if(!playing)drawImpact(0)}));
+function drawAll(){drawStatic();drawImpact(performance.now())}
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change",drawAll);
+let rt;window.addEventListener("resize",()=>{clearTimeout(rt);rt=setTimeout(drawAll,100)});
+setPressed();update();drawImpact(performance.now());if(playing)requestAnimationFrame(loop);
+</script>
+</body></html>
