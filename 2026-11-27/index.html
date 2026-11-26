@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="light dark">
+<title>How feeding and pumping schedules keep milk supply going — Research Explorer, 27 Nov 2026</title>
+<link rel="stylesheet" href="../assets/style.css">
+<style>
+canvas#ts{height:300px}
+canvas#eff,canvas#day,canvas#map{height:300px}
+.btnrow{display:flex;flex-wrap:wrap;gap:8px;margin:4px 0 14px;align-items:center}
+.btnrow button{font:500 14px var(--font);color:var(--text);background:var(--accent-soft);border:0;border-radius:8px;padding:7px 14px;min-height:32px;cursor:pointer}
+.btnrow button[aria-pressed="true"]{box-shadow:inset 0 0 0 2px var(--accent)}
+.btnrow .lbl{font-size:13px;color:var(--muted);margin-right:2px}
+label span{flex:1} label output{white-space:nowrap}
+.legend .sw{display:inline-block;width:14px;height:14px;border-radius:4px;vertical-align:-2px;margin-right:6px}
+.stat .v.good{color:var(--c3)} .stat .v.bad{color:var(--c2)}
+details.adv{margin:4px 0 12px} details.adv summary{cursor:pointer;color:var(--accent);font-weight:500;font-size:15px;padding:4px 0}
+</style></head><body><main>
+<a class="back" href="../">‹ All demos</a>
+<div class="eyebrow">27 Nov 2026 · Medicine</div>
+<h1>How often and how long to feed or pump: a maths model of milk supply</h1>
+<p class="lede">Taking milk out of the breast tells the breast to keep making it. That feedback is why "feed often, empty well" is standard lactation advice, but the advice has stayed qualitative. Mathematicians at the University of Vienna have now written that feedback as a small dynamical system: milk builds up between sessions, each session removes some of it, and the amount removed boosts the production rate for later. Stepping this model forward session by session predicts when a schedule keeps supply going, when supply quietly dies out, and which schedule gives the most milk per day. The demo below runs the paper's model live.</p>
+<p class="authors">Angelika Manhart, Tobias Müller</p>
+
+<section class="card why" aria-labelledby="why-h">
+<h2 id="why-h">Why it matters</h2>
+<p>Trouble building or keeping up milk supply is common and worrying for breastfeeding and pumping parents, especially those of premature babies, yet the guidance on how often and how long to feed or pump is mostly rules of thumb. This model turns the "removal drives production" feedback into testable maths, predicting a critical gap between sessions beyond which supply dies out whatever you do, and showing that emptying the breast every session does not always give the most milk per day.</p>
+</section>
+
+<section class="card" aria-labelledby="paper-h">
+<h2 id="paper-h">The paper</h2>
+<p style="margin:0 0 6px"><strong>Milk-removal feedback shapes lactation sustainability and daily output in a model of human lactation</strong></p>
+<p class="cite" style="margin:0">Angelika Manhart and Tobias Müller (Faculty of Mathematics, University of Vienna, Austria). arXiv:2611.33997 [q-bio.QM], submitted 25 November 2026. <a href="https://arxiv.org/abs/2611.33997">Read on arXiv</a> · <a href="https://arxiv.org/pdf/2611.33997">PDF</a> · <a href="https://github.com/angelikamanhart/Lactation_model_analytical_paper">Authors' code and explorer</a></p>
+<p style="margin-top:14px"><strong>In plain language:</strong> the model tracks two numbers for one breast: how much milk is stored, <i>m</i> (ml), and how fast it is being made, <i>p</i> (ml per hour). Between sessions milk builds up at rate <i>p</i> and is slowly reabsorbed, while the production rate fades away unless something keeps it up. Each feed or pumping session removes some milk, and removing milk gives the production rate a boost. More milk removed gives a bigger boost, up to a ceiling. The key point is that this is a loop. If supply drops, less milk comes out, so the next boost is smaller, and supply drops further. The authors prove when that downward spiral wins and when supply settles at a steady level.</p>
+<p>Between sessions (wait <i>T</i> hours) the model is two simple equations, solved exactly:</p>
+<div class="eq">dm/dt = p − δm, &nbsp;&nbsp; dp/dt = −γp &nbsp;&nbsp;⇒&nbsp;&nbsp; x = m·e<sup>−δT</sup> + p·G(T), &nbsp; G(T) = (e<sup>−γT</sup> − e<sup>−δT</sup>)/(δ − γ)</div>
+<p>At a session, an amount <i>M</i> is removed from the <i>x</i> ml available and production jumps by a stimulation <i>a</i>(<i>M</i>):</p>
+<div class="eq">m<sub>n</sub> = x<sub>n</sub> − M<sub>n</sub>, &nbsp;&nbsp; p<sub>n</sub> = e<sup>−γT</sup> p<sub>n−1</sub> + a(M<sub>n</sub>)</div>
+<p>Set-duration sessions remove <i>M</i> = <i>x</i>·min(τ/τ<sub>emp</sub>, 1), where τ<sub>emp</sub> is the time it takes to empty the breast. Set-target sessions remove <i>M</i> = min(<i>M</i><sub>tar</sub>, <i>x</i>). The boost <i>a</i>(<i>M</i>) is either Michaelis–Menten, <i>a</i><sub>max</sub>M/(M+μ), where small removals work best per ml, or Hill, <i>a</i><sub>max</sub>M²/(M²+μ²), where small removals barely count. Lactation can only last if the boost per ml, R(M) = a(M)/M, can beat the fade over one cycle, Γ(T) = (1 − e<sup>−γT</sup>)/G(T). Γ grows with the wait, so there is a <strong>critical wait</strong> T<sub>crit</sub>, with Γ(T<sub>crit</sub>) = max R. Wait longer than that between sessions and supply always dies out. Daily output in the steady state is M<sub>day</sub> = 24·M*/(T + τ*).</p>
+</section>
+
+<section class="card" aria-labelledby="try-h">
+<h2 id="try-h">Try it: design a feeding or pumping schedule</h2>
+<p class="note" style="margin-top:0">Defaults are the paper's order-of-magnitude estimates for one breast in established lactation. Production fades over about 48 h without stimulation (γ = δ = 1/48 h⁻¹). An efficient pump empties the breast in about 18 min. Exclusive breastfeeding gives about 18 ml/h per breast. The stimulation parameters are calibrated so that a feed every 3 h that empties the breast is a steady state. These numbers are not fitted to patient data, so treat the outputs as illustrations, not advice.</p>
+<div class="btnrow" role="group" aria-label="Protocol"><span class="lbl">Session ends:</span>
+ <button type="button" data-proto="dur">after a set time</button><button type="button" data-proto="tar">when a target amount is out</button></div>
+<div class="btnrow" role="group" aria-label="Stimulation response"><span class="lbl">Boost from removing milk:</span>
+ <button type="button" data-resp="mm">small amounts count most (Michaelis–Menten)</button><button type="button" data-resp="hill">small amounts barely count (Hill)</button></div>
+<div class="controls">
+ <div><label for="T"><span>Wait between sessions</span> <output id="To"></output></label><input type="range" id="T" min="0" max="1" step="0.002"></div>
+ <div id="tauBox"><label for="tau"><span>Session length τ</span> <output id="tauo"></output></label><input type="range" id="tau" min="1" max="45" step="1"></div>
+ <div id="tarBox" hidden><label for="tar"><span>Target per session M<sub>tar</sub></span> <output id="taro"></output></label><input type="range" id="tar" min="5" max="300" step="1"></div>
+ <div><label for="p0"><span>Production rate at the start</span> <output id="p0o"></output></label><input type="range" id="p0" min="0.5" max="40" step="0.5"></div>
+</div>
+<details class="adv"><summary>Body and pump parameters</summary>
+<div class="controls">
+ <div><label for="gi"><span>Supply fade time 1/γ (= 1/δ)</span> <output id="gio"></output></label><input type="range" id="gi" min="12" max="120" step="1"></div>
+ <div><label for="te"><span>Time to empty the breast τ<sub>emp</sub></span> <output id="teo"></output></label><input type="range" id="te" min="5" max="60" step="1"></div>
+ <div><label for="am"><span>Maximum boost a<sub>max</sub></span> <output id="amo"></output></label><input type="range" id="am" min="1" max="10" step="0.01"></div>
+ <div><label for="mu"><span>Boost half-way amount μ</span> <output id="muo"></output></label><input type="range" id="mu" min="20" max="300" step="1"></div>
+</div></details>
+<div class="stats">
+ <div class="stat"><div class="v" id="sP"></div><div class="l">Long-run production rate p* (ml/h)</div></div>
+ <div class="stat"><div class="v" id="sM"></div><div class="l">Milk out per session M* (ml)</div></div>
+ <div class="stat"><div class="v" id="sD"></div><div class="l">Daily output, one breast (ml/day)</div></div>
+ <div class="stat"><div class="v" id="sC"></div><div class="l">Critical wait T<sub>crit</sub></div></div>
+</div>
+<p class="note" id="verdict" aria-live="polite"></p>
+<div class="plot" style="margin-top:10px"><div class="plot-title">The first 10 days of your schedule</div>
+ <canvas id="ts" role="img" aria-label="Time series over ten days of milk stored in the breast, which rises between sessions and drops at each session, and the production rate"></canvas>
+ <div class="legend"><span style="--k:var(--c1)">milk stored in the breast m (ml, left axis)</span><span style="--k:var(--c2)">production rate p (ml/h, right axis)</span></div></div>
+<div class="grid" style="margin-top:20px">
+ <div class="plot"><div class="plot-title">Can removal keep up? Boost per ml vs what is needed</div>
+  <canvas id="eff" role="img" aria-label="Chart of stimulation efficiency R of M against milk removed, with a horizontal line for the efficiency Gamma of T needed to balance the fade at your wait interval"></canvas>
+  <div class="legend"><span style="--k:var(--c4)">R(M) = a(M)/M, boost per ml removed</span><span style="--k:var(--c2)">Γ(T), needed at your wait</span><span style="--k:var(--muted)">γ, needed with no wait at all</span></div></div>
+ <div class="plot"><div class="plot-title" id="dayTitle">Daily output vs session length (at your wait)</div>
+  <canvas id="day" role="img" aria-label="Chart of steady-state daily milk output against session length or target at the chosen wait interval, with the best value marked"></canvas>
+  <div class="legend"><span style="--k:var(--c3)">daily output M<sub>day</sub></span><span style="--k:var(--muted)" id="dayEmp">breast fully emptied</span><span><i class="sw" style="background:var(--cx)"></i>your schedule</span></div></div>
+</div>
+<div class="plot" style="margin-top:20px"><div class="plot-title" id="mapTitle">Schedule map: daily output for every wait and session length</div>
+ <canvas id="map" role="img" aria-label="Heat map of daily milk output over wait interval and session length, with grey where supply dies out and a dashed line at the critical wait"></canvas>
+ <div class="legend"><span><i class="sw" style="background:linear-gradient(90deg,var(--card-solid),var(--c1))"></i>more milk per day</span><span><i class="sw" style="background:var(--grid)"></i>supply dies out</span><span style="--k:var(--c2)">critical wait T<sub>crit</sub></span><span style="--k:var(--c3)">best session length for each wait</span><span><i class="sw" style="background:var(--cx);border-radius:50%"></i>your schedule</span></div></div>
+</section>
+
+<section class="card" aria-labelledby="find-h">
+<h2 id="find-h">What the paper finds</h2>
+<ul>
+ <li><strong>A critical wait.</strong> When the boost depends on how much milk comes out, a falling supply means less milk out, which means a weaker boost, so the fall feeds itself. For every wait longer than T<sub>crit</sub>, the only long-run state is zero production, however long or hard each session is. With the paper's estimates, T<sub>crit</sub> is roughly one to two days.</li>
+ <li><strong>Two kinds of steady supply.</strong> For waits shorter than T<sub>crit</sub>, supply settles either to a "target met" state, where the session goal is reached with milk left behind, or to an "emptying" state, where every session drains the breast. The largest goal that can be met every time, M<sub>emp</sub>(T), shrinks as the wait grows.</li>
+ <li><strong>A possible establishment threshold.</strong> If small removals barely stimulate (the Hill response), supply can be bistable. The same schedule keeps a well-established supply going but lets a weak one die out. This looks like the clinical idea that lactation has to be established first, though the model does not prove that is the cause.</li>
+ <li><strong>Emptying is not always best.</strong> A longer session gets more milk each time but leaves less time for more sessions. With the paper's estimates, for waits shorter than about 2–3 h, stopping before the breast is empty gives more milk per day.</li>
+ <li><strong>Time-based boosts behave differently.</strong> If stimulation depends on session length instead of amount removed, continued sessions can never drive supply all the way to zero. With a Hill response and a set target, supply can even oscillate from session to session, but only for waits over about 53 h.</li>
+</ul>
+<p class="note">This demo implements the amount-dependent model (Sec. 3.1–3.2 and 4.2 of the paper). The duration-dependent variants are in the authors' own interactive explorer, linked above.</p>
+</section>
+
+<section class="card" aria-labelledby="how-h">
+<h2 id="how-h">How to use it</h2>
+<ul>
+ <li>Start at the defaults: a session every 3 h, 18 min long, which just empties the breast. Supply holds at about 18 ml/h and gives about 375 ml a day from one breast, so roughly 750 ml from two. That matches the 700–800 ml a day that exclusively breastfed babies typically drink.</li>
+ <li>Drag <strong>Wait between sessions</strong> to the right. Daily output falls, and once you pass the red critical-wait line (about 40 h here) the 10-day trace shows production sliding towards zero. In the left chart, the red Γ(T) line has risen above the whole purple boost curve.</li>
+ <li>Set the wait to about 1 h and look at the daily-output chart. Its peak sits to the left of the grey "emptied" line, so shorter sessions that leave some milk behind give more milk per day. On the schedule map, the green best-length curve drops below the emptying time for short waits.</li>
+ <li>Switch to <strong>small amounts barely count</strong>. With the paper's Hill calibration, starting at 18 ml/h with a 1–2 h wait now dies out, while a 3 h wait from the same start climbs to a much larger supply. Raise <strong>Production rate at the start</strong> above about 35 ml/h and a 1.5 h wait works again. That is bistability: the outcome depends on where you start. The purple curve now crosses the red line twice. The left crossing is the threshold M<sub>sep</sub>, and the right one is M<sub>emp</sub>.</li>
+ <li>Switch to <strong>when a target amount is out</strong> to model a baby who takes a set amount or a pumping goal. A target above M<sub>emp</sub> cannot be met at every session, so each session drains the breast.</li>
+</ul>
+</section>
+<p class="note" style="margin-top:24px">Demo maths: the session-to-session map above is iterated exactly, with no time-stepping error, from m₀ = 0 and your starting production. The long-run numbers average the last 50 sessions after about 1,500 h of simulated time, using M<sub>day</sub> = 24·ΣM/Σ(T + τ). In set-target mode the session length is τ = τ<sub>emp</sub>·M<sub>tar</sub>/x, or τ<sub>emp</sub> if the breast is drained. T<sub>crit</sub> solves Γ(T) = max R by bisection. Default stimulation follows the paper's Sec. 6.1 estimate, a(51 ml) ≈ 1.1 ml/h with μ = 100 ml. That gives a<sub>max</sub> = 3.26 ml/h for Michaelis–Menten (max R ≈ 0.032 h⁻¹) and 5.33 ml/h for Hill (max R ≈ 0.027 h⁻¹). Under the Hill calibration, the 3-hourly 51 ml state sits exactly on the unstable threshold, which is why that response jumps to a larger supply. This is a model study with no clinical data, and it is not breastfeeding or pumping advice.</p>
+</main>
+<script>
+"use strict";
+const $=id=>document.getElementById(id);
+const AMAX={mm:3.26,hill:5.33};
+const P={proto:"dur",resp:"mm",T:3,tau:18,tar:50,p0:18,gi:48,te:18,am:AMAX.mm,mu:100};
+const TMIN=0.5,TMAX=48;
+const tFromS=s=>TMIN*Math.pow(TMAX/TMIN,s), sFromT=t=>Math.log(t/TMIN)/Math.log(TMAX/TMIN);
+// ---------- model (Manhart & Müller, Eqs. 1-6, 11) ----------
+function a(M){return P.resp==="mm"?P.am*M/(M+P.mu):P.am*M*M/(M*M+P.mu*P.mu)}
+function R(M){return M<=0?(P.resp==="mm"?P.am/P.mu:0):a(M)/M}
+const Rmax=()=>P.resp==="mm"?P.am/P.mu:P.am/(2*P.mu);
+function coef(T){const g=1/P.gi,d=1/P.gi;const G=Math.abs(d-g)<1e-12?T*Math.exp(-g*T):(Math.exp(-g*T)-Math.exp(-d*T))/(d-g);return {g:Math.exp(-g*T),d:Math.exp(-d*T),G}}
+function step(m,p,c,ctl,proto){const x=c.d*m+c.G*p,te=P.te/60;let M,tau;
+ if(proto==="dur"){M=x*Math.min(ctl/te,1);tau=ctl}else{M=Math.min(ctl,x);tau=x>ctl?ctl/x*te:te}
+ return [x-M,c.g*p+a(M),M,tau,x]}
+// ctl: hours (dur) or ml (tar)
+function steady(T,ctl,proto,p0){const c=coef(T);let m=0,p=p0,sM=0,sT=0,sP=0,last;
+ const N=Math.min(4000,Math.max(120,Math.ceil(1500/(T+(proto==="dur"?ctl:P.te/60)))));
+ for(let n=0;n<N;n++){last=step(m,p,c,ctl,proto);m=last[0];p=last[1];if(n>=N-50){sM+=last[2];sT+=T+last[3];sP+=p}}
+ const Mstar=sM/50,emptied=last[0]<1e-6*Math.max(1,last[4]);return {p:sP/50,M:Mstar,tau:sT/50-T,Mday:24*sM/sT,emptied}}
+const Gam=T=>{const c=coef(T);return (1-c.g)/c.G};
+function Tcrit(){if(1/P.gi>=Rmax())return 0;let lo=1e-4,hi=1e4;for(let i=0;i<90;i++){const mid=Math.sqrt(lo*hi);Gam(mid)<Rmax()?lo=mid:hi=mid}return lo}
+// intersections R(M)=Γ
+function crossings(G){const out=[];let prev=R(0.01)-G;for(let M=0.5;M<=3000;M+=0.5){const v=R(M)-G;if((v>0)!==(prev>0)){let lo=M-0.5,hi=M;for(let i=0;i<40;i++){const md=(lo+hi)/2;((R(md)-G)>0)===(prev>0)?lo=md:hi=md}out.push((lo+hi)/2)}prev=v}return out}
+// ---------- drawing helpers ----------
+function css(n){return getComputedStyle(document.documentElement).getPropertyValue(n).trim()}
+function setup(c){const r=c.getBoundingClientRect(),d=window.devicePixelRatio||1;c.width=Math.round(r.width*d);c.height=Math.round(r.height*d);const x=c.getContext("2d");x.setTransform(d,0,0,d,0,0);return [x,r.width,r.height]}
+const font=(s,w)=>`${w||400} ${s}px -apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Arial,sans-serif`;
+function nice(max,n,ext){const raw=max/(n||4),mag=Math.pow(10,Math.floor(Math.log10(raw))),f=raw/mag,st=(f<1.5?1:f<3?2:f<7?5:10)*mag;const t=[];for(let v=0;;v+=st){if(!ext&&v>max*1.0001)break;t.push(+v.toPrecision(6));if(ext&&v>=max*0.9999)break}return t}
+function fmtTick(v){return Math.abs(v)>=100||v===0?String(Math.round(v)):String(+v.toPrecision(3))}
+function frame(x,W,H,pad,xr,yr,xt,yt,xl,yl,logx,yfmt){
+ const X=logx?v=>pad.l+(Math.log(v)-Math.log(xr[0]))/(Math.log(xr[1])-Math.log(xr[0]))*(W-pad.l-pad.r):v=>pad.l+(v-xr[0])/(xr[1]-xr[0])*(W-pad.l-pad.r);
+ const Y=v=>H-pad.b-(v-yr[0])/(yr[1]-yr[0])*(H-pad.t-pad.b);
+ x.strokeStyle=css("--grid");x.fillStyle=css("--muted");x.lineWidth=1;x.font=font(12);
+ for(const t of yt){const y=Y(t);x.beginPath();x.moveTo(pad.l,y);x.lineTo(W-pad.r,y);x.stroke();x.textAlign="right";x.textBaseline="middle";x.fillText((yfmt||fmtTick)(t),pad.l-6,y)}
+ for(const t of xt){const xx=X(t);x.beginPath();x.moveTo(xx,pad.t);x.lineTo(xx,H-pad.b);x.stroke();x.textAlign="center";x.textBaseline="top";x.fillText(fmtTick(t),xx,H-pad.b+5)}
+ x.textAlign="center";x.textBaseline="bottom";x.fillText(xl,(pad.l+W-pad.r)/2,H-2);
+ if(yl){x.save();x.translate(13,(pad.t+H-pad.b)/2);x.rotate(-Math.PI/2);x.textBaseline="middle";x.fillText(yl,0,0);x.restore()}
+ return [X,Y]}
+function dot(x,px,py,col,lab,W){x.fillStyle=col;x.strokeStyle=css("--card-solid");x.lineWidth=2;x.beginPath();x.arc(px,py,6,0,7);x.fill();x.stroke();if(lab){x.fillStyle=css("--cx");x.font=font(12,600);const r=px>W-110;x.textAlign=r?"right":"left";x.textBaseline="bottom";x.fillText(lab,px+(r?-9:9),py-6)}}
+const ctl=()=>P.proto==="dur"?P.tau/60:P.tar;
+const fmtT=t=>t<10?(Math.round(t*4)/4).toFixed(2).replace(/\.?0+$/,"")+" h":Math.round(t)+" h";
+// ---------- state ----------
+let S={};
+function compute(){S.st=steady(P.T,ctl(),P.proto,P.p0);S.tc=Tcrit();S.G=Gam(P.T);S.cross=S.G<Rmax()?crossings(S.G):[]}
+function update(){
+ compute();const st=S.st,dead=st.p<0.05;
+ $("To").textContent=fmtT(P.T)+" · "+(24/(P.T+(P.proto==="dur"?P.tau/60:st.tau))).toFixed(1)+"/day";
+ $("tauo").textContent=P.tau+" min";$("taro").textContent=P.tar+" ml";$("p0o").textContent=P.p0+" ml/h";
+ $("gio").textContent=P.gi+" h";$("teo").textContent=P.te+" min";$("amo").textContent=P.am.toFixed(2)+" ml/h";$("muo").textContent=P.mu+" ml";
+ const sp=$("sP");sp.textContent=dead?"0":st.p.toFixed(1);sp.className="v "+(dead?"bad":"good");
+ $("sM").textContent=dead?"0":Math.round(st.M);$("sD").textContent=dead?"0":Math.round(st.Mday);
+ $("sC").textContent=S.tc>0?fmtT(S.tc):"none";
+ let v;
+ if(dead){
+  if(S.tc===0)v="Supply dies out. With these body parameters the boost per ml can never beat the fade, so no schedule can keep lactation going.";
+  else if(P.T>S.tc)v=`Supply dies out. Your ${fmtT(P.T)} wait is longer than the critical wait of ${fmtT(S.tc)}, so less milk comes out each time, the boost shrinks, and production slides to zero however long the sessions are.`;
+  else if(P.proto==="tar"&&S.cross.length===2&&P.tar<S.cross[0])v=`Supply dies out. A target of ${P.tar} ml is below the threshold Mₛₑₚ ≈ ${Math.round(S.cross[0])} ml: removing that little does not stimulate enough to replace the fade.`;
+  else if(P.resp==="hill"&&S.cross.length===2)v=`Supply dies out from this start. This schedule could sustain lactation, but starting at ${P.p0} ml/h only about ${Math.round(coef(P.T).G*P.p0)} ml is there at the first session, below the threshold Mₛₑₚ ≈ ${Math.round(S.cross[0])} ml. Raise the starting production to see the other outcome (bistability).`;
+  else v="Supply dies out: sessions remove too little to sustain production.";
+ }else{
+  const mode=st.emptied?"every session drains the breast (an \"emptying\" steady state)":"each session leaves milk behind (a \"target met\" steady state)";
+  v=`Supply holds. Production settles at ${st.p.toFixed(1)} ml/h, and ${mode}. That gives ${Math.round(st.Mday)} ml a day from this breast, about ${Math.round(2*st.Mday)} ml from two.`+(st.Mday>600?" That is far more than babies usually drink (700–800 ml a day in total), a sign these uncalibrated parameters have been pushed outside a realistic range.":"");
+ }
+ $("verdict").textContent=v;
+ drawTS();drawEff();drawDay();scheduleMap();
+}
+function drawTS(){
+ const [x,W,H]=setup($("ts")),pad={l:46,r:46,t:12,b:38},Tend=240;
+ // simulate
+ const c0=null;let m=0,p=P.p0,t=0;const pts=[[0,0,p]],te=P.te/60;
+ const g=1/P.gi;
+ while(t<Tend){const T=P.T;for(let i=1;i<=24;i++){const s=T*i/24,c=coef(s);pts.push([t+s,m*c.d+p*c.G,p*c.g]);if(t+s>=Tend)break}
+  const c=coef(T),r=step(m,p,c,ctl(),P.proto);t+=T;if(t>=Tend)break;
+  const pPre=p*c.g;pts.push([t+r[3],r[0],pPre]);t+=r[3];pts.push([t,r[0],r[1]]);m=r[0];p=r[1]}
+ const mmax=Math.max(10,...pts.map(q=>q[1]))*1.08,pmax=Math.max(5,...pts.map(q=>q[2]))*1.08;
+ const yt=nice(mmax,4,true),ym=yt[yt.length-1];
+ const [X,Y]=frame(x,W,H,pad,[0,Tend],[0,ym],[0,48,96,144,192,240],yt,"time (days)","milk in breast (ml)",false);
+ // relabel x in days
+ x.clearRect(pad.l-20,H-pad.b+3,W,16);x.fillStyle=css("--muted");x.font=font(12);x.textAlign="center";x.textBaseline="top";for(let d=0;d<=10;d+=2)x.fillText(String(d),X(d*24),H-pad.b+5);
+ const pt=nice(pmax,4,true),pm=pt[pt.length-1],YP=v=>H-pad.b-v/pm*(H-pad.t-pad.b);
+ x.textAlign="left";x.textBaseline="middle";x.fillStyle=css("--c2");for(const v of pt){const y=YP(v);if(y>=pad.t-2)x.fillText(fmtTick(v),W-pad.r+6,y)}
+ x.save();x.translate(W-10,(pad.t+H-pad.b)/2);x.rotate(Math.PI/2);x.textAlign="center";x.fillText("production (ml/h)",0,0);x.restore();
+ x.lineJoin="round";
+ x.strokeStyle=css("--c1");x.lineWidth=1.6;x.beginPath();pts.forEach((q,i)=>i?x.lineTo(X(q[0]),Y(q[1])):x.moveTo(X(q[0]),Y(q[1])));x.stroke();
+ x.strokeStyle=css("--c2");x.lineWidth=2.5;x.beginPath();pts.forEach((q,i)=>i?x.lineTo(X(q[0]),YP(q[2])):x.moveTo(X(q[0]),YP(q[2])));x.stroke();
+}
+function drawEff(){
+ const [x,W,H]=setup($("eff")),pad={l:64,r:12,t:12,b:38},Mx=300;
+ const top=Math.max(Rmax(),1/P.gi)*1.5,yt=nice(top,4,true),yr=[0,Math.max(top,yt[yt.length-1])];
+ const [X,Y]=frame(x,W,H,pad,[0,Mx],yr,nice(Mx),yt,"milk removed per session M (ml)","efficiency (h⁻¹)",false,v=>v===0?"0":v.toFixed(3));
+ const cy=v=>Math.max(pad.t,Y(Math.min(v,yr[1])));
+ x.setLineDash([2,4]);x.strokeStyle=css("--muted");x.lineWidth=1.5;x.beginPath();x.moveTo(pad.l,cy(1/P.gi));x.lineTo(W-pad.r,cy(1/P.gi));x.stroke();x.setLineDash([]);
+ x.strokeStyle=css("--c4");x.lineWidth=2.5;x.beginPath();for(let i=0;i<=200;i++){const M=Mx*i/200;i?x.lineTo(X(M),Y(R(M))):x.moveTo(X(M),Y(R(M)))}x.stroke();
+ x.setLineDash([7,4]);x.strokeStyle=css("--c2");x.lineWidth=2;x.beginPath();x.moveTo(pad.l,cy(S.G));x.lineTo(W-pad.r,cy(S.G));x.stroke();x.setLineDash([]);
+ x.fillStyle=css("--c2");x.font=font(12,600);x.textAlign="right";x.textBaseline="bottom";x.fillText(S.G>yr[1]?"Γ("+fmtT(P.T)+") is off the top ↑":"Γ at T = "+fmtT(P.T),W-pad.r-4,cy(S.G)-3);
+ const names=S.cross.length===2?["Mₛₑₚ","Mₑₘₚ"]:["Mₑₘₚ"];
+ S.cross.forEach((M,i)=>{if(M<=Mx){dot(x,X(M),Y(S.G),css("--c2"));x.fillStyle=css("--cx");x.font=font(12,600);x.textAlign="center";x.textBaseline="top";x.fillText(names[i]+" ≈ "+Math.round(M)+" ml",X(M),Y(S.G)+9)}});
+}
+function dayCurve(){const xs=[],ys=[];
+ if(P.proto==="dur"){const hi=Math.max(45,P.te*2);for(let i=1;i<=90;i++){const tm=hi*i/90;xs.push(tm);ys.push(steady(P.T,tm/60,"dur",P.p0).Mday)}return [xs,ys,hi]}
+ for(let i=1;i<=90;i++){const M=300*i/90;xs.push(M);ys.push(steady(P.T,M,"tar",P.p0).Mday)}return [xs,ys,300]}
+function drawDay(){
+ const [x,W,H]=setup($("day")),pad={l:60,r:12,t:12,b:38};
+ const [xs,ys,hi]=dayCurve();const top=Math.max(50,...ys,S.st.Mday)*1.12,yt=nice(top,4,true);
+ const [X,Y]=frame(x,W,H,pad,[0,hi],[0,Math.max(top,yt[yt.length-1])],nice(hi,5),yt,P.proto==="dur"?"session length τ (min)":"target per session Mₜₐᵣ (ml)","daily output (ml/day)",false);
+ // emptying marker
+ let xe=null;
+ if(P.proto==="dur")xe=P.te;else if(S.cross.length)xe=S.cross[S.cross.length-1];
+ if(xe!==null&&xe<=hi){x.setLineDash([5,4]);x.strokeStyle=css("--muted");x.lineWidth=1.5;x.beginPath();x.moveTo(X(xe),pad.t);x.lineTo(X(xe),H-pad.b);x.stroke();x.setLineDash([]);
+  x.fillStyle=css("--muted");x.font=font(11);x.textAlign="left";x.textBaseline="bottom";x.fillText(P.proto==="dur"?"emptied":"Mₑₘₚ",X(xe)+4,H-pad.b-4)}
+ x.strokeStyle=css("--c3");x.lineWidth=2.5;x.beginPath();xs.forEach((v,i)=>i?x.lineTo(X(v),Y(ys[i])):x.moveTo(X(v),Y(ys[i])));x.stroke();
+ let bi=0;ys.forEach((v,i)=>{if(v>ys[bi]+1e-9)bi=i});
+ if(ys[bi]>0.5){x.fillStyle=css("--c3");x.font=font(12,600);x.textAlign="center";x.textBaseline="bottom";const curv=P.proto==="dur"?P.tau:P.tar,nr=Math.abs(X(curv)-X(xs[bi]))<70;x.fillText((nr?"you · ":"")+"best ≈ "+Math.round(xs[bi])+(P.proto==="dur"?" min":" ml"),Math.min(Math.max(X(xs[bi]),pad.l+50),W-pad.r-50),Y(ys[bi])-8);x.beginPath();x.arc(X(xs[bi]),Y(ys[bi]),4,0,7);x.fill()}
+ const cur=P.proto==="dur"?P.tau:P.tar,near=ys[bi]>0.5&&Math.abs(X(cur)-X(xs[bi]))<70;if(cur<=hi)dot(x,X(cur),Y(S.st.Mday),css("--cx"),near?"":"you",W);
+ $("dayTitle").textContent=(P.proto==="dur"?"Daily output vs session length":"Daily output vs session target")+" (at a "+fmtT(P.T)+" wait)";
+ $("dayEmp").innerHTML=P.proto==="dur"?"breast fully emptied (τ<sub>emp</sub>)":"largest target met every time (M<sub>emp</sub>)";
+}
+let mapCache=null,mapKey="",mapPending=false;
+function scheduleMap(){if(!mapPending){mapPending=true;requestAnimationFrame(()=>{mapPending=false;drawMap()})}}
+function drawMap(){
+ const [x,W,H]=setup($("map")),pad={l:52,r:12,t:12,b:38};
+ const hi=P.proto==="dur"?Math.max(45,P.te*2):300,NX=72,NY=45;
+ const key=[P.proto,P.resp,P.p0,P.gi,P.te,P.am,P.mu].join();
+ if(key!==mapKey){const z=[];let zmax=0;const best=[];
+  for(let i=0;i<NX;i++){const T=tFromS((i+0.5)/NX);let bv=0,bj=-1;z.push([]);for(let j=0;j<NY;j++){const v=(j+0.5)/NY*hi;const s=steady(T,P.proto==="dur"?v/60:v,P.proto,P.p0);const d=s.p<0.05?0:s.Mday;z[i].push(d);if(d>zmax)zmax=d;if(d>bv){bv=d;bj=j}}best.push(bj>=0?(bj+0.5)/NY*hi:null)}
+  mapCache={z,zmax,best};mapKey=key}
+ const {z,zmax,best}=mapCache;
+ $("mapTitle").textContent=P.proto==="dur"?"Schedule map: daily output for every wait and session length":"Schedule map: daily output for every wait and session target";
+ const [X,Y]=frame(x,W,H,pad,[TMIN,TMAX],[0,hi],[0.5,1,2,3,6,12,24,48],nice(hi,5),"wait between sessions T (h, log scale)",P.proto==="dur"?"session length (min)":"target (ml)",true);
+ const c1=css("--c1"),bg=css("--card-solid"),gr=css("--grid");
+ const cw=(W-pad.l-pad.r)/NX,ch=(H-pad.t-pad.b)/NY;
+ x.fillStyle=bg;x.fillRect(pad.l,pad.t,W-pad.l-pad.r,H-pad.t-pad.b);
+ for(let i=0;i<NX;i++)for(let j=0;j<NY;j++){const v=z[i][j],x0=Math.round(pad.l+i*cw),x1=Math.round(pad.l+(i+1)*cw),y0=Math.round(H-pad.b-(j+1)*ch),y1=Math.round(H-pad.b-j*ch);
+  if(v<=0){x.fillStyle=gr;x.globalAlpha=1}else{x.fillStyle=c1;x.globalAlpha=0.12+0.88*Math.pow(v/zmax,0.6)}
+  x.fillRect(x0,y0,x1-x0,y1-y0);x.globalAlpha=1}
+ // re-draw axis labels on top of cells
+ x.strokeStyle=css("--line");x.strokeRect(pad.l,pad.t,W-pad.l-pad.r,H-pad.t-pad.b);
+ // best curve
+ x.strokeStyle=css("--c3");x.lineWidth=2.5;x.setLineDash([6,4]);x.beginPath();let on=false;best.forEach((b,i)=>{if(b===null){on=false;return}const px=pad.l+(i+0.5)*cw,py=Y(b);on?x.lineTo(px,py):x.moveTo(px,py);on=true});x.stroke();x.setLineDash([]);
+ if(P.proto==="dur"){x.strokeStyle=css("--muted");x.lineWidth=1;x.setLineDash([2,3]);x.beginPath();x.moveTo(pad.l,Y(P.te));x.lineTo(W-pad.r,Y(P.te));x.stroke();x.setLineDash([]);x.fillStyle=css("--muted");x.font=font(11);x.textAlign="left";x.textBaseline="bottom";x.fillText("emptied",pad.l+4,Y(P.te)-2)}
+ if(S.tc>TMIN&&S.tc<TMAX){x.strokeStyle=css("--c2");x.lineWidth=2;x.setLineDash([7,4]);x.beginPath();x.moveTo(X(S.tc),pad.t);x.lineTo(X(S.tc),H-pad.b);x.stroke();x.setLineDash([]);x.fillStyle=css("--c2");x.font=font(12,600);x.textAlign="right";x.textBaseline="top";x.fillText("Tcrit ≈ "+fmtT(S.tc),X(S.tc)-5,pad.t+4)}
+ const cur=P.proto==="dur"?P.tau:P.tar;dot(x,X(P.T),Y(Math.min(cur,hi)),css("--cx"),Math.round(S.st.Mday)+" ml/day",W);
+}
+// ---------- UI ----------
+function syncInputs(){$("T").value=sFromT(P.T);for(const k of ["tau","tar","p0","gi","te","am","mu"])$(k).value=P[k]}
+$("T").addEventListener("input",()=>{P.T=tFromS(+$("T").value);update()});
+for(const k of ["tau","tar","p0","gi","te","am","mu"])$(k).addEventListener("input",()=>{P[k]=+$(k).value;update()});
+function setPressed(){document.querySelectorAll("[data-proto]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.proto===P.proto));document.querySelectorAll("[data-resp]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.resp===P.resp));$("tauBox").hidden=P.proto!=="dur";$("tarBox").hidden=P.proto==="dur"}
+document.querySelectorAll("[data-proto]").forEach(b=>b.addEventListener("click",()=>{P.proto=b.dataset.proto;setPressed();update()}));
+document.querySelectorAll("[data-resp]").forEach(b=>b.addEventListener("click",()=>{P.resp=b.dataset.resp;P.am=AMAX[P.resp];syncInputs();setPressed();update()}));
+function redraw(){mapKey="";update()}
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change",redraw);
+let rt;window.addEventListener("resize",()=>{clearTimeout(rt);rt=setTimeout(redraw,100)});
+syncInputs();setPressed();update();
+</script>
+</body></html>
