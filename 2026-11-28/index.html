@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="light dark">
+<title>A wing on a fishing line lets weather balloons climb and dive on wind shear — Research Explorer, 28 Nov 2026</title>
+<link rel="stylesheet" href="../assets/style.css">
+<style>
+canvas#alt{height:340px}
+canvas#prof,canvas#force{height:320px}
+.btnrow{display:flex;flex-wrap:wrap;gap:8px;margin:4px 0 14px;align-items:center}
+.btnrow button{font:500 14px var(--font);color:var(--text);background:var(--accent-soft);border:0;border-radius:8px;padding:7px 14px;min-height:32px;cursor:pointer}
+.btnrow button[aria-pressed="true"]{box-shadow:inset 0 0 0 2px var(--accent)}
+.btnrow .lbl{font-size:13px;color:var(--muted);margin-right:2px}
+label span{flex:1} label output{white-space:nowrap}
+.legend .sw{display:inline-block;width:14px;height:14px;border-radius:4px;vertical-align:-2px;margin-right:6px}
+.legend .dash::before{background:repeating-linear-gradient(90deg,var(--k) 0 4px,transparent 4px 7px)!important}
+.stats{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+.stat .v.good{color:var(--c3)} .stat .v.bad{color:var(--c2)}
+details.adv{margin:4px 0 12px} details.adv summary{cursor:pointer;color:var(--accent);font-weight:500;font-size:15px;padding:4px 0}
+</style></head><body><main>
+<a class="back" href="../">‹ All demos</a>
+<div class="eyebrow">28 Nov 2026 · Climate &amp; Weather</div>
+<h1>A wing on a fishing line lets weather balloons climb and dive on the wind's own energy</h1>
+<p class="lede">Long-duration weather balloons can collect many profiles of the atmosphere, but every climb costs ballast and every descent costs lifting gas, and both run out. Engineers at WindBorne Systems hung a small wing 450 m below the balloon on braided fishing line. The wind at the wing's height is different from the wind at the balloon's height, so the wing feels a steady breeze. Tilting it nose-up pulls the balloon up, and tilting it nose-down pulls it down. Like a sailboat using both air and water, it takes its energy from the difference between two layers of air. The demo below flies the paper's force balance live.</p>
+<p class="authors">Michal Adamkiewicz, Andrey Sushko</p>
+
+<section class="card why" aria-labelledby="why-h">
+<h2 id="why-h">Why it matters</h2>
+<p>Weather forecasts are built on vertical profiles of temperature, humidity and wind, yet most still come from about 2,000 single-use radiosondes launched each day, and long-duration balloons that could profile again and again run out of ballast after roughly thirty climbs. Skysail shows that a small wing hung below the balloon can harvest the wind difference between two heights to drive the climbs and descents for free, logging 159 km of vertical profiling in one eight-day flight, which could make cheap, repeated soundings over oceans and data-poor regions practical.</p>
+</section>
+
+<section class="card" aria-labelledby="paper-h">
+<h2 id="paper-h">The paper</h2>
+<p style="margin:0 0 6px"><strong>Skysail: Altitude Control of Long-Duration Weather Balloons by Extracting Work from Wind Shear</strong></p>
+<p class="cite" style="margin:0">Michal Adamkiewicz and Andrey Sushko (WindBorne Systems, Palo Alto, CA, USA). arXiv:2611.33882 [physics.ao-ph], submitted 25 November 2026. <a href="https://arxiv.org/abs/2611.33882">Read on arXiv</a> · <a href="https://arxiv.org/pdf/2611.33882">PDF</a></p>
+<p style="margin-top:14px"><strong>In plain language:</strong> a zero-pressure balloon is only partly filled, so its net lift stays almost the same at any height. A small push up or down, its <em>free lift</em>, decides whether it rises or sinks, and the air's drag sets how fast. Normally that push comes from dropping ballast or venting gas, about 30–35 g of lift each time the balloon turns around. Skysail gets the push from a wing instead. The envelope is big and floppy, so it drifts with the wind at its own height. The wing, 450 m lower, is dragged along at the balloon's speed through air that is moving differently. The wing's tail points it into that relative breeze, and its pitch sets whether the lift pulls up or down on the tether. The stronger the shear, and the denser the air, the bigger the push.</p>
+<p>Free lift and drag set the vertical speed (Eq. 2 of the paper):</p>
+<div class="eq">v<sub>z</sub> = √( 2F / (ρ<sub>a</sub> C<sub>D</sub> A) ), &nbsp;&nbsp; A ≈ 0.5 m², C<sub>D</sub> ≈ 0.9</div>
+<p>The wing adds a force set by the wind-vector difference across the tether (Eq. 3):</p>
+<div class="eq">L<sub>w</sub> = ½ ρ<sub>a</sub> |Δv|² C<sub>L</sub> S<sub>A</sub>, &nbsp;&nbsp; Δv = v(z<sub>balloon</sub>) − v(z<sub>balloon</sub> − 450 m)</div>
+<p>With C<sub>L</sub> = 1, the momentum limit at 30° angle of attack, and a 0.6 m² wing, that is 37 gf per (m/s)² of shear at sea level and 13 gf per (m/s)² at 10 km. So 1–2 m/s of shear across the tether is enough to drive profiles through the troposphere. Across 8,006 balloon profiles from 2024–25, the median wind difference over 500 m between 2 and 10 km was 2.6 m/s. It fell below 1 m/s at 11% of levels. Because wind direction turns with height as well as changing speed, there is usually some shear, even where the wind speed alone stays the same.</p>
+</section>
+
+<section class="card" aria-labelledby="try-h">
+<h2 id="try-h">Try it: fly a Skysail balloon against an ordinary one</h2>
+<p class="note" style="margin-top:0">Both balloons profile up and down between the two band limits. The <strong>ordinary</strong> balloon uses ±15 g of free lift and buys each turnaround with 30 g of ballast (at the bottom) or gas (at the top), from a 1 kg ballast supply. The <strong>Skysail</strong> balloon is trimmed neutral and flips its wing between nose-up and nose-down, using the paper's fixed-pitch control mode. The wind is a made-up but realistic profile. Its speed grows with height, its direction turns with height, and random wiggles slowly change over a 36-hour cycle. Air density comes from the standard atmosphere.</p>
+<div class="btnrow" role="group" aria-label="Wind preset"><span class="lbl">Wind:</span>
+ <button type="button" data-preset="typ">typical day</button><button type="button" data-preset="calm">calm, weak shear</button><button type="button" data-preset="jet">straight jet, no turning</button></div>
+<div class="controls">
+ <div><label for="days"><span>Flight length</span> <output id="dayso"></output></label><input type="range" id="days" min="1" max="8" step="0.5"></div>
+ <div><label for="zlo"><span>Bottom of band</span> <output id="zloo"></output></label><input type="range" id="zlo" min="1" max="8" step="0.5"></div>
+ <div><label for="zhi"><span>Top of band</span> <output id="zhio"></output></label><input type="range" id="zhi" min="3" max="13" step="0.5"></div>
+ <div><label for="S"><span>Wing area S<sub>A</sub></span> <output id="So"></output></label><input type="range" id="S" min="0.2" max="1.5" step="0.05"></div>
+</div>
+<details class="adv"><summary>Wing and wind settings</summary>
+<div class="controls">
+ <div><label for="cl"><span>Lift coefficient reached C<sub>L</sub></span> <output id="clo"></output></label><input type="range" id="cl" min="0.1" max="1" step="0.05"></div>
+ <div><label for="k"><span>Wind speed gain with height</span> <output id="ko"></output></label><input type="range" id="k" min="0" max="4" step="0.1"></div>
+ <div><label for="turn"><span>Wind direction turn with height</span> <output id="turno"></output></label><input type="range" id="turn" min="0" max="20" step="1"></div>
+ <div><label for="sig"><span>Random wind wiggles σ</span> <output id="sigo"></output></label><input type="range" id="sig" min="0" max="5" step="0.1"></div>
+</div>
+<label class="toggle"><input type="checkbox" id="jet"> Jet stream: extra 25 m/s wind peaking at 8 km</label>
+<label class="toggle"><input type="checkbox" id="fb"> When the wing can't move it for 20 min, fall back on ballast or vent (5 g at a time)</label>
+<label class="toggle"><input type="checkbox" id="sd"> New random wind (reseed)</label>
+</details>
+<div class="stats">
+ <div class="stat"><div class="v good" id="sP"></div><div class="l">Skysail profiles &gt; 1 km</div></div>
+ <div class="stat"><div class="v" id="sV"></div><div class="l">Skysail vertical travel (km)</div></div>
+ <div class="stat"><div class="v" id="sC"></div><div class="l">Skysail ballast + gas used (g)</div></div>
+ <div class="stat"><div class="v" id="oP"></div><div class="l">Ordinary balloon: profiles &gt; 1 km</div></div>
+ <div class="stat"><div class="v bad" id="oC"></div><div class="l">Ordinary: ballast + gas used (g)</div></div>
+</div>
+<p class="note" id="verdict" aria-live="polite"></p>
+<div class="plot" style="margin-top:10px"><div class="plot-title">Altitude over the flight</div>
+ <canvas id="alt" role="img" aria-label="Altitude against time for the Skysail balloon and an ordinary ballast-and-vent balloon profiling between two altitude limits, with times when the wing was stuck shaded"></canvas>
+ <div class="legend"><span style="--k:var(--c1)">Skysail balloon</span><span class="dash" style="--k:var(--c2)">ordinary balloon (ballast + vent)</span><span><i class="sw" style="background:var(--grid)"></i>wing can't drive it (too little shear)</span><span style="--k:var(--muted)">band limits</span></div></div>
+<div class="grid" style="margin-top:20px">
+ <div class="plot"><div class="plot-title">Wing force available at each height</div>
+  <canvas id="prof" role="img" aria-label="Wing force in grams-force against altitude: median and 10 to 90 percent range over the flight, with the force needed to move at half a metre per second"></canvas>
+  <div class="legend"><span style="--k:var(--c1)">median wing force L<sub>w</sub></span><span><i class="sw" style="background:var(--accent-soft)"></i>10–90% over the flight</span><span class="dash" style="--k:var(--c2)">force for 0.5 m/s</span></div></div>
+ <div class="plot"><div class="plot-title">Eq. 3: wing force vs shear across the tether</div>
+  <canvas id="force" role="img" aria-label="Wing force against wind-vector difference at 2, 7.3 and 10 kilometres altitude, with the force needed to reverse a balloon at 7.3 kilometres"></canvas>
+  <div class="legend"><span style="--k:var(--c3)">2 km</span><span style="--k:var(--c1)">7.3 km</span><span style="--k:var(--c4)">10 km</span><span class="dash" style="--k:var(--c2)">≈28 gf: reverse 0.9 → −1.2 m/s at 7.3 km</span></div></div>
+</div>
+</section>
+
+<section class="card" aria-labelledby="find-h">
+<h2 id="find-h">What the paper finds</h2>
+<ul>
+ <li><strong>It works in flight.</strong> On flight F-1242 at 7.3 km, switching the wing from +30° to −30° pitch raised the tether load by 50 g and took the balloon from +0.9 to −1.2 m/s. Eq. 2 says about 28 gf is needed to make that reversal.</li>
+ <li><strong>Ballast-free profiling.</strong> In one 43-hour stretch the balloon flew eleven reversals and 53 km of vertical travel without dropping ballast or venting gas at all. In the middle of that stretch there was not enough shear to push it down, so it sat between 6 and 8 km for a while, then carried on once the wind changed a day later.</li>
+ <li><strong>Long flights.</strong> An eight-day flight with a 1 m² wing completed 24 profiles of more than 1 km, 159 km of vertical travel. An ordinary flight spends about 35 g of ballast per reversal, so 1 kg of ballast buys only about thirty climbs.</li>
+ <li><strong>Simple control is enough.</strong> A fixed ±30° pitch beat cleverer schemes, such as sweeping the pitch for maximum tether tension or holding a fixed angle to the airflow. The same square-wave pitch held a balloon inside a 330 m band at 10.5 km while keeping its sensors ventilated.</li>
+ <li><strong>Getting the line out is the hard part.</strong> Lowering the 1 kg module 450 m releases about 4.5 kJ. A 3D-printed spool with paddle air brakes, whose payout slows as (r<sub>1</sub>/r<sub>0</sub>)<sup>3/2</sup> as it empties, handles that. Of 42 launches, 14 produced a working sail, and deployment was the biggest cause of losses.</li>
+</ul>
+</section>
+
+<section class="card" aria-labelledby="how-h">
+<h2 id="how-h">How to use it</h2>
+<ul>
+ <li>Start with <strong>typical day</strong>. The blue Skysail trace bounces between the band limits again and again with zero ballast. The dashed ordinary balloon spends 30 g at every turnaround, so stretch <strong>Flight length</strong> to 8 days and watch it run out of its 1 kg of ballast and stop.</li>
+ <li>Look at <strong>Wing force available at each height</strong>. Where the blue band sits right of the dashed red curve, the wing can push the balloon at 0.5 m/s or faster. The force shrinks with height because the air thins, which is why the wing works best low in the band.</li>
+ <li>Try <strong>calm, weak shear</strong>. The Skysail balloon now gets stuck at times (grey shading). It waits until the wind pattern changes, as on the real 43-hour flight. Turn on the ballast/vent fallback to see how little it then needs, or make the wing bigger.</li>
+ <li>Try <strong>straight jet, no turning</strong>. The wind speed peaks at 8 km and never changes direction, so around that height the wind is the same above and below the wing. The balloon gets stuck there, which is the paper's Rolle's-theorem point. Add some <strong>direction turn</strong> under Wing and wind settings and the stuck band disappears.</li>
+ <li>The <strong>Eq. 3</strong> chart shows that doubling the shear gives four times the force. Lower <strong>C<sub>L</sub></strong> or <strong>S<sub>A</sub></strong> to see how much shear the 28 gf reversal at 7.3 km needs.</li>
+</ul>
+</section>
+<p class="note" style="margin-top:24px">Demo maths: Eqs. 2 and 3 of the paper are stepped every 10 s, with air density ρ<sub>a</sub>(z) from the International Standard Atmosphere (0.57 kg/m³ at 7.3 km, as in the paper). The wing feels |v(z) − v(z − 0.45 km)| and the force is evaluated at the wing's height. As in the paper's fixed-pitch mode, the apparent wind from the balloon's own vertical motion is ignored. C<sub>L</sub> scales the paper's momentum bound (C<sub>L</sub> = 1), and the default of 0.3 gives average vertical speeds near the 1 m/s seen in flight. The wind field is synthetic, not the paper's climatology. Its wiggles are seeded random walks in height (100 m steps, linearly interpolated), with a default strength chosen so that the median shear over 500 m comes out close to the paper's 2.6 m/s. A "profile" is counted at each reversal at least 1 km from the previous one.</p>
+</main>
+<script>
+"use strict";
+const $=id=>document.getElementById(id);
+const PRE={typ:{k:1.5,turn:6,sig:3,jet:false},calm:{k:0.4,turn:2,sig:0.9,jet:false},jet:{k:1.5,turn:0,sig:0,jet:true}};
+const P={preset:"typ",days:3,zlo:3,zhi:10,S:0.6,cl:0.3,k:1.5,turn:6,sig:3,jet:false,fb:false,seed:7};
+const G0=9.80665,CDA=0.9*0.5,TETHER=0.45,DZ=0.01,ZMAX=14,NZ=Math.round(ZMAX/DZ)+1,PER=36*3600;
+// ---------- atmosphere (ISA troposphere / lower stratosphere) ----------
+function rho(z){let T,p;if(z<=11){T=288.15-6.5*z;p=101325*Math.pow(T/288.15,5.25588)}else{T=216.65;p=22632*Math.exp(-(z-11)/6.3416)}return p/(287.053*T)}
+// ---------- wind field ----------
+function mulberry(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return ((t^t>>>14)>>>0)/4294967296}}
+let RW=null,RWseed=-1;
+function walks(){if(RWseed===P.seed)return;const r=mulberry(P.seed*9973+1),gs=()=>{let u=0;while(!u)u=r();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*r())};
+ const CZ=0.1,NC=Math.round(ZMAX/CZ)+2,R10=Math.round(CZ/DZ);
+ RW=[];for(let j=0;j<6;j++){const c=new Float64Array(NC);let s=0;for(let i=0;i<NC;i++){c[i]=s;s+=gs()*Math.sqrt(CZ)}
+  const a=new Float64Array(NZ);for(let i=0;i<NZ;i++){const q=Math.floor(i/R10),f=(i%R10)/R10;a[i]=c[q]*(1-f)+c[q+1]*f}RW.push(a)}RWseed=P.seed}
+let MU,MV;
+function meanWind(){MU=new Float64Array(NZ);MV=new Float64Array(NZ);for(let i=0;i<NZ;i++){const z=i*DZ;let s=4+P.k*z;if(P.jet)s+=25*Math.exp(-Math.pow((z-8)/1.8,2));const th=P.turn*z*Math.PI/180;MU[i]=s*Math.cos(th);MV[i]=s*Math.sin(th)}}
+// wind vector at grid index i, time t (s)
+function windAt(i,c,s){const k=P.sig/Math.SQRT2;return [MU[i]+k*(RW[0][i]+c*RW[2][i]+s*RW[4][i]),MV[i]+k*(RW[1][i]+c*RW[3][i]+s*RW[5][i])]}
+function windZ(z,c,s){const q=Math.min(NZ-1.000001,Math.max(0,z/DZ)),i=Math.floor(q),f=q-i,a=windAt(i,c,s),b=windAt(i+1,c,s);return [a[0]+(b[0]-a[0])*f,a[1]+(b[1]-a[1])*f]}
+function shear(z,t){const ph=2*Math.PI*t/PER,c=Math.cos(ph),s=Math.sin(ph);const a=windZ(z,c,s),b=windZ(Math.max(0,z-TETHER),c,s);return Math.hypot(a[0]-b[0],a[1]-b[1])}
+const wingGf=(z,dv)=>0.5*rho(Math.max(0,z-TETHER))*dv*dv*P.cl*P.S/G0*1000; // Eq. 3 in grams-force
+const vzOf=(Fg,z)=>Math.sign(Fg)*Math.sqrt(2*Math.abs(Fg)/1000*G0/(rho(z)*CDA)); // Eq. 2
+// ---------- simulation ----------
+function simulate(){walks();meanWind();
+ const dt=10,N=Math.round(P.days*86400/dt),every=30;const out={t:[],zs:[],zo:[],stuck:[],tEnd:null};
+ let zs=P.zlo,ds=1,F0=0,st=0,used=0,lastS=P.zlo,profS=0,travS=0,stuckN=0;
+ let zo=P.zlo,dOrd=1,ball=1000,usedO=0,lastO=P.zlo,profO=0,alive=true,FO=15;
+ for(let n=0;n<=N;n++){const t=n*dt;
+  // Skysail
+  const dv=shear(zs,t),Lw=wingGf(zs,dv),v=vzOf(F0+ds*Lw,zs);
+  if(v*ds<0.1){st+=dt;stuckN++}else st=0;
+  if(P.fb&&st>=1200){if(ds>0)F0+=5;else F0-=5;used+=5;st=0}
+  const dz=v*dt/1000;zs=Math.min(ZMAX-0.1,Math.max(0.6,zs+dz));travS+=Math.abs(dz);
+  if(ds>0&&zs>=P.zhi||ds<0&&zs<=P.zlo){if(Math.abs(zs-lastS)>=1)profS++;lastS=zs;ds=-ds}
+  // ordinary balloon
+  if(alive){const vo=vzOf(FO,zo);zo=Math.min(ZMAX-0.1,Math.max(0.6,zo+vo*dt/1000));
+   if(dOrd>0&&zo>=P.zhi){FO=-15;usedO+=30;dOrd=-1;if(Math.abs(zo-lastO)>=1)profO++;lastO=zo}
+   else if(dOrd<0&&zo<=P.zlo){if(ball>=30){ball-=30;usedO+=30;FO=15;dOrd=1;if(Math.abs(zo-lastO)>=1)profO++;lastO=zo}else{alive=false;out.tEnd=t}}}
+  if(n%every===0){out.t.push(t/3600);out.zs.push(zs);out.zo.push(alive?zo:NaN);out.stuck.push(st>=600)}
+ }
+ Object.assign(out,{zEnd:zs,profS,travS,used,profO,usedO,ball,alive,stuckFrac:stuckN/(N+1)});return out}
+// force statistics vs altitude over the flight
+function profileStats(){const zs=[],med=[],p10=[],p90=[],need=[];const T=P.days*86400,nt=Math.max(24,Math.round(P.days*24));
+ for(let z=1;z<=13.001;z+=0.1){const a=[];for(let k=0;k<nt;k++)a.push(wingGf(z,shear(z,k*T/nt)));a.sort((x,y)=>x-y);
+  zs.push(z);p10.push(a[Math.floor(0.1*(nt-1))]);med.push(a[Math.floor(0.5*(nt-1))]);p90.push(a[Math.floor(0.9*(nt-1))]);need.push(0.5*rho(z)*0.25*CDA/G0*1000)}
+ return {zs,med,p10,p90,need}}
+// ---------- drawing helpers ----------
+function css(n){return getComputedStyle(document.documentElement).getPropertyValue(n).trim()}
+function setup(c){const r=c.getBoundingClientRect(),d=window.devicePixelRatio||1;c.width=Math.round(r.width*d);c.height=Math.round(r.height*d);const x=c.getContext("2d");x.setTransform(d,0,0,d,0,0);return [x,r.width,r.height]}
+const font=(s,w)=>`${w||400} ${s}px -apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Arial,sans-serif`;
+function nice(max,n){const raw=max/(n||4),mag=Math.pow(10,Math.floor(Math.log10(raw))),f=raw/mag,st=(f<1.5?1:f<3?2:f<7?5:10)*mag;const t=[];for(let v=0;v<=max*1.0001;v+=st)t.push(+v.toPrecision(6));return t}
+function fmtTick(v){return Math.abs(v)>=100||v===0?String(Math.round(v)):String(+v.toPrecision(3))}
+function frame(x,W,H,pad,xr,yr,xt,yt,xl,yl,xfmt){
+ const X=v=>pad.l+(v-xr[0])/(xr[1]-xr[0])*(W-pad.l-pad.r),Y=v=>H-pad.b-(v-yr[0])/(yr[1]-yr[0])*(H-pad.t-pad.b);
+ x.strokeStyle=css("--grid");x.fillStyle=css("--muted");x.lineWidth=1;x.font=font(12);
+ for(const t of yt){const y=Y(t);x.beginPath();x.moveTo(pad.l,y);x.lineTo(W-pad.r,y);x.stroke();x.textAlign="right";x.textBaseline="middle";x.fillText(fmtTick(t),pad.l-6,y)}
+ for(const t of xt){const xx=X(t);x.beginPath();x.moveTo(xx,pad.t);x.lineTo(xx,H-pad.b);x.stroke();x.textAlign="center";x.textBaseline="top";x.fillText((xfmt||fmtTick)(t),xx,H-pad.b+5)}
+ x.textAlign="center";x.textBaseline="bottom";x.fillText(xl,(pad.l+W-pad.r)/2,H-2);
+ if(yl){x.save();x.translate(13,(pad.t+H-pad.b)/2);x.rotate(-Math.PI/2);x.textBaseline="middle";x.fillText(yl,0,0);x.restore()}
+ return [X,Y]}
+function line(x,X,Y,xs,ys,col,w,dash){x.strokeStyle=col;x.lineWidth=w||2;x.setLineDash(dash||[]);x.lineJoin="round";x.beginPath();let pen=false;for(let i=0;i<xs.length;i++){const v=ys[i];if(!isFinite(v)){pen=false;continue}const px=X(xs[i]),py=Y(v);pen?x.lineTo(px,py):x.moveTo(px,py);pen=true}x.stroke();x.setLineDash([])}
+// ---------- charts ----------
+function drawAlt(R){const [x,W,H]=setup($("alt")),pad={l:46,r:14,t:12,b:36};const tm=P.days*24;
+ const xt=[];const stp=tm<=36?6:tm<=96?12:24;for(let v=0;v<=tm+1e-9;v+=stp)xt.push(v);
+ const [X,Y]=frame(x,W,H,pad,[0,tm],[0,14],xt,[0,2,4,6,8,10,12,14],"Time since start (hours)","Altitude (km)",v=>v%24===0&&v>0?"day "+(v/24):fmtTick(v));
+ x.fillStyle=css("--grid");for(let i=0;i<R.t.length;i++)if(R.stuck[i]){const a=X(R.t[i]),b=X(R.t[Math.min(i+1,R.t.length-1)]);x.fillRect(a,pad.t,Math.max(1,b-a+0.5),H-pad.t-pad.b)}
+ x.strokeStyle=css("--muted");x.setLineDash([3,4]);x.lineWidth=1;for(const z of [P.zlo,P.zhi]){x.beginPath();x.moveTo(pad.l,Y(z));x.lineTo(W-pad.r,Y(z));x.stroke()}x.setLineDash([]);
+ line(x,X,Y,R.t,R.zo,css("--c2"),1.6,[5,4]);line(x,X,Y,R.t,R.zs,css("--c1"),2.2);
+ if(R.tEnd!==null){const px=X(R.tEnd/3600),py=Y(P.zlo);x.fillStyle=css("--c2");x.beginPath();x.arc(px,py,5,0,7);x.fill();x.font=font(12,600);x.textAlign=px>W-150?"right":"left";x.textBaseline="bottom";x.fillText("out of ballast",px+(px>W-150?-8:8),py-6)}}
+function drawProf(S){const [x,W,H]=setup($("prof")),pad={l:46,r:14,t:12,b:36};let mx=Math.max(...S.p90.filter((v,i)=>S.zs[i]>=2),...S.need)*1.05;mx=Math.min(Math.max(mx,20),400);
+ const xt=nice(mx,4);const [X,Y]=frame(x,W,H,pad,[0,xt[xt.length-1]],[0,14],xt,[0,2,4,6,8,10,12,14],"Wing force (grams-force)","Altitude (km)");
+ x.fillStyle=css("--accent-soft");x.beginPath();S.zs.forEach((z,i)=>{const px=X(Math.min(S.p90[i],xt[xt.length-1]));i?x.lineTo(px,Y(z)):x.moveTo(px,Y(z))});for(let i=S.zs.length-1;i>=0;i--)x.lineTo(X(S.p10[i]),Y(S.zs[i]));x.closePath();x.fill();
+ x.save();x.beginPath();x.rect(pad.l,pad.t,W-pad.l-pad.r,H-pad.t-pad.b);x.clip();
+ line(x,X,Y,S.need,S.zs,css("--c2"),1.6,[5,4]);line(x,X,Y,S.med,S.zs,css("--c1"),2.2);x.restore();
+ x.strokeStyle=css("--muted");x.setLineDash([3,4]);x.lineWidth=1;for(const z of [P.zlo,P.zhi]){x.beginPath();x.moveTo(pad.l,Y(z));x.lineTo(W-pad.r,Y(z));x.stroke()}x.setLineDash([])}
+function drawForce(){const [x,W,H]=setup($("force")),pad={l:46,r:14,t:12,b:36};const dvs=[];for(let d=0;d<=6.0001;d+=0.05)dvs.push(d);
+ const f=(z)=>dvs.map(d=>0.5*rho(z)*d*d*P.cl*P.S/G0*1000);const a=f(2),b=f(7.3),c=f(10);let mx=Math.max(60,Math.min(Math.max(...b)*1.1,300));const yt=nice(mx,4);
+ const [X,Y]=frame(x,W,H,pad,[0,6],[0,yt[yt.length-1]],[0,1,2,3,4,5,6],yt,"Wind difference across the tether |Δv| (m/s)","Wing force (gf)");
+ x.save();x.beginPath();x.rect(pad.l,pad.t,W-pad.l-pad.r,H-pad.t-pad.b);x.clip();
+ const need=(0.5*rho(7.3)*(0.9*0.9+1.2*1.2)*CDA)/G0*1000;line(x,X,Y,[0,6],[need,need],css("--c2"),1.6,[5,4]);
+ line(x,X,Y,dvs,a,css("--c3"),2);line(x,X,Y,dvs,b,css("--c1"),2.2);line(x,X,Y,dvs,c,css("--c4"),2);
+ // shear needed at 7.3 km for the reversal (wing force flips sign, so each side needs ~need/2)
+ const dvn=Math.sqrt((need/2)/1000*G0/(0.5*rho(7.3-TETHER)*P.cl*P.S));if(dvn<6){x.fillStyle=css("--c1");x.beginPath();x.arc(X(dvn),Y(need/2),5,0,7);x.fill();x.fillStyle=css("--cx");x.font=font(12,600);x.textAlign="left";x.textBaseline="top";x.fillText("±"+(need/2).toFixed(0)+" gf at "+dvn.toFixed(1)+" m/s",X(dvn)+8,Y(need/2)+4)}
+ x.restore()}
+// ---------- UI ----------
+const ids=["days","zlo","zhi","S","cl","k","turn","sig"];
+function syncInputs(){ids.forEach(k=>$(k).value=P[k]);$("jet").checked=P.jet;$("fb").checked=P.fb}
+function setPressed(){document.querySelectorAll("[data-preset]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.preset===P.preset)))}
+function update(){
+ if(P.zhi<P.zlo+1){P.zhi=P.zlo+1;$("zhi").value=P.zhi}
+ $("dayso").textContent=P.days+(P.days===1?" day":" days");$("zloo").textContent=P.zlo+" km";$("zhio").textContent=P.zhi+" km";
+ $("So").textContent=P.S.toFixed(2)+" m²";$("clo").textContent=P.cl.toFixed(2);$("ko").textContent=P.k.toFixed(1)+" m/s per km";
+ $("turno").textContent=P.turn+"° per km";$("sigo").textContent=P.sig.toFixed(1)+" m/s per √km";
+ const R=simulate(),S=profileStats();
+ $("sP").textContent=R.profS;$("sV").textContent=R.travS.toFixed(0);const sc=$("sC");sc.textContent=R.used;sc.className="v "+(R.used===0?"good":"bad");
+ $("oP").textContent=R.profO;$("oC").textContent=R.usedO;
+ const sf=Math.round(R.stuckFrac*100);let v;
+ if(R.profS===0)v=`The Skysail balloon got stuck near ${R.zEnd.toFixed(1)} km, where the wind at the wing almost matches the wind at the balloon, so the wing has nothing to push against. Try adding some wind direction turn, a bigger wing, or the ballast/vent fallback.`;
+ else v=`Skysail flew ${R.profS} profiles and ${R.travS.toFixed(0)} km of vertical travel using ${R.used} g of consumables`+(sf>0?`, and spent about ${sf}% of the flight unable to move in the commanded direction`:"")+". "+(R.alive?`The ordinary balloon flew ${R.profO} profiles for ${R.usedO} g of ballast and gas and has ${R.ball} g of ballast left.`:`The ordinary balloon ran out of ballast after ${R.profO} profiles, about ${(R.tEnd/3600).toFixed(0)} hours in.`);
+ $("verdict").textContent=v;
+ drawAlt(R);drawProf(S);drawForce()}
+let pend=false;const sched=()=>{if(!pend){pend=true;requestAnimationFrame(()=>{pend=false;update()})}};
+ids.forEach(k=>$(k).addEventListener("input",e=>{P[k]=+e.target.value;if(["k","turn","sig"].includes(k)){P.preset="";setPressed()}sched()}));
+$("jet").addEventListener("change",e=>{P.jet=e.target.checked;P.preset="";setPressed();sched()});
+$("fb").addEventListener("change",e=>{P.fb=e.target.checked;sched()});
+$("sd").addEventListener("change",e=>{P.seed=e.target.checked?108:7;sched()});
+document.querySelectorAll("[data-preset]").forEach(b=>b.addEventListener("click",()=>{P.preset=b.dataset.preset;Object.assign(P,PRE[P.preset]);syncInputs();setPressed();update()}));
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change",update);
+let rt;window.addEventListener("resize",()=>{clearTimeout(rt);rt=setTimeout(update,100)});
+syncInputs();setPressed();update();
+</script>
+</body></html>
